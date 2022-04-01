@@ -16,6 +16,7 @@ import io.renren.common.utils.DateUtil2;
 import io.renren.common.utils.HexUtil;
 import io.renren.common.utils.StringUtil;
 import io.renren.common.utils.Util16;
+import io.renren.modules.common.utils.HttpClientUtil;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.pub.service.SocketService;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -228,6 +230,13 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                                 }
                             } else {
                                 msgInfoJsonObject.putOpt("Files", jsonArray);
+
+                                //后台分析图片
+                                if (null != jsonArray && !jsonArray.isEmpty()) {
+                                    JSONObject json = jsonArray.getJSONObject(0);
+                                    KxDeviceService.analysisImg(json,deviceDTO.getId());
+                                }
+
                             }
                         }
 

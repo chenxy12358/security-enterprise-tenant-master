@@ -1,10 +1,10 @@
 package io.renren.modules.device.service;
 
+import cn.hutool.json.JSONObject;
 import io.renren.common.service.CrudService;
 import io.renren.common.utils.Result;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.entity.KxDeviceEntity;
-import springfox.documentation.service.ApiListing;
 
 import java.util.List;
 
@@ -46,5 +46,12 @@ public interface KxDeviceService extends CrudService<KxDeviceEntity, KxDeviceDTO
      * @return
      */
     Result modify(KxDeviceDTO vo);
+
+    /**
+     * 图片分析
+     * @param json
+     * @param deviceId
+     */
+    void analysisImg(JSONObject json,Long deviceId);
 
 }
