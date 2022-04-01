@@ -380,6 +380,7 @@ public class NettyService {
 
 //            String fileName = FILE_PATH + getUploadFilename(deviceSn, type, array.get(i), ""); // todo cxy 判断 路径
             String fileName = KxConstants.IMG_UPLOAD + KxConstants.IMG_JOB +"/"+getUploadFilename(deviceSn, type, array.get(i), "");
+//            String fileName = KxConstants.IMG_UPLOAD + KxConstants.IMG_ALARM +"/"+getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
             File dir = new File(pathName);
             if (!dir.exists()) {// 判断目录是否存在
