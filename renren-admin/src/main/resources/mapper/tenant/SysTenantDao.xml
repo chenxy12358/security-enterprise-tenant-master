@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.tenant.dao.SysTenantDao">
+
+    <select id="getList" resultType="io.renren.modules.tenant.entity.SysTenantEntity">
+        select t1.*,t2.real_name,t2.email,t2.mobile from sys_tenant t1, sys_user t2
+            where t1.user_id = t2.id and t1.del_flag = 0
+        <if test="sysTenant != 0">
+            and t1.sys_tenant = 0
+        </if>
+        <if test="tenantName != null and tenantName.trim() != ''">
+            and t1.tenant_name like #{tenantName}
+        </if>
+        <if test="tenantCode != null and tenantCode.trim() != ''">
+            and t1.tenant_code like #{tenantCode}
+        </if>
+    </select>
+
+
+    <select id="getById" resultType="io.renren.modules.tenant.entity.SysTenantEntity">
+        select t1.*,t2.real_name,t2.email,t2.mobile from sys_tenant t1, sys_user t2
+            where t1.user_id = t2.id and t1.del_flag = 0 and t1.id = #{value}
+    </select>
+
+    <select id="getTenantCode" resultType="io.renren.modules.tenant.entity.SysTenantEntity">
+        select * from sys_tenant where del_flag = 0 and tenant_code = #{value}
+    </select>
+    
+    <update id="deleteBatch">
+        update sys_tenant set del_flag = 1 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

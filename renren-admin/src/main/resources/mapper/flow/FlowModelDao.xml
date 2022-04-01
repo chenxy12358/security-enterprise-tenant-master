@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.flow.dao.FlowModelDao">
+	
+	<select id="getList" resultType="io.renren.modules.flow.entity.FlowModelEntity">
+		select * from ACT_DE_MODEL where model_type = 0
+		 <if test="name != null and name.trim() != ''">
+			 and name like #{name}
+		 </if>
+		 <if test="modelKey != null and modelKey.trim() != ''">
+			 and model_key like #{modelKey}
+		 </if>
+	</select>
+
+</mapper>
