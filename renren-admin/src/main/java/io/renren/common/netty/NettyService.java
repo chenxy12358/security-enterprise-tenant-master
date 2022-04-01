@@ -13,6 +13,7 @@ import io.renren.common.exception.RenException;
 import io.renren.common.utils.*;
 import io.renren.modules.battery.dto.KxBatteryDTO;
 import io.renren.modules.battery.service.KxBatteryService;
+import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.deviceAlarm.dto.KxDeviceAlarmDTO;
@@ -377,7 +378,8 @@ public class NettyService {
         JSONArray newArray = new JSONArray();
         for (int i = 0; i < array.size(); i++) {
 
-            String fileName = FILE_PATH + getUploadFilename(deviceSn, type, array.get(i), "");
+//            String fileName = FILE_PATH + getUploadFilename(deviceSn, type, array.get(i), ""); // todo cxy 判断 路径
+            String fileName = KxConstants.IMG_UPLOAD + KxConstants.IMG_JOB +"/"+getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
             File dir = new File(pathName);
             if (!dir.exists()) {// 判断目录是否存在
@@ -386,15 +388,15 @@ public class NettyService {
             FileUtil.hexToFile(data, fileName);
             JSONObject jsonObject = JSONUtil.parseObj(array.get(i));
             String filename160 = fileName.substring(0, fileName.lastIndexOf(".")) + "-160" + fileName.substring(fileName.lastIndexOf("."));
-            //  String filename320 = fileName.substring(0, fileName.lastIndexOf(".")) + "-320" + fileName.substring(fileName.lastIndexOf("."));
+              String filename320 = fileName.substring(0, fileName.lastIndexOf(".")) + "-320" + fileName.substring(fileName.lastIndexOf("."));
             String filename640 = fileName.substring(0, fileName.lastIndexOf(".")) + "-640" + fileName.substring(fileName.lastIndexOf("."));
             Thumbnails.of(new File(fileName)).size(160, 120).toFile(new File(filename160));
-            //  Thumbnails.of(new File(fileName)).size(320, 240).toFile(new File(filename320));
+              Thumbnails.of(new File(fileName)).size(320, 240).toFile(new File(filename320));
             Thumbnails.of(new File(fileName)).size(640, 480).toFile(new File(filename640));
-            jsonObject.putOpt("Uri", fileName);
-            jsonObject.putOpt("Uri160", filename160);
-            // jsonObject.putOpt("Uri320", filename320);
-            jsonObject.putOpt("Uri640", filename640);
+            jsonObject.putOpt("Uri", fileName.replace(KxConstants.IMG_UPLOAD,""));
+            jsonObject.putOpt("Uri160", filename160.replace(KxConstants.IMG_UPLOAD,""));
+             jsonObject.putOpt("Uri320", filename320.replace(KxConstants.IMG_UPLOAD,""));
+            jsonObject.putOpt("Uri640", filename640.replace(KxConstants.IMG_UPLOAD,""));
             newArray.add(jsonObject);
             System.err.println("图片生成完成！========================================================");
 

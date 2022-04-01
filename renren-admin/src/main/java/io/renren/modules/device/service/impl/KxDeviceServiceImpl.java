@@ -114,11 +114,10 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
 
             String filePath="";
             if(imgFilePath.contains("\\")){
-                filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("\\")+1);
-            }else {
-                filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
+                imgFilePath=imgFilePath.replaceAll("\\\\","/");
             }
-            String outImgFilePath = KxConstants.IMG_UPLOAD+filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
+            filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
+            String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
             String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
             com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();
             parameters.put("imgFilePath", imgFilePath);

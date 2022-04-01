@@ -18,7 +18,7 @@ public class KxConstants {
     /**
      * 服务器图片保存路径 计划任务 job-data 预警图片 alarm-data
      */
-    public static String IMG_UPLOAD="C:\\upload\\";
+    public static String IMG_UPLOAD="D:/upload/";
 
     /**
      * 计划任务文件夹
