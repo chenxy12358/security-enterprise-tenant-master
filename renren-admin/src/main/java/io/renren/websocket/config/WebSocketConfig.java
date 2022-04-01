@@ -10,6 +10,8 @@ package io.renren.websocket.config;
 
 import io.renren.common.constant.Constant;
 import io.renren.modules.security.user.SecurityUser;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
@@ -25,7 +27,11 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
  * @author Mark sunlightcs@gmail.com
  */
 @Configuration
+@Data
 public class WebSocketConfig extends Configurator {
+    private int port;
+
+    private String url;
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();

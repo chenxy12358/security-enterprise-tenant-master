@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.deviceAlarm.dao.KxDeviceAlarmDao">
+
+    <resultMap type="io.renren.modules.deviceAlarm.entity.KxDeviceAlarmEntity" id="kxDeviceAlarmMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="level" column="level"/>
+        <result property="handleType" column="handle_type"/>
+        <result property="signalType" column="signal_type"/>
+        <result property="senderInfo" column="sender_info"/>
+        <result property="content" column="content"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+</mapper>

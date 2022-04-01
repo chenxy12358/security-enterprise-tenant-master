@@ -24,6 +24,7 @@ import io.renren.modules.notice.service.SysNoticeService;
 import io.renren.modules.notice.service.SysNoticeUserService;
 import io.renren.modules.security.user.SecurityUser;
 import io.renren.modules.sys.service.SysUserService;
+
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import org.apache.commons.lang3.StringUtils;

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.gas.dao.KxGasDataDao">
+
+    <resultMap type="io.renren.modules.gas.entity.KxGasDataEntity" id="kxGasDataMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="content" column="content"/>
+        <result property="unit" column="unit"/>
+        <result property="gasType" column="gas_type"/>
+        <result property="sensorId" column="sensor_id"/>
+        <result property="alarmStatus" column="alarm_status"/>
+        <result property="firsLevelAlarm" column="firs_level_alarm"/>
+        <result property="concentrationValue" column="concentration_value"/>
+        <result property="secondaryLevelAlarm" column="secondary_level_Alarm"/>
+        <result property="properties" column="properties"/>
+        <result property="remark" column="remark"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="stationName" column="station_name"/>
+        <result property="deptName" column="dept_name"/>
+    </resultMap>
+
+    <select id="getList"  resultMap="kxGasDataMap">
+        SELECT
+        g.*,
+        t.device_name,
+        t.station_name,
+        t.dept_name
+        FROM
+        kx_gas_data g,
+        (
+        SELECT
+        d.id AS device_id,
+        d.NAME device_name,
+        s.NAME station_name,
+        t.NAME dept_name,
+         t.id  org_id
+        FROM
+        kx_device d,
+        kx_station s,
+        sys_dept t
+        WHERE
+        d.station_id = s.id
+        AND s.org_id = t.id
+        ) t
+        WHERE
+        g.device_id = t.device_id
+        <if test="deviceName != null and deviceName.trim() != ''">
+            and t.device_name like #{deviceName}
+        </if>
+        <if test="stationName != null and stationName.trim() != ''">
+            and t.station_name like #{stationName}
+        </if>
+        <if test="orgId != null and orgId.trim() != ''">
+            and t.org_id =  #{orgId}
+        </if>
+        <if test="startTime != null and startTime.trim() != ''">
+            and g.create_date >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime.trim() != ''">
+            and #{endTime}>= g.create_date
+        </if>
+
+
+
+
+
+    </select>
+
+</mapper>

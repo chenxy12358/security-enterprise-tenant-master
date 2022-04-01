@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.netWorkData.dao.KxNetWorkStateDataDao">
+
+    <resultMap type="io.renren.modules.netWorkData.entity.KxNetWorkStateDataEntity" id="kxNetWorkStateDataMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceid" column="deviceId"/>
+        <result property="stationid" column="stationId"/>
+        <result property="content" column="content"/>
+        <result property="nicName" column="nic_name"/>
+        <result property="accessTech" column="access_tech"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="signalQuality" column="signal_quality"/>
+        <result property="properties" column="properties"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap type="io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO" id="kxNetWorkStateDataVoMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceid" column="deviceId"/>
+        <result property="stationid" column="stationId"/>
+        <result property="content" column="content"/>
+        <result property="nicName" column="nic_name"/>
+        <result property="accessTech" column="access_tech"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="signalQuality" column="signal_quality"/>
+        <result property="properties" column="properties"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+
+    <select id="getList" resultMap="kxNetWorkStateDataVoMap">
+        SELECT
+            d.NAME deviceName,
+            s.NAME sName,
+            m.NAME depName,
+            t.*
+        FROM
+            kx_net_work_state_data t
+            LEFT JOIN kx_device d ON d.id = t.deviceId
+            LEFT JOIN kx_station s ON s.id = d.station_id
+            LEFT JOIN sys_dept m ON m.id = s.org_id
+        where 1=1
+
+        <if test="deviceName != null and deviceName.trim() != ''">
+            and d.name like #{deviceName}
+        </if>
+        <if test="sName != null and sName.trim() != ''">
+            and s.name like #{sName}
+        </if>
+        <if test="orgId != null and orgId.trim() != ''">
+            and m.id =  #{orgId}
+        </if>
+        <if test="startTime != null and startTime.trim() != ''">
+            and t.create_date >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime.trim() != ''">
+            and #{endTime}>= t.create_date
+        </if>
+        order by t.create_date desc
+    </select>
+
+
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.deviceData.dao.KxDeviceTemperatureDao">
+
+    <resultMap type="io.renren.modules.deviceData.entity.KxDeviceTemperatureEntity" id="kxDeviceTemperatureMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="currentValue" column="current_value"/>
+        <result property="unit" column="unit"/>
+        <result property="sensorNo" column="sensor_no"/>
+        <result property="alarmStatus" column="alarm_status"/>
+        <result property="firsLevelAlarm" column="firs_level_alarm"/>
+        <result property="secondaryLevelAlarm" column="secondary_level_Alarm"/>
+        <result property="content" column="content"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap type="io.renren.modules.deviceData.dto.KxDeviceTemperatureDTO" id="kxDeviceTemperatureVoMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="currentValue" column="current_value"/>
+        <result property="unit" column="unit"/>
+        <result property="sensorNo" column="sensor_no"/>
+        <result property="alarmStatus" column="alarm_status"/>
+        <result property="firsLevelAlarm" column="firs_level_alarm"/>
+        <result property="secondaryLevelAlarm" column="secondary_level_Alarm"/>
+        <result property="content" column="content"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="getById" resultMap="kxDeviceTemperatureVoMap">
+        SELECT
+            ( SELECT u.username FROM sys_user u WHERE u.id = t.creator ) creatorName,
+            ( SELECT u.username FROM sys_user u WHERE u.id = t.updater ) updaterName,
+            d.NAME device_name,
+            s.NAME station_name,
+            m.NAME dept_name,
+            t.*
+        FROM
+            kx_device_temperature t
+            LEFT JOIN kx_device d ON d.id = t.device_id
+            LEFT JOIN kx_station s ON s.id = d.station_id
+            LEFT JOIN sys_dept m ON m.id = s.org_id
+			where t.id = #{value}
+	</select>
+
+
+    <select id="getList" resultMap="kxDeviceTemperatureVoMap">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        g.*,
+        CASE
+        WHEN g.current_value  &gt;=  g.firs_level_alarm
+        AND g.current_value  &lt; g.secondary_level_Alarm
+        THEN 1 WHEN g.current_value  &gt;= g.secondary_level_Alarm THEN
+        2
+        END alarmLevel,
+        t.device_name,
+        t.station_name,
+        t.org_id,
+        t.dept_name
+        FROM
+        kx_device_temperature g
+        LEFT JOIN (
+        SELECT
+        d.id AS device_id,
+        d.NAME device_name,
+        s.NAME station_name,
+        t.NAME dept_name,
+        t.id org_id
+        FROM
+        kx_device d,
+        kx_station s,
+        sys_dept t
+        WHERE
+        d.station_id = s.id
+        AND s.org_id = t.id
+        ) t ON g.device_id = t.device_id
+        ) h
+        where 1=1
+        <if test="deviceId != null and deviceId.trim() != ''">
+            and h.device_id = #{deviceId}
+        </if>
+        <if test="stationId != null and stationId.trim() != ''">
+            and h.device_id in (SELECT id FROM kx_device d WHERE d.station_id=#{stationId})
+        </if>
+        <if test="deviceName != null and deviceName.trim() != ''">
+            and h.device_name like #{deviceName}
+        </if>
+        <if test="stationName != null and stationName.trim() != ''">
+            and h.station_name like #{stationName}
+        </if>
+        <if test="orgId != null and orgId.trim() != ''">
+            and h.org_id = #{orgId}
+        </if>
+        <if test="startTime != null and startTime.trim() != ''">
+            and h.create_date >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime.trim() != ''">
+            and #{endTime}>= h.create_date
+        </if>
+        <if test="queryType== 'alarm'">
+            and h.alarmLevel is not null
+        </if>
+        <if test="alarmLevel != null and alarmLevel.trim() != ''">
+            and #{alarmLevel}= h.alarmLevel
+        </if>
+    </select>
+
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.scheduleItem.dao.KxScheduleItemDao">
+
+    <resultMap type="io.renren.modules.scheduleItem.entity.KxScheduleItemEntity" id="kxScheduleItemMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="scheduleJobId" column="schedule_job_id"/>
+        <result property="itemType" column="item_type"/>
+        <result property="version" column="version"/>
+        <result property="signalType" column="signal_type"/>
+        <result property="properties" column="properties"/>
+        <result property="content" column="content"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <resultMap type="io.renren.modules.scheduleItem.dto.KxScheduleItemDTO" id="kxScheduleItemVoMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="scheduleJobId" column="schedule_job_id"/>
+        <result property="itemType" column="item_type"/>
+        <result property="version" column="version"/>
+        <result property="signalType" column="signal_type"/>
+        <result property="properties" column="properties"/>
+        <result property="content" column="content"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+
+    <select id="getList" resultMap="kxScheduleItemVoMap">
+        SELECT
+            d.serial_no deviceNum,
+            s.`name` stationName,
+            t.*
+        FROM
+            kx_schedule_item_result t
+            LEFT JOIN kx_schedule_job j ON j.id = t.schedule_job_id
+            LEFT JOIN kx_device d ON d.id = j.device_id
+            LEFT JOIN kx_station s ON s.id = d.station_id
+            LEFT JOIN sys_dept m ON m.id = s.org_id
+        WHERE
+            t.deleted = 'f'
+        <if test="deviceNum != null and deviceNum.trim() != ''">
+            and d.serial_no like #{deviceNum}
+        </if>
+        <if test="stationName != null and stationName.trim() != ''">
+            and s.name like #{stationName}
+        </if>
+        <if test="orgId != null and orgId.trim() != ''">
+            and m.id = #{orgId}
+        </if>
+        <if test="startTime != null and startTime.trim() != ''">
+            and t.create_date >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime.trim() != ''">
+            and #{endTime}>= t.create_date
+        </if>
+        order by t.create_date desc
+    </select>
+    <select id="getById" resultMap="kxScheduleItemVoMap">
+
+        SELECT
+            d.serial_no deviceNum,
+            s.`name` stationName,
+            t.*
+        FROM
+            kx_schedule_item_result t
+            LEFT JOIN kx_schedule_job j ON j.id = t.schedule_job_id
+            LEFT JOIN kx_device d ON d.id = j.device_id
+            LEFT JOIN kx_station s ON s.id = d.station_id
+            LEFT JOIN sys_dept m ON m.id = s.org_id
+        WHERE
+            t.deleted = 'f'
+            and t.id = #{value}
+
+    </select>
+
+</mapper>
