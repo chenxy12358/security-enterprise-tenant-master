@@ -369,18 +369,18 @@ public class NettyService {
      * @param data
      */
 
-    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data) throws ParseException, IOException {
+    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface) throws ParseException, IOException {
         if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
             return null;
         }
-
         JSONArray newArray = new JSONArray();
         for (int i = 0; i < array.size(); i++) {
-
-//            String fileName = FILE_PATH + getUploadFilename(deviceSn, type, array.get(i), ""); // todo cxy 判断 路径
-            String fileName = KxConstants.IMG_UPLOAD + KxConstants.IMG_JOB +"/"+getUploadFilename(deviceSn, type, array.get(i), "");
-//            String fileName = KxConstants.IMG_UPLOAD + KxConstants.IMG_ALARM +"/"+getUploadFilename(deviceSn, type, array.get(i), "");
+            String typePath = KxConstants.IMG_JOB;
+            if ("Emd.Msg.Alarm".equals(Interface)) {
+                typePath = KxConstants.IMG_ALARM;
+            }
+            String fileName = KxConstants.IMG_UPLOAD + typePath + "/" + getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
             File dir = new File(pathName);
             if (!dir.exists()) {// 判断目录是否存在
@@ -388,16 +388,16 @@ public class NettyService {
             }
             FileUtil.hexToFile(data, fileName);
             JSONObject jsonObject = JSONUtil.parseObj(array.get(i));
-            String filename160 = fileName.substring(0, fileName.lastIndexOf(".")) + "-160" + fileName.substring(fileName.lastIndexOf("."));
-              String filename320 = fileName.substring(0, fileName.lastIndexOf(".")) + "-320" + fileName.substring(fileName.lastIndexOf("."));
+            //  String filename160 = fileName.substring(0, fileName.lastIndexOf(".")) + "-160" + fileName.substring(fileName.lastIndexOf("."));
+            String filename320 = fileName.substring(0, fileName.lastIndexOf(".")) + "-320" + fileName.substring(fileName.lastIndexOf("."));
             String filename640 = fileName.substring(0, fileName.lastIndexOf(".")) + "-640" + fileName.substring(fileName.lastIndexOf("."));
-            Thumbnails.of(new File(fileName)).size(160, 120).toFile(new File(filename160));
-              Thumbnails.of(new File(fileName)).size(320, 240).toFile(new File(filename320));
+            //Thumbnails.of(new File(fileName)).size(160, 120).toFile(new File(filename160));
+            Thumbnails.of(new File(fileName)).size(320, 240).toFile(new File(filename320));
             Thumbnails.of(new File(fileName)).size(640, 480).toFile(new File(filename640));
-            jsonObject.putOpt("Uri", fileName.replace(KxConstants.IMG_UPLOAD,""));
-            jsonObject.putOpt("Uri160", filename160.replace(KxConstants.IMG_UPLOAD,""));
-             jsonObject.putOpt("Uri320", filename320.replace(KxConstants.IMG_UPLOAD,""));
-            jsonObject.putOpt("Uri640", filename640.replace(KxConstants.IMG_UPLOAD,""));
+            jsonObject.putOpt("Uri", fileName.replace(KxConstants.IMG_UPLOAD, ""));
+            // jsonObject.putOpt("Uri160", filename160.replace(KxConstants.IMG_UPLOAD, ""));
+            jsonObject.putOpt("Uri320", filename320.replace(KxConstants.IMG_UPLOAD, ""));
+            jsonObject.putOpt("Uri640", filename640.replace(KxConstants.IMG_UPLOAD, ""));
             newArray.add(jsonObject);
             System.err.println("图片生成完成！========================================================");
 
@@ -551,7 +551,9 @@ public class NettyService {
             updateDeviceStat(deviceSn, senderInfo, msgInfo);
         } else if ("Emd.Msg.Data".equals(Interface)) {
             if ("AccessPicture".equals(senderInfo.get("Signal"))) {
+/*
                 savePic(deviceSn, senderInfo, msgInfo);
+*/
             } else {
                 saveData(deviceSn, senderInfo, msgInfo);
             }
@@ -666,6 +668,12 @@ public class NettyService {
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
+            Object files = msgInfo.get("Files");
+            if (files != null) {
+                JSONArray jsonArray = JSONUtil.parseArray(files.toString());
+                JSONObject json = jsonArray.getJSONObject(0);
+                kxDeviceService.analysisImg(json, deviceDTO.getId());
+            }
         } else if ("GasTransmitter".equals(Signal)) {
             saveGasData(deviceDTO, senderInfo, msgInfo);
         } else if ("BatteryState".equals(Signal)) {

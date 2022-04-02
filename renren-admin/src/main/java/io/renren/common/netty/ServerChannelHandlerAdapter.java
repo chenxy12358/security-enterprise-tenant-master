@@ -16,7 +16,6 @@ import io.renren.common.utils.DateUtil2;
 import io.renren.common.utils.HexUtil;
 import io.renren.common.utils.StringUtil;
 import io.renren.common.utils.Util16;
-import io.renren.modules.common.utils.HttpClientUtil;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.pub.service.SocketService;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -48,7 +46,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
     private int loss_connect_time = 0;
 
     @Autowired
-    private KxDeviceService KxDeviceService;
+    private KxDeviceService kxDeviceService;
 
 
     /**
@@ -68,6 +66,9 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
         System.out.println("断开连接：" + ctx.channel().id());
         logger.info("断开连接：" + ctx.channel().id() + "IP:" + ctx.channel().localAddress().toString() + "--" + DateUtil2.getCurrentDateTime());
         nettyService.remove(ctx.channel().id().toString());
+
+
+
     }
 
     @Override
@@ -98,6 +99,8 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
         logger.error(cause.getMessage());
         logger.error("异常断开连接：" + ctx.channel().id() + "IP:" + ctx.channel().localAddress().toString() + "--" + DateUtil2.getCurrentDateTime());
         nettyService.remove(ctx.channel().id().toString());
+
+
         ctx.close();
     }
 
@@ -108,7 +111,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
             byte[] result1 = new byte[result.readableBytes()];
             result.readBytes(result1);
             String body = HexUtil.byte2HexStr(result1);
-            logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 服务端接收到消息：" + body.toString());
+          //  logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 服务端接收到消息：" + body.toString());
             String flag = "";
             int ver = 0;
             int type = 0;
@@ -122,7 +125,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                 type = Util16.hexToInt(body.substring(10, 12));
                 deviceSn = Util16.hexStringToString(body.substring(12, 46));
 
-                KxDeviceDTO deviceDTO = KxDeviceService.getBySerialNo(deviceSn);
+                KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
                 if (deviceDTO == null) {
                     log.error("总接受入口，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
                     return;
@@ -132,8 +135,9 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                 if (DataConstant.PACK_TYPE_HEART_BEAT == type) {
                     int data = Util16.hexToInt(body.substring(54, 62));
                     nettyService.rcvHeartBeat(deviceSn, Integer.toString(data), channel);
+                    deviceDTO.setEnable("t");
+                    kxDeviceService.update(deviceDTO);
                     //发送初始化消息
-
                    // nettyService.sendCmdCamer(deviceSn, "Emd.Device.Camera.E1", channel);
                     // nettyService.sendInitInfo(deviceSn, channel);
                 } else if (DataConstant.PACK_TYPE_INIT_REPLY == type) {
@@ -219,7 +223,9 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                             fileType = "Result";
                         }
                         //保存文件
-                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data);
+
+                        String Interface = String.valueOf(senderInfoJsonObject.get("Interface"));
+                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data,Interface);
                         if (jsonArray != null && jsonArray.size() > 0) {
                             if (isCmmdReply) {
                                 Object obj = msgInfoJsonObject.get("ResultValue");
@@ -231,12 +237,12 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                             } else {
                                 msgInfoJsonObject.putOpt("Files", jsonArray);
 
-                                //后台分析图片 todo cxy 位置？
+                         /*       //后台分析图片 todo cxy 位置？
                                 if (null != jsonArray && !jsonArray.isEmpty()) {
                                     JSONObject json = jsonArray.getJSONObject(0);
-                                    KxDeviceService.analysisImg(json,deviceDTO.getId());
+                                    kxDeviceService.analysisImg(json,deviceDTO.getId());
                                 }
-
+*/
                             }
                         }
 
@@ -260,12 +266,10 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         }
                     }
                 }
-
             } else {
                 logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 协议头错误:" + flag);
 
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();

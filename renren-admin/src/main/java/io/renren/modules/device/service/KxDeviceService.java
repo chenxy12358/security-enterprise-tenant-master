@@ -52,6 +52,6 @@ public interface KxDeviceService extends CrudService<KxDeviceEntity, KxDeviceDTO
      * @param json
      * @param deviceId
      */
-    void analysisImg(JSONObject json,Long deviceId);
+     void analysisImg(JSONObject json, Long deviceId);
 
 }
