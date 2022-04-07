@@ -13,7 +13,7 @@ public class KxConstants {
     /**
      * 图片分析服务器地址服务器
      */
-    public static String IMG_SERVER_URL="http://localhost:8080/renren-admin/";
+    public static String IMG_SERVER_URL="http://117.175.158.169:8082/renren-admin/";
 
     /**
      * 服务器图片保存路径 计划任务 job-data 预警图片 alarm-data
