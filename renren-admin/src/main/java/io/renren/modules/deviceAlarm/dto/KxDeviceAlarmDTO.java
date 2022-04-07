@@ -1,5 +1,6 @@
 package io.renren.modules.deviceAlarm.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -26,6 +27,9 @@ public class KxDeviceAlarmDTO implements Serializable {
     private Long creator;
     @ApiModelProperty(value = "创建时间")
     private Date createDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @ApiModelProperty(value = "拍照时间")
+    private Date pictureDate;
     @ApiModelProperty(value = "更新者")
     private Long updater;
     @ApiModelProperty(value = "创建时间")

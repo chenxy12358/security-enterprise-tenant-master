@@ -12,10 +12,12 @@ import io.renren.modules.device.dao.KxDeviceDao;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.entity.KxDeviceEntity;
 import io.renren.modules.device.service.KxDeviceService;
+import io.renren.modules.discernConfig.service.KxDiscernConfigHdService;
 import io.renren.modules.security.user.SecurityUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,8 @@ import java.util.Map;
 @EnableAsync
 public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEntity, KxDeviceDTO> implements KxDeviceService {
 
+    @Autowired
+    private KxDiscernConfigHdService kxDiscernConfigHdService;
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Override
     public QueryWrapper<KxDeviceEntity> getWrapper(Map<String, Object> params) {
@@ -118,14 +122,18 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
             }
             filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
             String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
-            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
-            com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();
-            parameters.put("imgFilePath", imgFilePath);
-            parameters.put("outImgFilePath", outImgFilePath);
-            parameters.put("deviceId", deviceId);
-            parameters.put("picDate", picDate);
-            String str = HttpClientUtil.postMethod(interfacePath, parameters);
-            System.err.println(str);
+
+//            后台分析图片 本地
+            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate);
+
+//            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
+//            com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();
+//            parameters.put("imgFilePath", imgFilePath);
+//            parameters.put("outImgFilePath", outImgFilePath);
+//            parameters.put("deviceId", deviceId);
+//            parameters.put("picDate", picDate);
+//            String str = HttpClientUtil.postMethod(interfacePath, parameters);
+//            System.err.println(str);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("error"+e);

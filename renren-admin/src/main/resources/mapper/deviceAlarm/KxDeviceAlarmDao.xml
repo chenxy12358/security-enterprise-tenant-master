@@ -19,6 +19,8 @@
         <result property="senderInfo" column="sender_info"/>
         <result property="content" column="content"/>
         <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="pictureDate" column="picture_date"/>
     </resultMap>
 
 </mapper>
