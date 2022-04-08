@@ -135,7 +135,7 @@ public class KxScheduleJobEntity  {
 	/**
 	 * 预置位
 	 */
-	private String presetId;
+	private Integer presetId;
 	/**
 	 * 时间选择类型
 	 */

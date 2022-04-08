@@ -78,7 +78,7 @@ public class KxScheduleJobDTO implements Serializable {
     private String[] period;
 //    private String period;
     @ApiModelProperty(value = "预置位")
-    private String presetId;
+    private Integer presetId;
     @ApiModelProperty(value = "时间选择类型")
     private String timeType;
     @ApiModelProperty(value = "时间间隔（分钟）")
