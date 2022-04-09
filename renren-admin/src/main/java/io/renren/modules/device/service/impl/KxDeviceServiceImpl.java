@@ -123,8 +123,10 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
             filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
             String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
 
-//            后台分析图片 本地
+            // 后台分析图片 本地
+            logger.debug("后台分析图片开始");
             kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate);
+            logger.debug("后台分析图片结束");
 
 //            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
 //            com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();

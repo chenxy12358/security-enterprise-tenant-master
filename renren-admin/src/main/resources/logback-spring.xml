@@ -1,21 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <logger name="org.springframework.web" level="INFO"/>
-    <logger name="org.springboot.sample" level="TRACE" />
+
+<!-- logback默认每60秒扫描该文件一次，如果有变动则用变动后的配置文件。 -->
+<configuration scan="false">
+
+    <!-- ==============================================开发环境=========================================== -->
+    <!--    <springProfile name="dev">-->
+
+    <!--        &lt;!&ndash; 控制台输出 &ndash;&gt;-->
+    <!--        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+    <!--            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+    <!--                &lt;!&ndash;格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符&ndash;&gt;-->
+    <!--                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>-->
+    <!--            </encoder>-->
+    <!--        </appender>-->
+
+    <!--        &lt;!&ndash; 日志输出级别 &ndash;&gt;-->
+    <!--        <root level="INFO">-->
+    <!--            <appender-ref ref="STDOUT"/>-->
+    <!--        </root>-->
+    <!--    </springProfile>-->
 
     <!-- 开发、测试环境 -->
     <springProfile name="dev,test">
-        <logger name="org.springframework.web" level="INFO"/>
-        <logger name="org.springboot.sample" level="INFO" />
-        <logger name="io.renren" level="DEBUG" />
+        <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+        <property name="LOG_HOME" value="D:/kxkj-server/receive-log"/>
+
+        <!-- 控制台输出 -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="springweblog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/springweb.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/info-%d{yyyy-MM-dd}.log</FileNamePattern>
+                <!--日志文件保留天数-->
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <!-- 控制台也要使用utf-8，不要使用gbk -->
+                <charset>UTF-8</charset>
+            </encoder>
+            <!--日志文件最大的大小-->
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <MaxFileSize>10MB</MaxFileSize>
+            </triggeringPolicy>
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="springbootlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/springboot.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/error-%d{yyyy-MM-dd}.log</FileNamePattern>
+                <!--日志文件保留天数-->
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <!-- 控制台也要使用utf-8，不要使用gbk -->
+                <charset>UTF-8</charset>
+            </encoder>
+            <!--日志文件最大的大小-->
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <MaxFileSize>10MB</MaxFileSize>
+            </triggeringPolicy>
+            <!--            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+            <!--                <level>ERROR</level>-->
+            <!--            </filter>-->
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="kxkjlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/kxkj.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/error-%d{yyyy-MM-dd}.log</FileNamePattern>
+                <!--日志文件保留天数-->
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <!-- 控制台也要使用utf-8，不要使用gbk -->
+                <charset>UTF-8</charset>
+            </encoder>
+            <!--日志文件最大的大小-->
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <MaxFileSize>10MB</MaxFileSize>
+            </triggeringPolicy>
+            <!--            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+            <!--                <level>ERROR</level>-->
+            <!--            </filter>-->
+        </appender>
+
+        <logger name="org.springframework.web" level="INFO">
+            <appender-ref ref="springweblog"/>
+            <appender-ref ref="STDOUT"/>
+        </logger>
+        <logger name="org.springboot.sample" level="INFO">
+            <appender-ref ref="springbootlog"/>
+            <appender-ref ref="STDOUT"/>
+        </logger>
+        <logger name="io.renren" level="DEBUG">
+            <appender-ref ref="kxkjlog"/>
+            <appender-ref ref="STDOUT"/>
+        </logger>
+
+        <!-- 日志输出级别 -->
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
     </springProfile>
 
-    <!-- 生产环境 -->
+    <!-- ==============================================生产环境=========================================== -->
     <springProfile name="prod">
-        <logger name="org.springframework.web" level="ERROR"/>
-        <logger name="org.springboot.sample" level="ERROR" />
-        <logger name="io.renren" level="ERROR" />
-    </springProfile>
+        <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+        <property name="LOG_HOME" value="./log"/>
 
+        <!-- 控制台输出 -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="INFO_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/info.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/info.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+                <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+                <totalSizeCap>1GB</totalSizeCap>
+                <MaxFileSize>10MB</MaxFileSize>
+            </rollingPolicy>
+            <encoder>
+                <charset>UTF-8</charset>
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n
+                </pattern>
+            </encoder>
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="ERROR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_HOME}/error.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/error.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+                <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+                <totalSizeCap>1GB</totalSizeCap>
+                <MaxFileSize>10MB</MaxFileSize>
+            </rollingPolicy>
+            <encoder>
+                <charset>UTF-8</charset>
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n
+                </pattern>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <!-- 日志输出级别 -->
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="INFO_APPENDER"/>
+            <appender-ref ref="ERROR_APPENDER"/>
+        </root>
+    </springProfile>
 </configuration>
