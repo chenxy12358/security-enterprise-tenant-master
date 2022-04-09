@@ -12,7 +12,7 @@ server:
       cookie:
         http-only: true
 netty:
-  port: 9097
+  port: 9096
   isRecord: record
   websocket:
     port: 8888

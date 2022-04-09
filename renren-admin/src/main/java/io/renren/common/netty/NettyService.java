@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -505,6 +506,8 @@ public class NettyService {
                     }
                 } else if ("Emd.Service.VideoSender.E0".equals(senderInfo.get("DestObject"))) {
                     if ("SendVideoStream".equals(senderInfo.get("Method"))) {
+
+
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
@@ -716,13 +719,20 @@ public class NettyService {
      * @param senderInfo
      * @param msgInfo
      */
-    public void saveBatteryStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
+    public void saveBatteryStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) throws ParseException {
         KxBatteryDTO dto = new KxBatteryDTO();
         dto.setDeviceId(deviceDTO.getId());
         dto.setStationId(deviceDTO.getStationId());
         dto.setContent(String.valueOf(msgInfo));
-        dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
-        // TODO: 2022/3/1  拆分数据
+        //dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
+        dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
+        dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
+        dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
+        dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
+        dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
+        dto.setChargeVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
         kxBatteryService.save(dto);
     }
 
@@ -739,7 +749,6 @@ public class NettyService {
         dto.setDeviceid(deviceDTO.getId());
         dto.setStationid(deviceDTO.getStationId());
         dto.setContent(String.valueOf(msgInfo));
-        dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
         // TODO: 2022/3/1  拆分数据
         kxNetWorkStateDataService.save(dto);
 
@@ -776,7 +785,13 @@ public class NettyService {
             dto.setDeviceId(deviceDTO.getId());
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
-            // TODO: 2022/3/1  拆分数据
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
+            dto.setHdop(msgInfo.get("Hdop").toString());
+            dto.setAltitude(msgInfo.get("Altitude").toString());
+            dto.setLatitude(msgInfo.get("Latitude").toString());
+            dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
+            dto.setLongitude(new Double(msgInfo.get("Longitude").toString()));
             kxDeviceGpsService.save(dto);
         } catch (Exception e) {
             e.printStackTrace();
@@ -947,17 +962,17 @@ public class NettyService {
             KxDeviceAlarmDTO alarmDTO = new KxDeviceAlarmDTO();
             alarmDTO.setDeviceNo(String.valueOf(senderInfo.get("SerialNo")));
             alarmDTO.setSignalType(String.valueOf(senderInfo.get("Signal")));
-            alarmDTO.setLevel((Integer) senderInfo.get("Level"));
+            alarmDTO.setLevel((Integer) msgInfo.get("Level"));
             alarmDTO.setDeviceId(deviceDTO.getId());
             alarmDTO.setStationId(deviceDTO.getStationId());
             alarmDTO.setSenderInfo(String.valueOf(senderInfo));
             alarmDTO.setContent(String.valueOf(msgInfo));
 
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (senderInfo.get("CreatedTime") == null) {
                 alarmDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
-                alarmDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
+                alarmDTO.setUpdateDate(formatter.parse(String.valueOf(senderInfo.get("CreatedTime"))));
             }
             kxDeviceAlarmService.save(alarmDTO);
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
@@ -967,43 +982,6 @@ public class NettyService {
         }
     }
 
-
-    /**
-     * 注册命令
-     *
-     * @param sourceID
-     * @param data
-     */
-    public void rcvRegistration(String seqNo, String sourceID, String data, SocketChannel channel) {
-    /*    GatewayEntity entity = gatewayService.getByCode(sourceID);
-        if (entity == null) {
-            log.error("未找到对应数据，丢弃" + sourceID + "---" + data);
-            return;
-        }
-        //做通道绑定
-        addServer(channel.id().toString(), sourceID);
-        //设置网关状态
-        if (!"99".equals(entity.getStatus())) {
-            entity.setStatus("99");
-            gatewayService.updateById(entity);
-            TextWebSocketFrame tws = new TextWebSocketFrame("refresh");
-            ChannelSupervise.sendGateWayAll(tws);
-        }
-        //回复确认结果
-        byte[] d = HexUtil.makeACK(sourceID, seqNo);
-        ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-        respLengthBuf.writeBytes(d);
-        respLengthBuf.order(ByteOrder.LITTLE_ENDIAN);
-        channel.writeAndFlush(respLengthBuf);*/
-    }
-
-    /**
-     * 周期数据传输
-     *
-     * @param sourceID
-     * @param data
-     */
-    //--------------------------通道管理-----------------------------------
 
     /**
      * 获取通道
