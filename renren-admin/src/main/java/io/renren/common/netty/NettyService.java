@@ -506,12 +506,11 @@ public class NettyService {
                     }
                 } else if ("Emd.Service.VideoSender.E0".equals(senderInfo.get("DestObject"))) {
                     if ("SendVideoStream".equals(senderInfo.get("Method"))) {
-
-
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
+                        msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
                         msgInfoJsonObject.putOpt("type", "SendVideoStream");
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);

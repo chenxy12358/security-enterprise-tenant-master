@@ -138,8 +138,6 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     deviceDTO.setEnable("t");
                     kxDeviceService.update(deviceDTO);
                     //发送初始化消息
-                   // nettyService.sendCmdCamer(deviceSn, "Emd.Device.Camera.E1", channel);
-                    // nettyService.sendInitInfo(deviceSn, channel);
                 } else if (DataConstant.PACK_TYPE_INIT_REPLY == type) {
                     String senderInfo = Util16.hexStringToString(body.substring(54, 54 + payloadLen * 2));
                     logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 收到数据初始化回复，暂时没有其他业务操作：" + senderInfo);
