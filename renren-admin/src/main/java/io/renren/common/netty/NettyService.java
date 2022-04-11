@@ -973,7 +973,7 @@ public class NettyService {
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 JSONObject json = jsonArray.getJSONObject(0);
-                if (senderInfo.get("DateTime") == null) {
+                if (json.get("DateTime") == null) {
                     alarmDTO.setPictureDate(formatter.parse(formatter.format(new Date())));
                 } else {
                     alarmDTO.setPictureDate(formatter.parse(String.valueOf(json.get("DateTime"))));
