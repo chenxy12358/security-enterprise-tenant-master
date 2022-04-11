@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
     @Override
     public KxDiscernConfigHdDTO getBydeviceId(Long deviceId) {
         KxDiscernConfigHdDTO dto = baseDao.getBydeviceId(deviceId);
-        dto = this.getCameraAndSbConfig(dto, deviceId);
+        dto = this.getCameraAndSbConfig(dto);
         return dto;
     }
 
@@ -131,14 +132,14 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
      * @param dto
      * @return
      */
-    private KxDiscernConfigHdDTO getCameraAndSbConfig(KxDiscernConfigHdDTO dto, Long deviceId) {
-//        List<KxAIPzVO> discernList = new ArrayList();
-//        List<SysDictDataEntity> list = sysDictDataService.getListByDictName(KxConstants.KX_DISCERN_TYPE);
-//        if (null == dto) {
-//            dto = this.getFirstSbConfig(discernList,list); // 未保存时
-//        } else {
-//            dto = this.getDetailSbConfig(dto, discernList,list); //已保存时
-//        }
+    private KxDiscernConfigHdDTO getCameraAndSbConfig(KxDiscernConfigHdDTO dto) {
+        List<KxAIPzVO> discernList = new ArrayList();
+        List<SysDictDataEntity> list = sysDictDataService.getListByDictName(KxConstants.KX_DISCERN_TYPE);
+        if (null == dto) {
+            dto = this.getFirstSbConfig(discernList,list); // 未保存时
+        } else {
+            dto = this.getDetailSbConfig(dto, discernList,list); //已保存时
+        }
 
         return dto;
 

@@ -41,4 +41,10 @@ public class KxConstants {
     public static String NO="f";
 
 
+    /**
+     * 识别类型码表
+     */
+    public static String KX_DISCERN_TYPE="kx_discern_type";
+
+
 }

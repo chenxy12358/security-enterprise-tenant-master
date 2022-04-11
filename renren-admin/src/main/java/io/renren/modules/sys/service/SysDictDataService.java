@@ -12,7 +12,9 @@ import io.renren.common.page.PageData;
 import io.renren.common.service.BaseService;
 import io.renren.modules.sys.dto.SysDictDataDTO;
 import io.renren.modules.sys.entity.SysDictDataEntity;
+import io.renren.modules.sys.entity.SysDictTypeEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,5 +33,7 @@ public interface SysDictDataService extends BaseService<SysDictDataEntity> {
     void update(SysDictDataDTO dto);
 
     void delete(Long[] ids);
+
+    List<SysDictDataEntity> getListByDictName(String code);
 
 }
