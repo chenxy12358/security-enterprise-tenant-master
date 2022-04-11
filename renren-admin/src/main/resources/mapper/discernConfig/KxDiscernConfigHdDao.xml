@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.discernConfig.dao.KxDiscernConfigHdDao">
+
+    <resultMap type="io.renren.modules.discernConfig.entity.KxDiscernConfigHdEntity" id="kxDiscernConfigHdMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="name" column="name"/>
+        <result property="schemeNo" column="scheme_no"/>
+        <result property="schemePath" column="scheme_path"/>
+        <result property="picSize" column="pic_size"/>
+        <result property="distinguishConfig" column="distinguish_config"/>
+        <result property="orgId" column="org_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="enable" column="enable"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deleter" column="deleter"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
+    <resultMap type="io.renren.modules.discernConfig.dto.KxDiscernConfigHdDTO" id="kxDiscernConfigHdVoMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="name" column="name"/>
+        <result property="schemeNo" column="scheme_no"/>
+        <result property="schemePath" column="scheme_path"/>
+        <result property="picSize" column="pic_size"/>
+        <result property="distinguishConfig" column="distinguish_config"/>
+        <result property="orgId" column="org_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="enable" column="enable"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deleter" column="deleter"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
+    <select id="getBydeviceId" resultMap="kxDiscernConfigHdVoMap">
+        select  * from kx_discern_config_hd t1
+        where deleted='f' and device_id = #{deviceId,jdbcType=BIGINT}
+    </select>
+</mapper>
