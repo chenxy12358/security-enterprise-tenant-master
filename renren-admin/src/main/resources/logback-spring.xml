@@ -23,7 +23,7 @@
     <!-- 开发、测试环境 -->
     <springProfile name="dev,test">
         <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
-        <property name="LOG_HOME" value="D:/kxkj-server/receive-log"/>
+        <property name="LOG_HOME" value="C:/kxkj-server/receive-log"/>
 
         <!-- 控制台输出 -->
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

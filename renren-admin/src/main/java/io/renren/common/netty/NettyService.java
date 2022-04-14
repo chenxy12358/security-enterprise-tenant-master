@@ -24,6 +24,8 @@ import io.renren.modules.gas.dto.KxGasDataDTO;
 import io.renren.modules.gas.service.KxGasDataService;
 import io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO;
 import io.renren.modules.netWorkData.service.KxNetWorkStateDataService;
+import io.renren.modules.newLoadData.dto.KxNewUploadDataDTO;
+import io.renren.modules.newLoadData.service.KxNewUploadDataService;
 import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
 import io.renren.modules.scheduleItem.service.KxScheduleItemService;
 import io.renren.modules.scheduleJob.service.KxScheduleJobService;
@@ -78,6 +80,8 @@ public class NettyService {
     private KxDeviceInclinationService kxDeviceInclinationService;
     @Autowired
     private KxDeviceTemperatureService kxDeviceTemperatureService;
+    @Autowired
+    private KxNewUploadDataService kxNewUploadDataService;
 
 
     private Map<String, Channel> map = new HashMap<String, Channel>();
@@ -592,6 +596,16 @@ public class NettyService {
                 itemDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
             }
             kxScheduleItemService.save(itemDTO);
+
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(itemDTO.getCreateDate());
+            dataDTO.setType("任务数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
+
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
         } catch (Exception e) {
@@ -662,11 +676,15 @@ public class NettyService {
      * @param msgInfo
      */
     public void saveData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo) throws ParseException {
+
+
         KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
         if (deviceDTO == null) {
             log.error("处理一般上传数据，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
             return;
         }
+
+
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
@@ -696,6 +714,7 @@ public class NettyService {
         } else if ("Tempsensors".equals(Signal)) {
             saveTemperatureData(deviceDTO, senderInfo, msgInfo);
 
+
         }
     }
 
@@ -719,20 +738,36 @@ public class NettyService {
      * @param msgInfo
      */
     public void saveBatteryStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) throws ParseException {
-        KxBatteryDTO dto = new KxBatteryDTO();
-        dto.setDeviceId(deviceDTO.getId());
-        dto.setStationId(deviceDTO.getStationId());
-        dto.setContent(String.valueOf(msgInfo));
-        //dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
-        dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
-        dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
-        dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
-        dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
-        dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
-        dto.setChargeVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
-        kxBatteryService.save(dto);
+        try {
+            KxBatteryDTO dto = new KxBatteryDTO();
+            dto.setDeviceId(deviceDTO.getId());
+            dto.setStationId(deviceDTO.getStationId());
+            dto.setContent(String.valueOf(msgInfo));
+            //dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
+            dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
+            dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
+            dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
+            dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
+            dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
+            dto.setChargeVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
+            kxBatteryService.save(dto);
+
+            // 保存最新数据
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("电池数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+
+        }
+
     }
 
 
@@ -744,12 +779,27 @@ public class NettyService {
      * @param msgInfo
      */
     public void saveNetWorkStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
-        KxNetWorkStateDataDTO dto = new KxNetWorkStateDataDTO();
-        dto.setDeviceid(deviceDTO.getId());
-        dto.setStationid(deviceDTO.getStationId());
-        dto.setContent(String.valueOf(msgInfo));
-        // TODO: 2022/3/1  拆分数据
-        kxNetWorkStateDataService.save(dto);
+        try {
+            KxNetWorkStateDataDTO dto = new KxNetWorkStateDataDTO();
+            dto.setDeviceid(deviceDTO.getId());
+            dto.setStationid(deviceDTO.getStationId());
+            dto.setContent(String.valueOf(msgInfo));
+            // TODO: 2022/3/1  拆分数据
+            kxNetWorkStateDataService.save(dto);
+
+            // 保存最新数据
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("网络数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 
     }
 
@@ -792,6 +842,16 @@ public class NettyService {
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
             dto.setLongitude(new Double(msgInfo.get("Longitude").toString()));
             kxDeviceGpsService.save(dto);
+
+
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("GPS数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -828,6 +888,16 @@ public class NettyService {
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
 
             kxDeviceHumidityService.save(dto);
+
+
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("湿度数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -862,6 +932,16 @@ public class NettyService {
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
 
             kxDeviceInclinationService.save(dto);
+
+
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("倾斜数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -899,6 +979,14 @@ public class NettyService {
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
 
             kxDeviceTemperatureService.save(dto);
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(dto.getCreateDate());
+            dataDTO.setType("温度数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
         } catch (Exception e) {
 
         }
@@ -935,6 +1023,17 @@ public class NettyService {
             KxGasDataDTO.setCreator(deviceDTO.getCreator());
             KxGasDataDTO.setUpdater(deviceDTO.getUpdater());
             KxGasDataService.save(KxGasDataDTO);
+
+
+            // 保存最新数据
+            KxNewUploadDataDTO dto = new KxNewUploadDataDTO();
+            dto.setDeviceId(deviceDTO.getId());
+            dto.setStationId(deviceDTO.getStationId());
+            dto.setCreateDate(KxGasDataDTO.getCreateDate());
+            dto.setType("燃气数据");
+            kxNewUploadDataService.deleleByDeviceId(dto.getDeviceId());
+            kxNewUploadDataService.save(dto);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -974,6 +1073,15 @@ public class NettyService {
                 alarmDTO.setUpdateDate(formatter.parse(String.valueOf(senderInfo.get("CreatedTime"))));
             }
             kxDeviceAlarmService.save(alarmDTO);
+
+            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+            dataDTO.setDeviceId(deviceDTO.getId());
+            dataDTO.setStationId(deviceDTO.getStationId());
+            dataDTO.setCreateDate(alarmDTO.getCreateDate());
+            dataDTO.setType("报警数据");
+            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+            kxNewUploadDataService.save(dataDTO);
+
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
         } catch (Exception e) {
