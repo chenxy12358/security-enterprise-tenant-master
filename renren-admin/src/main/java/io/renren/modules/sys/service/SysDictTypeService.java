@@ -44,4 +44,6 @@ public interface SysDictTypeService extends BaseService<SysDictTypeEntity> {
      */
     List<DictType> getDictTypeList();
 
+
+    SysDictTypeEntity getDictTpyeByname(String dictTypeName);
 }

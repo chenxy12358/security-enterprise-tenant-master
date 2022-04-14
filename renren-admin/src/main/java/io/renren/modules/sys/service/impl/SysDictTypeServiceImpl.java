@@ -108,4 +108,16 @@ public class SysDictTypeServiceImpl extends BaseServiceImpl<SysDictTypeDao, SysD
         return baseDao.getDictTypeList();
     }
 
+    @Override
+    public SysDictTypeEntity getDictTpyeByname(String dictTypeName) {
+        QueryWrapper<SysDictTypeEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("dict_type", dictTypeName);
+        List<SysDictTypeEntity> list =baseDao.selectList(wrapper);
+        if (null!=list &&list.size() >0 ){
+
+            return list.get(0);
+        }
+        return null;
+    }
+
 }

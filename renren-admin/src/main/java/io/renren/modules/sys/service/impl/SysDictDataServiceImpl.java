@@ -16,13 +16,15 @@ import io.renren.common.utils.ConvertUtils;
 import io.renren.modules.sys.dao.SysDictDataDao;
 import io.renren.modules.sys.dto.SysDictDataDTO;
 import io.renren.modules.sys.entity.SysDictDataEntity;
+import io.renren.modules.sys.entity.SysDictTypeEntity;
 import io.renren.modules.sys.service.SysDictDataService;
+import io.renren.modules.sys.service.SysDictTypeService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 字典类型
@@ -31,6 +33,9 @@ import java.util.Map;
  */
 @Service
 public class SysDictDataServiceImpl extends BaseServiceImpl<SysDictDataDao, SysDictDataEntity> implements SysDictDataService {
+
+    @Autowired
+    SysDictTypeService sysDictTypeService;
 
     @Override
     public PageData<SysDictDataDTO> page(Map<String, Object> params) {
@@ -83,6 +88,25 @@ public class SysDictDataServiceImpl extends BaseServiceImpl<SysDictDataDao, SysD
     public void delete(Long[] ids) {
         //删除
         deleteBatchIds(Arrays.asList(ids));
+    }
+
+    @Override
+    public List<SysDictDataEntity> getListByDictName(String dictTypeName) {
+        SysDictTypeEntity sysDictTypeEntity =sysDictTypeService.getDictTpyeByname(dictTypeName);
+        List<SysDictDataEntity> list =new ArrayList<>();
+        if(null!=sysDictTypeEntity){
+            QueryWrapper<SysDictDataEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("dict_type_id", sysDictTypeEntity.getId());
+            list =baseDao.selectList(wrapper);
+            //按sort排序
+            Collections.sort(list, new Comparator<SysDictDataEntity>() {
+                @Override
+                public int compare(SysDictDataEntity o1, SysDictDataEntity o2) {
+                    return o1.getSort().compareTo(o2.getSort());
+                }
+            });
+        }
+        return list;
     }
 
 }

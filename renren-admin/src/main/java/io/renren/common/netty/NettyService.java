@@ -1066,7 +1066,19 @@ public class NettyService {
             alarmDTO.setSenderInfo(String.valueOf(senderInfo));
             alarmDTO.setContent(String.valueOf(msgInfo));
 
+
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Object files = msgInfo.get("Files");
+            if (files != null) {
+                JSONArray jsonArray = JSONUtil.parseArray(files.toString());
+                JSONObject json = jsonArray.getJSONObject(0);
+                if (json.get("DateTime") == null) {
+                    alarmDTO.setPictureDate(formatter.parse(formatter.format(new Date())));
+                } else {
+                    alarmDTO.setPictureDate(formatter.parse(String.valueOf(json.get("DateTime"))));
+                }
+            }
+
             if (senderInfo.get("CreatedTime") == null) {
                 alarmDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
