@@ -28,7 +28,9 @@ import io.renren.modules.newLoadData.dto.KxNewUploadDataDTO;
 import io.renren.modules.newLoadData.service.KxNewUploadDataService;
 import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
 import io.renren.modules.scheduleItem.service.KxScheduleItemService;
+import io.renren.modules.scheduleJob.entity.KxScheduleJobEntity;
 import io.renren.modules.scheduleJob.service.KxScheduleJobService;
+import io.renren.modules.stationTrack.service.KxStationTrackService;
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -82,12 +85,14 @@ public class NettyService {
     private KxDeviceTemperatureService kxDeviceTemperatureService;
     @Autowired
     private KxNewUploadDataService kxNewUploadDataService;
+    @Autowired
+    private KxStationTrackService kxStationTrackService;
 
 
     private Map<String, Channel> map = new HashMap<String, Channel>();
     private Map<String, String> ServerMap = new HashMap<String, String>();
 
-    private static final String dataDir = "D:";
+//    private static final String dataDir = "D:";
 
     /**
      * 日志处理
@@ -334,6 +339,77 @@ public class NettyService {
         }
     }
 
+
+    // TODO: 2022/4/18 cxy
+    public void sendJobInfo(Long deviceId) {
+
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(deviceId);
+            if (dto == null) {
+                return;
+            }
+            List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
+            if(null !=jobList && jobList.size()>0){
+                JSONArray jsonArray =new JSONArray();
+                for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
+                    JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
+                    String jobconf=json.get("TaskSchedule").toString();
+                    JSONArray jsonArrayO =JSONUtil.parseArray(jobconf);
+                    jsonArray.addAll(jsonArrayO);
+                }
+                JSONObject param = new JSONObject();
+                param.putOpt("TaskSchedule",jsonArray);
+                System.err.println(param.toString());
+            }
+
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+//                Channel channel = getChannel(key);
+//                JSONObject destInfo = new JSONObject();
+//                destInfo.putOpt("DestObject", String.valueOf(params.get("cameraName")));
+//                destInfo.putOpt("Method", "PtzControl");
+//                destInfo.putOpt("Interface", "Emd.Method.Ctrl");
+//                JSONObject param = new JSONObject();
+//
+//                param.putOpt("Command", String.valueOf(params.get("command")));
+//                param.putOpt("AutoScanParam", null);
+//                if (params.get("PresetId") != null) {
+//                    param.putOpt("PresetId", params.get("PresetId"));
+//                }
+//                if (params.get("PresetName") != null) {
+//                    String PresetName = String.valueOf(params.get("PresetName"));
+//                    param.putOpt("PresetName", PresetName);
+//
+//                }
+//                if (params.get("TourID") != null) {
+//                    param.putOpt("TourID", params.get("TourID"));
+//                }
+//                if (params.get("Speed") != null) {
+//                    param.putOpt("Speed", params.get("speed"));
+//                }
+//                if (params.get("Duration") != null) {
+//                    param.putOpt("Duration", params.get("Duration"));
+//                }
+//                param.putOpt("_session", 1);
+//                //获取基本信息
+//
+//
+//                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+//                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+//                respLengthBuf.writeBytes(d);
+//                channel.writeAndFlush(respLengthBuf);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+    }
 
     /**
      * 接收心跳数据
@@ -842,6 +918,10 @@ public class NettyService {
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
             dto.setLongitude(new Double(msgInfo.get("Longitude").toString()));
             kxDeviceGpsService.save(dto);
+
+            // TODO: 2022/4/19 保存路径
+            kxStationTrackService.add(msgInfo,deviceDTO);
+
 
 
             KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();

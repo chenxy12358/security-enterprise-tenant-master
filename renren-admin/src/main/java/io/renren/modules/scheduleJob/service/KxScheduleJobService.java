@@ -6,6 +6,7 @@ import io.renren.modules.scheduleJob.dto.KxScheduleJobDTO;
 import io.renren.modules.scheduleJob.dto.KxScheduleJobPageDTO;
 import io.renren.modules.scheduleJob.entity.KxScheduleJobEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +27,13 @@ public interface KxScheduleJobService extends CrudService<KxScheduleJobEntity, K
     PageData<KxScheduleJobPageDTO> pageNew(Map<String, Object> params);
     @Override
     KxScheduleJobDTO get(Long id);
+
+
+    /**
+     * 通过设备id取得对应配置信息
+     * @param deviceId 设备id
+     */
+    List<KxScheduleJobEntity> getInfoByDeviceId(Long deviceId);
 
 
 }

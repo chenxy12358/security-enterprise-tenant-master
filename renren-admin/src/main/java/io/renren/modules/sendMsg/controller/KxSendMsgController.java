@@ -8,16 +8,9 @@ import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
 import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import liquibase.pro.packaged.J;
+import io.swagger.annotations.ApiOperation; 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.xml.crypto.Data;
-
+import org.springframework.web.bind.annotation.*; 
 
 /**
  * 接收前端消息
@@ -72,6 +65,21 @@ public class KxSendMsgController {
     public Result sendCmdPtzControl(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         nettyService.sendCmdPtzControl(params);
+        return new Result();
+    }
+
+    // TODO: 2022/4/19 cxy
+    @PostMapping("sendJobInfo")
+    @ApiOperation("发送计划任务到设备端")
+    public Result sendJobInfo(@RequestParam Long deviceId) {
+        nettyService.sendJobInfo(deviceId);
+        return new Result();
+    }
+
+    @PostMapping("sendAIConfig")
+    @ApiOperation("发送ai配置到设备端")
+    public Result sendAIConfig(@RequestParam Long deviceId) {
+        nettyService.sendJobInfo(deviceId);
         return new Result();
     }
 

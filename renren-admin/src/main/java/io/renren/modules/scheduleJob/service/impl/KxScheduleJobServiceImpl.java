@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,10 +48,16 @@ public class KxScheduleJobServiceImpl extends CrudServiceImpl<KxScheduleJobDao, 
                 getPage(params, null, false),
                 getWrapper(params)
         );
-
-
         return getPageData(page, KxScheduleJobPageDTO.class);
 
+    }
+
+    @Override
+    public List<KxScheduleJobEntity> getInfoByDeviceId(Long deviceId) {
+        QueryWrapper<KxScheduleJobEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("device_id", deviceId);
+        List<KxScheduleJobEntity> list =baseDao.selectList(wrapper);
+        return list;
     }
 
 
