@@ -998,7 +998,7 @@ public class NettyService {
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 dto.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 dto.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
