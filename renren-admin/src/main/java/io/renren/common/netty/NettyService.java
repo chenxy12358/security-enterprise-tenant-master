@@ -666,7 +666,7 @@ public class NettyService {
             itemDTO.setDeleted("f");
             itemDTO.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 itemDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 itemDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
@@ -821,7 +821,11 @@ public class NettyService {
             dto.setContent(String.valueOf(msgInfo));
             //dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
+            if (msgInfo.get("CreatedTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("CreatedTime").toString())) {
+                dto.setCreateDate(formatter.parse(formatter.format(new Date())));
+            } else {
+                dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
+            }
             dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
             dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
             dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
@@ -911,7 +915,12 @@ public class NettyService {
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            dto.setCreateDate(formatter.parse(senderInfo.get("CreatedTime").toString()));
+
+            if (msgInfo.get("CreatedTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("CreatedTime").toString())) {
+                dto.setCreateDate(formatter.parse(formatter.format(new Date())));
+            } else {
+                dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
+            }
             dto.setHdop(msgInfo.get("Hdop").toString());
             dto.setAltitude(msgInfo.get("Altitude").toString());
             dto.setLatitude(msgInfo.get("Latitude").toString());
@@ -954,7 +963,7 @@ public class NettyService {
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 dto.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 dto.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
@@ -1044,7 +1053,7 @@ public class NettyService {
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 dto.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 dto.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
@@ -1090,7 +1099,7 @@ public class NettyService {
             KxGasDataDTO.setGasType(String.valueOf(msgInfo.get("GasType")));
             KxGasDataDTO.setSensorId(Long.valueOf(String.valueOf(msgInfo.get("SensorId"))));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null) {
+            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 KxGasDataDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 KxGasDataDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
@@ -1152,7 +1161,7 @@ public class NettyService {
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 JSONObject json = jsonArray.getJSONObject(0);
-                if (json.get("DateTime") == null) {
+                if (msgInfo.get("DateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("DateTime").toString())) {
                     alarmDTO.setPictureDate(formatter.parse(formatter.format(new Date())));
                 } else {
                     alarmDTO.setPictureDate(formatter.parse(String.valueOf(json.get("DateTime"))));
