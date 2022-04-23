@@ -821,7 +821,7 @@ public class NettyService {
             dto.setContent(String.valueOf(msgInfo));
             //dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("CreatedTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("CreatedTime").toString())) {
+            if (msgInfo.get("UpdataTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdataTime").toString())) {
                 dto.setCreateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
