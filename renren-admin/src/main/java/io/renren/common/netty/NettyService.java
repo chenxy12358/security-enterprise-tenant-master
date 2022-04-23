@@ -831,7 +831,7 @@ public class NettyService {
             dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
             dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
             dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
-            dto.setChargeVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
+            dto.setOutputVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
             kxBatteryService.save(dto);
 
             // 保存最新数据
