@@ -47,6 +47,7 @@ public class KxStationTrackServiceImpl extends CrudServiceImpl<KxStationTrackDao
     public Result add(JSONObject msgInfo, KxDeviceDTO kxDeviceDTO) {
         String latitude = msgInfo.get("Latitude").toString();//纬度
         String longitude = msgInfo.get("Longitude").toString();//经度
+        logger.debug("gps=========");
         logger.debug(latitude);
         logger.debug(longitude);
         List<KxStationTrackDTO> list = this.getTrackListInfo(kxDeviceDTO.getStationId());

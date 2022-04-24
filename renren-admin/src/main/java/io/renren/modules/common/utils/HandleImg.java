@@ -99,6 +99,8 @@ public class HandleImg {
         while ((tempLine = reader.readLine()) != null) {
             list.add(tempLine);
         }
+
+        LOGGER.debug("listDis=" + listDis.size());
         String[] names = list.toArray(new String[list.size()]);
         // 定义对象
         String jpgFile = "";
@@ -113,6 +115,7 @@ public class HandleImg {
             im = Imgcodecs.imread(imgFilePath, Imgcodecs.IMREAD_COLOR);
             if (im.empty()) {
                 System.out.println("read image fail");
+                LOGGER.debug("read image fail");
             }
             if (deleteFlag) {
                 File file = new File(imgFilePath);
@@ -127,6 +130,7 @@ public class HandleImg {
             Net net = Dnn.readNetFromDarknet(cfgFile, weights);
             if (net.empty()) {
                 System.out.println("init net fail");
+                LOGGER.debug("init net fail");
             }
 
             // 设置计算后台：如果电脑有GPU，可以指定为：DNN_BACKEND_CUDA
@@ -146,6 +150,7 @@ public class HandleImg {
             out = net.forward(outLayersNames.get(0));
             if (out.empty()) {
                 System.out.println("forward result is null");
+                LOGGER.debug("forward result is null");
             }
 
             // 处理 out 的结果集: 移除小的置信度数据和去重
@@ -187,6 +192,7 @@ public class HandleImg {
             }
             if (rect2dList.isEmpty()) {
                 System.out.println("not object");
+                LOGGER.debug("not object");
             }
             // box 去重
             indexs = new MatOfInt();
@@ -200,6 +206,7 @@ public class HandleImg {
             Dnn.NMSBoxes(boxes, con, 0.01F, 0.01F, indexs);
             if (indexs.empty()) {
                 System.out.println("indexs is empty");
+                LOGGER.debug("indexs is empty");
             }
             boolean isOut = false;
             // 去重后的索引
@@ -209,6 +216,7 @@ public class HandleImg {
                 typeClass = names[objIndexList.get(i)]; // 类别
                 Confidence = String.format("%1.2f", confList.get(i)); //置信度
 
+                LOGGER.debug("typeClass233=" + typeClass);
                 for (KxAIPzVO kxAIPzVO : listDis) {
                     String code = kxAIPzVO.getCode();
                     String name = kxAIPzVO.getName();
