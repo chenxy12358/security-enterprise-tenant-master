@@ -9,6 +9,8 @@ import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -29,6 +31,7 @@ import java.util.List;
  * @create 2022/3/23
  */
 public class HandleImg {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandleImg.class);
 
     public static void main(String[] args) throws Exception {
         String outImgFilePath = "D:/ai_demo/out1/";
@@ -211,6 +214,7 @@ public class HandleImg {
                     String name = kxAIPzVO.getName();
                     BigDecimal thresh = kxAIPzVO.getThresh();
                     if (typeClass.equals(code) && kxAIPzVO.isEnable() && confList.get(i) >= thresh.floatValue()) {
+                        LOGGER.debug("typeClass=" + typeClass);
                         Map map = new HashMap();
                         map.put("Object", name);
                         map.put("Similarity", confList.get(i));
@@ -220,19 +224,25 @@ public class HandleImg {
                         Integer obj = objIndexList.get(i);
                         classesNumberList[obj] += 1;
 
+                        LOGGER.debug("1122");
                         //标记框颜色 start
                         int topclass  = kxAIPzVO.getSort();
+                        LOGGER.debug("topclass=" + topclass);
                         int nclasses  = listDis.size();
+                        LOGGER.debug("nclasses=" + nclasses);
                         int   offset = (topclass * 123457) % nclasses;
+                        LOGGER.debug("offset=" + offset);
                         float red    = getColor(2, offset, nclasses);
                         float green  = getColor(1, offset, nclasses);
                         float blue   = getColor(0, offset, nclasses);
                         //标记框颜色 end
 
+                        LOGGER.debug("red=" + red+";green=" + green+";blue=" + blue);
                         // 将 box 信息画在图片上, Scalar 对象是 BGR 的顺序，与RGB顺序反着的。
                         Imgproc.rectangle(im, new Point(rect2d.x, rect2d.y), new Point(rect2d.x + rect2d.width, rect2d.y + rect2d.height),
                                 new Scalar(blue, green, red), 1);
                         String content = name + ":" + Confidence;
+                        LOGGER.debug("red=" + red+";green=" + green+";content=" + content);
                         im = setText(im, content, rect2d.x, rect2d.y,red,green,blue);
                         isOut = true;
                     }
@@ -241,6 +251,7 @@ public class HandleImg {
             }
 
             if (isOut) {
+                LOGGER.debug("isOut=" + isOut);
                 String fileName = "";
                 if(imgFilePath.contains("\\")){
                     imgFilePath=imgFilePath.replaceAll("\\\\","/");
@@ -250,10 +261,12 @@ public class HandleImg {
                 fileName = "ai-s-" + System.currentTimeMillis() + "-" + fileName;
                 jpgFile = Paths.get(outImgFilePath, fileName).toString();
                 Imgcodecs.imwrite(jpgFile, im);
-                System.err.println("输出文件路径" + jpgFile);
+                LOGGER.debug("输出文件路径" + jpgFile);
 
             }
         } catch (Exception e) {
+            LOGGER.error("HandleImg===Exception==:"+e);
+            LOGGER.error(e.getMessage());
             System.err.println(e.getMessage());
             throw e;
         } finally {
@@ -285,6 +298,7 @@ public class HandleImg {
         Font font = new Font("微软雅黑", Font.PLAIN, 12);
         BufferedImage bufImg = ImageUtil.Mat2BufImg(im, ".png");
 
+        LOGGER.debug("content1=" + content);
         Graphics2D g = bufImg.createGraphics();
 
         FontRenderContext frc = g.getFontRenderContext();
@@ -293,6 +307,7 @@ public class HandleImg {
         g.setBackground(new Color((int)(red+0.5), (int)(green+0.5), (int)(blue+0.5)));//设置背景色
         g.clearRect(new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - 13, new Double(fontWidth).intValue() + 1, 13);//通过使用当前绘图表面的背景色进行填充来清除指定的矩形。
 
+        LOGGER.debug("fontWidth=" + fontWidth);
 
         g.setColor(Color.black);//设置字体色
         g.drawImage(bufImg, 0, 0, bufImg.getWidth(), bufImg.getHeight(), null);
