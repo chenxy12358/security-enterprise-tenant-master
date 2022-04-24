@@ -18,8 +18,8 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * 使用官方模型和配置
@@ -219,11 +219,21 @@ public class HandleImg {
                         Rect2d rect2d = rect2dList.get(i);
                         Integer obj = objIndexList.get(i);
                         classesNumberList[obj] += 1;
+
+                        //标记框颜色 start
+                        int topclass  = kxAIPzVO.getSort();
+                        int nclasses  = listDis.size();
+                        int   offset = (topclass * 123457) % nclasses;
+                        float red    = getColor(2, offset, nclasses);
+                        float green  = getColor(1, offset, nclasses);
+                        float blue   = getColor(0, offset, nclasses);
+                        //标记框颜色 end
+
                         // 将 box 信息画在图片上, Scalar 对象是 BGR 的顺序，与RGB顺序反着的。
                         Imgproc.rectangle(im, new Point(rect2d.x, rect2d.y), new Point(rect2d.x + rect2d.width, rect2d.y + rect2d.height),
-                                new Scalar(0, 255, 0), 1);
+                                new Scalar(blue, green, red), 1);
                         String content = name + ":" + Confidence;
-                        im = setText(im, content, rect2d.x, rect2d.y);
+                        im = setText(im, content, rect2d.x, rect2d.y,red,green,blue);
                         isOut = true;
                     }
 
@@ -271,8 +281,8 @@ public class HandleImg {
 
     }
 
-    public static Mat setText(Mat im, String content, double leftBottomX, double leftBottomY) {
-        Font font = new Font("微软雅黑", Font.PLAIN, 18);
+    public static Mat setText(Mat im, String content, double leftBottomX, double leftBottomY,float red,float green,float blue) {
+        Font font = new Font("微软雅黑", Font.PLAIN, 12);
         BufferedImage bufImg = ImageUtil.Mat2BufImg(im, ".png");
 
         Graphics2D g = bufImg.createGraphics();
@@ -280,16 +290,15 @@ public class HandleImg {
         FontRenderContext frc = g.getFontRenderContext();
         Rectangle2D stringBounds = font.getStringBounds(content, frc);
         double fontWidth = stringBounds.getWidth();
-
-        g.setBackground(new Color(202, 27, 122));//设置背景色
-        g.clearRect(new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - 25, new Double(fontWidth).intValue() + 1, 20);//通过使用当前绘图表面的背景色进行填充来清除指定的矩形。
+        g.setBackground(new Color((int)(red+0.5), (int)(green+0.5), (int)(blue+0.5)));//设置背景色
+        g.clearRect(new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - 13, new Double(fontWidth).intValue() + 1, 13);//通过使用当前绘图表面的背景色进行填充来清除指定的矩形。
 
 
         g.setColor(Color.black);//设置字体色
         g.drawImage(bufImg, 0, 0, bufImg.getWidth(), bufImg.getHeight(), null);
         g.setFont(font); //设置字体
         //设置水印的坐标
-        g.drawString(content, new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - 10);
+        g.drawString(content, new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue());
         g.dispose();
         im = ImageUtil.Img2Mat(bufImg, BufferedImage.TYPE_3BYTE_BGR, CvType.CV_8UC3);// CvType.CV_8UC3
         return im;
@@ -346,6 +355,33 @@ public class HandleImg {
             System.out.println("创建目录" + destDirName + "失败！");
             return false;
         }
-
     }
+
+
+    /**
+     * 计算rgb 权重规则 （与设备端一致）
+     *
+     * topclass 当前识别到的物体的顺序
+     * nclasses 物体种类数
+     * int   offset = (topclass * 123457) % nclasses;
+     * float red    = get_color(2, offset, nclasses);
+     * float green  = get_color(1, offset, nclasses);
+     * float blue   = get_color(0, offset, nclasses);
+     * @param c
+     * @param x
+     * @param max
+     * @return
+     */
+    public static float getColor(int c, int x, int max) {
+        float colors[][] = {{1,0,1},{0,0,1},{0,1,1},{0,1,0},{1,1,0},{1,0,0}};
+        float ratio = ((float)x/max)*5;
+        int i = (int) Math.floor(ratio);  //取整,返回的是小于或等于ratio的最大整数
+        int j = (int) Math.ceil(ratio);   //取整,返回的是大于ratio的最小整数
+        ratio -= i;
+        float r = (1-ratio)*colors[i][c] + ratio*colors[j][c];
+        return r*255;
+    }
+
+
+
 }

@@ -8,11 +8,11 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
-* 识别参数配置
-*
-* @author cxy
-* @since 3.0 2022-03-08
-*/
+ * 识别参数配置
+ *
+ * @author cxy
+ * @since 3.0 2022-03-08
+ */
 @Data
 @ApiModel(value = "识别参数配置")
 public class KxAIPzVO implements Serializable {
@@ -22,6 +22,8 @@ public class KxAIPzVO implements Serializable {
     private String name;
     @ApiModelProperty(value = "code")
     private String code;
+    @ApiModelProperty(value = "sort")
+    private Integer sort;
     @ApiModelProperty(value = "是否启用")
     private boolean enable;
     @ApiModelProperty(value = "是否启用铃声")
