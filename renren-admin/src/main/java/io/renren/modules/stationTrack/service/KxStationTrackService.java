@@ -5,10 +5,9 @@ import io.renren.common.service.CrudService;
 import io.renren.common.utils.ConvertUtils;
 import io.renren.common.utils.Result;
 import io.renren.modules.device.dto.KxDeviceDTO;
+import io.renren.modules.deviceData.dto.KxDeviceGpsDTO;
 import io.renren.modules.stationTrack.dto.KxStationTrackDTO;
 import io.renren.modules.stationTrack.entity.KxStationTrackEntity;
-import liquibase.pro.packaged.D;
-import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
@@ -24,9 +23,9 @@ public interface KxStationTrackService extends CrudService<KxStationTrackEntity,
 
     /**
      *  新增
-     * @param msgInfo
+     * @param dto
      * @param kxDeviceDTO
      * @return
      */
-    Result add(JSONObject msgInfo, KxDeviceDTO kxDeviceDTO);
+    Result add(KxDeviceGpsDTO dto, KxDeviceDTO kxDeviceDTO);
 }

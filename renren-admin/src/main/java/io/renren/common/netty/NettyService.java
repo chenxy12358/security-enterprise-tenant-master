@@ -14,6 +14,7 @@ import io.renren.common.utils.*;
 import io.renren.modules.battery.dto.KxBatteryDTO;
 import io.renren.modules.battery.service.KxBatteryService;
 import io.renren.modules.common.constant.KxConstants;
+import io.renren.modules.common.utils.CoordinateTransform;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.deviceAlarm.dto.KxDeviceAlarmDTO;
@@ -926,15 +927,19 @@ public class NettyService {
             } else {
                 dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
             }
+            String lat=msgInfo.get("Latitude").toString();
+            String lng=msgInfo.get("Longitude").toString();
+            lat=CoordinateTransform.transferGps(lat);
+            lng=CoordinateTransform.transferGps(lng);
+            dto.setLongitude(lng);
+            dto.setLatitude(lat);
             dto.setHdop(msgInfo.get("Hdop").toString());
             dto.setAltitude(msgInfo.get("Altitude").toString());
-            dto.setLatitude(msgInfo.get("Latitude").toString());
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
-            dto.setLongitude(new Double(msgInfo.get("Longitude").toString()));
             kxDeviceGpsService.save(dto);
 
-            // TODO: 2022/4/19 保存路径
-            kxStationTrackService.add(msgInfo,deviceDTO);
+            // 保存gps轨迹路径
+            kxStationTrackService.add(dto,deviceDTO);
 
 
 

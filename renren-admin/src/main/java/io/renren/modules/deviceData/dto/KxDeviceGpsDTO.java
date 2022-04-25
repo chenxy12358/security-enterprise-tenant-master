@@ -41,7 +41,7 @@ public class KxDeviceGpsDTO implements Serializable {
     @ApiModelProperty(value = "站点id")
     private Long stationId;
     @ApiModelProperty(value = "经度")
-    private Double longitude;
+    private String longitude;
     @ApiModelProperty(value = "纬度")
     private String latitude;
     @ApiModelProperty(value = "东/西经")

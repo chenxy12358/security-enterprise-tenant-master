@@ -62,7 +62,7 @@ public class KxDeviceGpsEntity {
 	/**
 	* 经度
 	*/
-	private Double longitude;
+	private String longitude;
 	/**
 	* 纬度
 	*/

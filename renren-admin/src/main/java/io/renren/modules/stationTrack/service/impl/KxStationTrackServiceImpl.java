@@ -7,6 +7,7 @@ import io.renren.common.service.impl.CrudServiceImpl;
 import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
 import io.renren.modules.device.dto.KxDeviceDTO;
+import io.renren.modules.deviceData.dto.KxDeviceGpsDTO;
 import io.renren.modules.security.user.SecurityUser;
 import io.renren.modules.stationTrack.dao.KxStationTrackDao;
 import io.renren.modules.stationTrack.dto.KxStationTrackDTO;
@@ -44,9 +45,9 @@ public class KxStationTrackServiceImpl extends CrudServiceImpl<KxStationTrackDao
     }
 
     @Override
-    public Result add(JSONObject msgInfo, KxDeviceDTO kxDeviceDTO) {
-        String latitude = msgInfo.get("Latitude").toString();//纬度
-        String longitude = msgInfo.get("Longitude").toString();//经度
+    public Result add(KxDeviceGpsDTO dto, KxDeviceDTO kxDeviceDTO) {
+        String latitude = dto.getLatitude();//纬度
+        String longitude = dto.getLongitude();//经度
         List<KxStationTrackEntity> list = this.getTrackListInfo(kxDeviceDTO.getStationId());
         if (StringUtil.isNotEmpty(latitude) && StringUtil.isNotEmpty(longitude)) {
             if (null != list && list.size() > 0) {
