@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -46,23 +47,36 @@ public class KxStationTrackServiceImpl extends CrudServiceImpl<KxStationTrackDao
 
     @Override
     public Result add(KxDeviceGpsDTO dto, KxDeviceDTO kxDeviceDTO) {
-        String latitude = dto.getLatitude();//纬度
-        String longitude = dto.getLongitude();//经度
-        List<KxStationTrackEntity> list = this.getTrackListInfo(kxDeviceDTO.getStationId());
-        if (StringUtil.isNotEmpty(latitude) && StringUtil.isNotEmpty(longitude)) {
-            if (null != list && list.size() > 0) {
-                KxStationTrackEntity kxStationTrack = list.get(0);;
-                if (!latitude.equals(kxStationTrack.getLat()) || !longitude.equals(kxStationTrack.getLng())) {
-                    //  保存轨迹坐标点
+        try {
+            String latitude = dto.getLatitude();//纬度
+            String longitude = dto.getLongitude();//经度
+            String latNew = String.format("%.4f",Double.parseDouble(latitude));
+            String lngNew = String.format("%.4f", Double.parseDouble(longitude));
+            List<KxStationTrackEntity> list = this.getTrackListInfo(kxDeviceDTO.getStationId());
+            if (StringUtil.isNotEmpty(latitude) && StringUtil.isNotEmpty(longitude)) {
+                if (null != list && list.size() > 0) {
+                    KxStationTrackEntity kxStationTrack = list.get(0);
+                    String latOld = String.format("%.4f",Double.parseDouble(kxStationTrack.getLat()));
+                    String lngOld = String.format("%.4f", Double.parseDouble(kxStationTrack.getLng()));
+                    BigDecimal latB=new BigDecimal(latNew).subtract(new BigDecimal(latOld)).abs();
+                    BigDecimal lngB=new BigDecimal(lngNew).subtract(new BigDecimal(lngOld)).abs();
+                    if (lngB.compareTo(new BigDecimal("0.0001")) == 1 || latB.compareTo(new BigDecimal("0.0001")) == 1 ) {
+                        //  保存轨迹坐标点
+                        this.saveInfo(kxDeviceDTO,latitude,longitude);
+                    }
+                }else {
+                    //桩点第一次的经纬度保存
                     this.saveInfo(kxDeviceDTO,latitude,longitude);
                 }
-            }else {
-                //桩点第一次的经纬度保存
-                this.saveInfo(kxDeviceDTO,latitude,longitude);
-            }
 
+            }
+            return new Result();
+
+        }catch (Exception e){
+            logger.error("保存桩点路径失败",e);
+            logger.error("保存桩点路径失败,content=",dto.getContent()+";DeviceId="+dto.getDeviceId());
+            return new Result().error("保存路径失败");
         }
-        return new Result();
     }
 
     /**
@@ -77,6 +91,7 @@ public class KxStationTrackServiceImpl extends CrudServiceImpl<KxStationTrackDao
         kxStationTrack.setRemark(kxDeviceDTO.getId().toString());// 保存设备id
         kxStationTrack.setLat(latitude);
         kxStationTrack.setLng(longitude);
+        kxStationTrack.setPosition(longitude+","+latitude);
         this.save(kxStationTrack);
 
     }
