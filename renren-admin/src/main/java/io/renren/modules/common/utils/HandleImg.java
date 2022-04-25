@@ -273,7 +273,7 @@ public class HandleImg {
 
             }
         } catch (Exception e) {
-            LOGGER.error("HandleImg===Exception==:"+e);
+            LOGGER.error("识别图像出错:"+e);
             LOGGER.error(e.getMessage());
             System.err.println(e.getMessage());
             throw e;
@@ -303,7 +303,8 @@ public class HandleImg {
     }
 
     public static Mat setText(Mat im, String content, double leftBottomX, double leftBottomY,float red,float green,float blue) {
-        Font font = new Font("微软雅黑", Font.PLAIN, 12);
+        int fontSize=13;
+        Font font = new Font("微软雅黑", Font.PLAIN, fontSize);
         BufferedImage bufImg = ImageUtil.Mat2BufImg(im, ".png");
 
         LOGGER.debug("content1=" + content);
@@ -313,7 +314,7 @@ public class HandleImg {
         Rectangle2D stringBounds = font.getStringBounds(content, frc);
         double fontWidth = stringBounds.getWidth();
         g.setBackground(new Color((int)(red+0.5), (int)(green+0.5), (int)(blue+0.5)));//设置背景色
-        g.clearRect(new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - 13, new Double(fontWidth).intValue() + 1, 13);//通过使用当前绘图表面的背景色进行填充来清除指定的矩形。
+        g.clearRect(new Double(leftBottomX).intValue(), new Double(leftBottomY).intValue() - fontSize-2, new Double(fontWidth).intValue() + 1, fontSize+2);//通过使用当前绘图表面的背景色进行填充来清除指定的矩形。
 
         LOGGER.debug("fontWidth=" + fontWidth);
 
