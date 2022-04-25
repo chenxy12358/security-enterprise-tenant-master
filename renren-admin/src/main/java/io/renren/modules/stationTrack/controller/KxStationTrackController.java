@@ -11,6 +11,7 @@ import io.renren.common.validator.group.AddGroup;
 import io.renren.common.validator.group.DefaultGroup;
 import io.renren.common.validator.group.UpdateGroup;
 import io.renren.modules.stationTrack.dto.KxStationTrackDTO;
+import io.renren.modules.stationTrack.entity.KxStationTrackEntity;
 import io.renren.modules.stationTrack.excel.KxStationTrackExcel;
 import io.renren.modules.stationTrack.service.KxStationTrackService;
 import io.swagger.annotations.Api;
@@ -57,9 +58,9 @@ public class KxStationTrackController {
 
     @GetMapping("/getTrackListInfo/{stationId}")
     @ApiOperation(value = "轨迹数据")
-    public Result<List<KxStationTrackDTO>> getTrackListInfo(@PathVariable Long stationId) {
-        List<KxStationTrackDTO> list = kxStationTrackService.getTrackListInfo(stationId);
-        return new Result<List<KxStationTrackDTO>>().ok(list);
+    public Result<List<KxStationTrackEntity>> getTrackListInfo(@PathVariable Long stationId) {
+        List<KxStationTrackEntity> list = kxStationTrackService.getTrackListInfo(stationId);
+        return new Result<List<KxStationTrackEntity>>().ok(list);
     }
 
 

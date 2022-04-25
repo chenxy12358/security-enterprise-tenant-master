@@ -132,6 +132,7 @@ public class NettyService {
             channel.writeAndFlush(respLengthBuf2);
 
         } catch (Exception e) {
+            logger.error("initBaseInfoAndStatus",e);
             e.printStackTrace();
         }
 
@@ -610,6 +611,7 @@ public class NettyService {
 
             }
         } catch (Exception e) {
+            logger.error("rcvCmmdReply",e);
             e.printStackTrace();
         }
 
@@ -685,6 +687,7 @@ public class NettyService {
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
         } catch (Exception e) {
+            logger.error("savePic",e);
             e.printStackTrace();
         }
 
@@ -737,6 +740,7 @@ public class NettyService {
                 }
             }
         } catch (Exception e) {
+            logger.error("updateDeviceStat",e);
             e.printStackTrace();
         }
 
@@ -876,6 +880,7 @@ public class NettyService {
             kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
             kxNewUploadDataService.save(dataDTO);
         } catch (Exception e) {
+            logger.error("saveNetWorkStateData",e);
             e.printStackTrace();
         }
 
@@ -942,6 +947,7 @@ public class NettyService {
             kxNewUploadDataService.save(dataDTO);
 
         } catch (Exception e) {
+            logger.error("saveGpsData",e);
             e.printStackTrace();
 
         }
@@ -988,6 +994,7 @@ public class NettyService {
             kxNewUploadDataService.save(dataDTO);
 
         } catch (Exception e) {
+            logger.error("saveHumidityData",e);
             e.printStackTrace();
 
         }
@@ -1032,6 +1039,7 @@ public class NettyService {
             kxNewUploadDataService.save(dataDTO);
 
         } catch (Exception e) {
+            logger.error("saveInclinationData",e);
             e.printStackTrace();
         }
 
@@ -1077,6 +1085,8 @@ public class NettyService {
             kxNewUploadDataService.save(dataDTO);
 
         } catch (Exception e) {
+            logger.error("saveTemperatureData",e);
+            e.printStackTrace();
 
         }
     }
@@ -1124,6 +1134,7 @@ public class NettyService {
             kxNewUploadDataService.save(dto);
 
         } catch (Exception e) {
+            logger.error("saveGasData",e);
             e.printStackTrace();
         }
 
@@ -1186,6 +1197,7 @@ public class NettyService {
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
         } catch (Exception e) {
+            logger.error("saveAlarm",e);
             e.printStackTrace();
         }
     }
@@ -1214,6 +1226,7 @@ public class NettyService {
                     kxDeviceService.update(dto);
                 }
             } catch (Exception e) {
+                logger.error("remove",e);
                 e.printStackTrace();
             }
 

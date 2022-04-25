@@ -17,5 +17,5 @@ import java.util.List;
 @Mapper
 public interface KxStationTrackDao extends BaseDao<KxStationTrackEntity> {
 
-    List<KxStationTrackDTO> getTrackListInfoByStationId(@Param("stationId") Long stationId);
+    List<KxStationTrackEntity> getTrackListInfoByStationId(@Param("stationId") Long stationId);
 }

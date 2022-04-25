@@ -20,7 +20,7 @@ import java.util.List;
  */
 public interface KxStationTrackService extends CrudService<KxStationTrackEntity, KxStationTrackDTO> {
 
-    List<KxStationTrackDTO> getTrackListInfo(Long stationId);
+    List<KxStationTrackEntity> getTrackListInfo(Long stationId);
 
     /**
      *  新增
