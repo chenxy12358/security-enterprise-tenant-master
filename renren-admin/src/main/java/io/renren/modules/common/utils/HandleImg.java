@@ -234,7 +234,7 @@ public class HandleImg {
 
                         LOGGER.debug("1122");
                         //标记框颜色 start
-                        int topclass  = kxAIPzVO.getSort();
+                        int topclass  =  null == kxAIPzVO.getSort()  ? 0: kxAIPzVO.getSort();
                         LOGGER.debug("topclass=" + topclass);
                         int nclasses  = listDis.size();
                         LOGGER.debug("nclasses=" + nclasses);
