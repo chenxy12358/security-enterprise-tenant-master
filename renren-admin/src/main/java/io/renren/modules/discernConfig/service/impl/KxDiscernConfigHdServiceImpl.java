@@ -77,6 +77,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             jsonMap.put("Enable", kxAIPzVO.isEnable());
             jsonMap.put("Thresh", kxAIPzVO.getThresh());
             jsonMap.put("Name", kxAIPzVO.getName());
+            jsonMap.put("Sort", kxAIPzVO.getSort());
             json.put(kxAIPzVO.getCode(), jsonMap);
         }
         dto.setDistinguishConfig(json.toString());
@@ -107,7 +108,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
                 logger.debug("图片：{"+imgFilePath+"} ，分析开始");
                 List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
                 logger.debug("图片：{"+imgFilePath+"} ，分析结束");
-                logger.debug("listInfo：{"+listInfo.size());
+                logger.debug("listInfo："+listInfo.size());
                 if(!listInfo.get(0).toString().isEmpty()){
                     logger.debug("listInfo：{"+listInfo.get(0).toString());
                     kxDeviceAlarmService.saveAnalysisImg(listInfo,deviceID,picDate);
@@ -160,6 +161,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             KxAIPzVO kxAIPzVO = new KxAIPzVO();
             kxAIPzVO.setCode(sysDictDataEntity.getDictValue());
             kxAIPzVO.setName(sysDictDataEntity.getDictLabel());
+            kxAIPzVO.setSort(sysDictDataEntity.getSort());
             discernList.add(kxAIPzVO);
         }
         dto.setDiscernList(discernList);
@@ -189,7 +191,8 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
                         JSONObject json = (JSONObject) entry.getValue();
                         kxAIPzVO.setEnable(json.get("Enable") == null ? false : (boolean) json.get("Enable"));
                         kxAIPzVO.setThresh(json.get("Thresh") == null ? BigDecimal.ZERO : new BigDecimal(json.get("Thresh").toString()));
-                        kxAIPzVO.setName(json.get("Name") == null ? "" : json.get("Name").toString());
+                        kxAIPzVO.setName(sysDictDataEntity.getDictLabel() == null ? "" : sysDictDataEntity.getDictLabel() );
+                        kxAIPzVO.setSort(sysDictDataEntity.getSort());
                         flag = false;
                     }
                 }
@@ -197,6 +200,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             if (flag) {
                 kxAIPzVO.setCode(sysDictDataEntity.getDictValue());
                 kxAIPzVO.setName(sysDictDataEntity.getDictLabel());
+                kxAIPzVO.setSort(sysDictDataEntity.getSort());
 
             }
             discernList.add(kxAIPzVO);
