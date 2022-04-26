@@ -935,6 +935,8 @@ public class NettyService {
             dto.setLatitude(lat);
             dto.setHdop(msgInfo.get("Hdop").toString());
             dto.setAltitude(msgInfo.get("Altitude").toString());
+            dto.setEastWest(msgInfo.get("East/West").toString());
+            dto.setNorthSouth(msgInfo.get("North/South").toString());
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
             kxDeviceGpsService.save(dto);
 

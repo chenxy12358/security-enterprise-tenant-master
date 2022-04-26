@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 /**
  * 提供了百度坐标（BD09）、国测局坐标（火星坐标，GCJ02）、和WGS84坐标系之间的转换
  *
- * @author Daniel
- * @since 2016/7/27 0027
+ * @author cxy
+ * @since 2022年4月26日09:48:16
  */
 public class CoordinateTransform {
     private static final double x_PI = 3.14159265358979324 * 3000.0 / 180.0;
