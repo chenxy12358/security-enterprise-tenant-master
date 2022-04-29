@@ -320,7 +320,7 @@ public class NettyService {
                 if (params.get("Duration") != null) {
                     param.putOpt("Duration", params.get("Duration"));
                 }
-                param.putOpt("_session", 1);
+                param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
                 //获取基本信息
 
 
