@@ -192,7 +192,7 @@ public class NettyService {
      * @param deviceSn
      * @param cameraName
      */
-    public void sendCmdCamera(String deviceSn, String cameraName) {
+    public void sendCmdCamera(String deviceSn, String cameraName,Long currentTime) {
         try {
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(deviceSn);
             if (dto == null) {
@@ -215,7 +215,7 @@ public class NettyService {
                 param.putOpt("Channel", 2);
                 param.putOpt("StreamType", "Rtmp");
                 param.putOpt("Protocol", "tcp");
-                param.putOpt("_session", 1);
+                param.putOpt("_session", currentTime);
                 //获取基本信息
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), param.toString(), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
@@ -565,7 +565,7 @@ public class NettyService {
      * @param channel
      * @throws ParseException
      */
-    public void rcvCmmdReply(String deviceSn, JSONObject senderInfo, JSONObject msgInfoJsonObject, SocketChannel channel) throws ParseException {
+    public void rcvCmmdReply(String deviceSn, JSONObject senderInfo, JSONObject msgInfoJsonObject, SocketChannel channel,String session) throws ParseException {
 
         try {
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
@@ -605,6 +605,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", "PtzControl");
+                        msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);
                     }
@@ -938,6 +939,9 @@ public class NettyService {
             dto.setEastWest(msgInfo.get("East/West").toString());
             dto.setNorthSouth(msgInfo.get("North/South").toString());
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
+            dto.setLongitude(msgInfo.get("Longitude").toString());
+            dto.setEastWest(msgInfo.get("East/West").toString());
+            dto.setNorthSouth(msgInfo.get("North/South").toString());
             kxDeviceGpsService.save(dto);
 
             // 保存gps轨迹路径

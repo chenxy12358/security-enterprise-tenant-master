@@ -8,9 +8,9 @@ import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
 import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation; 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*; 
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 接收前端消息
@@ -31,7 +31,7 @@ public class KxSendMsgController {
     public Result sendCmdCamera(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         if (StringUtil.isNotEmpty(String.valueOf(params.get("cameraName"))) && StringUtil.isNotEmpty(String.valueOf(params.get("deviceSn")))) {
-            nettyService.sendCmdCamera(params.get("deviceSn").toString(), params.get("cameraName").toString());
+            nettyService.sendCmdCamera(params.get("deviceSn").toString(), params.get("cameraName").toString(), Long.valueOf(params.get("currentTime").toString()));
             params.putOpt("command", "GetPresetsDetail");
             sendCmdPtzControl(params);
 
@@ -51,7 +51,7 @@ public class KxSendMsgController {
             Object deviceSn = jsonObject.get("deviceSn");
             Object taskId = jsonObject.get("taskId");
             if (deviceSn != null && taskId != null) {
-                System.err.println("发送保持推送命令deviceSn"+deviceSn+"taskId"+ taskId);
+                System.err.println("发送保持推送命令deviceSn" + deviceSn + "taskId" + taskId);
                 nettyService.keepStream(deviceSn.toString(), Integer.parseInt(taskId.toString()));
             }
         }

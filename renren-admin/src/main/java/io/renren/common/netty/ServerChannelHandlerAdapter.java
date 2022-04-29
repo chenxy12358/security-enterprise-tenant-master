@@ -171,12 +171,10 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     }
                     //回传调用时Param中所带的“_session”对象，用于服务器辨认会话
                     String session = "";
-                    JSONObject sessionJsonObject = new JSONObject();
+                    // -1 发现多了一位空格
                     if (SessionLen > 0) {
-                        session = Util16.hexStringToString(body.substring(86 + SenderInfoLen, 86 + SenderInfoLen + SessionLen));
-                        if (StringUtil.isNotEmpty(session)) {
-                            // sessionJsonObject = JSONUtil.parseObj(session);
-                        }
+                        session = Util16.hexStringToString(body.substring(86 + SenderInfoLen, 86 + SenderInfoLen + SessionLen-1));
+
                     }
                     // 通过类型和session判断是否是-命令回应
                     Boolean isCmmdReply = false;
@@ -253,7 +251,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
                     if (isCmmdReply) {
-                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel);
+                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel,session);
                     } else {
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {
