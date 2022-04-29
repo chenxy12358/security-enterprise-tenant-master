@@ -594,6 +594,7 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
                         msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
                         msgInfoJsonObject.putOpt("type", "SendVideoStream");
+                        msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);
 
