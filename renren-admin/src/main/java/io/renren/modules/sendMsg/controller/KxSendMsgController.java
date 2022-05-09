@@ -79,7 +79,7 @@ public class KxSendMsgController {
     @PostMapping("sendAIConfig")
     @ApiOperation("发送ai配置到设备端")
     public Result sendAIConfig(@RequestParam Long deviceId) {
-        nettyService.sendJobInfo(deviceId);
+        nettyService.sendAIConfig(deviceId);
         return new Result();
     }
 

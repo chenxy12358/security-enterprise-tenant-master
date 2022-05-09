@@ -288,7 +288,11 @@ public class NettyService {
     public void sendCmdPtzControl(JSONObject params) {
         try {
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
+            if(null != params.get("deviceId")){
+                dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            }
             if (dto == null) {
+                logger.error("sendCmdPtzControl====>未查到相关设备信息");
                 return;
             }
             //获取通讯通道
@@ -337,77 +341,116 @@ public class NettyService {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl",e);
 
         }
     }
 
 
-    // TODO: 2022/4/18 cxy
+    /**
+     * 发送计划任务 TODO: 2022/4/18 cxy
+     * @param deviceId
+     */
     public void sendJobInfo(Long deviceId) {
-
         try {
             KxDeviceDTO dto = kxDeviceService.get(deviceId);
             if (dto == null) {
                 return;
             }
-            List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
-            if(null !=jobList && jobList.size()>0){
-                JSONArray jsonArray =new JSONArray();
-                for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
-                    JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
-                    String jobconf=json.get("TaskSchedule").toString();
-                    JSONArray jsonArrayO =JSONUtil.parseArray(jobconf);
-                    jsonArray.addAll(jsonArrayO);
-                }
-                JSONObject param = new JSONObject();
-                param.putOpt("TaskSchedule",jsonArray);
-                System.err.println(param.toString());
-            }
-
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
-//                Channel channel = getChannel(key);
-//                JSONObject destInfo = new JSONObject();
-//                destInfo.putOpt("DestObject", String.valueOf(params.get("cameraName")));
-//                destInfo.putOpt("Method", "PtzControl");
-//                destInfo.putOpt("Interface", "Emd.Method.Ctrl");
-//                JSONObject param = new JSONObject();
-//
-//                param.putOpt("Command", String.valueOf(params.get("command")));
-//                param.putOpt("AutoScanParam", null);
-//                if (params.get("PresetId") != null) {
-//                    param.putOpt("PresetId", params.get("PresetId"));
-//                }
-//                if (params.get("PresetName") != null) {
-//                    String PresetName = String.valueOf(params.get("PresetName"));
-//                    param.putOpt("PresetName", PresetName);
-//
-//                }
-//                if (params.get("TourID") != null) {
-//                    param.putOpt("TourID", params.get("TourID"));
-//                }
-//                if (params.get("Speed") != null) {
-//                    param.putOpt("Speed", params.get("speed"));
-//                }
-//                if (params.get("Duration") != null) {
-//                    param.putOpt("Duration", params.get("Duration"));
-//                }
-//                param.putOpt("_session", 1);
-//                //获取基本信息
-//
-//
-//                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-//                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-//                respLengthBuf.writeBytes(d);
-//                channel.writeAndFlush(respLengthBuf);
+                JSONObject param = new JSONObject();
+                List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
+                if(null !=jobList && jobList.size()>0){
+                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
+                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
+                        Object jobconf=json.get("TaskSchedule");
+                        String camera=kxScheduleJobEntity.getCamera();
+                        if( null == jobconf || null == camera){
+                            log.error("发送计划任务失败,参数错误");
+                        }else {
+                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
+                            param.putOpt("TaskSchedule",jobconf.toString());
+                            Channel channel = getChannel(key);
+                            JSONObject destInfo = new JSONObject();
+                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
+                            destInfo.putOpt("Method", "SetConfig");
+                            destInfo.putOpt("Interface", "Emd.Method.Normal");
+                            //获取基本信息
+                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                            respLengthBuf.writeBytes(d);
+                            channel.writeAndFlush(respLengthBuf);
+
+                        }
+
+                    }
+                }
             } else {
-                log.error("无相应的通讯通道");
+                log.error("发送计划任务失败,无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            log.error("send message error，" + e.getMessage(), e);
+
+        }
+
+    }
+
+    /**
+     * 发送AI任务 todo
+     * @param deviceId
+     */
+    public void sendAIConfig(Long deviceId) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(deviceId);
+            if (dto == null) {
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                JSONObject param = new JSONObject();
+                List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
+                if(null !=jobList && jobList.size()>0){
+                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
+                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
+                        Object jobconf=json.get("TaskSchedule");
+                        String camera=kxScheduleJobEntity.getCamera();
+                        if( null == jobconf || null == camera){
+                            log.error("发送计划任务失败,参数错误");
+                        }else {
+                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
+                            param.putOpt("TaskSchedule",jobconf.toString());
+                            Channel channel = getChannel(key);
+                            JSONObject destInfo = new JSONObject();
+                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
+                            destInfo.putOpt("Method", "SetConfig");
+                            destInfo.putOpt("Interface", "Emd.Method.Normal");
+                            //获取基本信息
+                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                            respLengthBuf.writeBytes(d);
+                            channel.writeAndFlush(respLengthBuf);
+
+                        }
+
+                    }
+                }
+            } else {
+                log.error("发送计划任务失败,无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("send message error，" + e.getMessage(), e);
 
         }
 
