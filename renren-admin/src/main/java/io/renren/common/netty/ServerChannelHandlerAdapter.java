@@ -111,7 +111,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
             byte[] result1 = new byte[result.readableBytes()];
             result.readBytes(result1);
             String body = HexUtil.byte2HexStr(result1);
-          //  logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 服务端接收到消息：" + body.toString());
+            logger.debug(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 服务端接收到消息：" + body);
             String flag = "";
             int ver = 0;
             int type = 0;
