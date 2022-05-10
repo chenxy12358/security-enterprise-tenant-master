@@ -36,6 +36,7 @@ import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,6 @@ public class NettyService {
     private Map<String, Channel> map = new HashMap<String, Channel>();
     private Map<String, String> ServerMap = new HashMap<String, String>();
 
-//    private static final String dataDir = "D:";
 
     /**
      * 日志处理
@@ -349,7 +349,7 @@ public class NettyService {
 
 
     /**
-     * 发送计划任务 TODO: 2022/4/18 cxy
+     * 发送计划任务
      * @param deviceId
      */
     public void sendJobInfo(Long deviceId) {
@@ -360,34 +360,31 @@ public class NettyService {
             }
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
-            if (StringUtil.isNotEmpty(key)) {
+            if (!StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");
+                destInfo.putOpt("Method", "SetConfig");
+                destInfo.putOpt("Interface", "Emd.Method.Normal");
+
                 JSONObject param = new JSONObject();
+                JSONArray jsonArray =new JSONArray();
                 List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
                 if(null !=jobList && jobList.size()>0){
                     for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
                         JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
-                        Object jobconf=json.get("TaskSchedule");
-                        String camera=kxScheduleJobEntity.getCamera();
-                        if( null == jobconf || null == camera){
-                            log.error("发送计划任务失败,参数错误");
-                        }else {
-                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
-                            param.putOpt("TaskSchedule",jobconf.toString());
-                            Channel channel = getChannel(key);
-                            JSONObject destInfo = new JSONObject();
-                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
-                            destInfo.putOpt("Method", "SetConfig");
-                            destInfo.putOpt("Interface", "Emd.Method.Normal");
-                            //获取基本信息
-                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                            respLengthBuf.writeBytes(d);
-                            channel.writeAndFlush(respLengthBuf);
-
-                        }
-
+                        String jobconf=json.get("TaskSchedule").toString();
+                        jsonArray.addAll(JSONUtil.parseArray(jobconf));
                     }
                 }
+                param.putOpt("TaskSchedule",jsonArray);
+                System.err.println(param);
+
+                //获取基本信息
+                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                respLengthBuf.writeBytes(d);
+                channel.writeAndFlush(respLengthBuf);
             } else {
                 log.error("发送计划任务失败,无相应的通讯通道");
                 printNettyLog();
@@ -396,6 +393,7 @@ public class NettyService {
 
         } catch (Exception e) {
             e.printStackTrace();
+            log.error("发送计划任务失败=");
             log.error("send message error，" + e.getMessage(), e);
 
         }
