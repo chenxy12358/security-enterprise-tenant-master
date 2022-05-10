@@ -89,7 +89,7 @@ public class KxScheduleJobEntity  {
 	/**
 	* 状态
 	*/
-	private String status;
+	private String status;// 0 未下发，1下发
 	/**
 	* 备注
 	*/

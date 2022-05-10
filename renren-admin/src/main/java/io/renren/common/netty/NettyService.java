@@ -375,6 +375,8 @@ public class NettyService {
                         JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
                         String jobconf=json.get("TaskSchedule").toString();
                         jsonArray.addAll(JSONUtil.parseArray(jobconf));
+                        kxScheduleJobEntity.setStatus("1");//已发送
+                        kxScheduleJobService.updateById(kxScheduleJobEntity);
                     }
                 }
                 param.putOpt("TaskSchedule",jsonArray);
