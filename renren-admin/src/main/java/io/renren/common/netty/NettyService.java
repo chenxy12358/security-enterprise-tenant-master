@@ -360,7 +360,7 @@ public class NettyService {
             }
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
-            if (!StringUtil.isNotEmpty(key)) {
+            if (StringUtil.isNotEmpty(key)) {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");
