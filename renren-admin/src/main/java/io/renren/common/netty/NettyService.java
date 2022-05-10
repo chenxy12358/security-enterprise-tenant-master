@@ -363,7 +363,7 @@ public class NettyService {
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
-                destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");
+                destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");// todo 暂时固定写法
                 destInfo.putOpt("Method", "SetConfig");
                 destInfo.putOpt("Interface", "Emd.Method.Normal");
 
