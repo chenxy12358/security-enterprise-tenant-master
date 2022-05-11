@@ -13,6 +13,7 @@ import io.renren.common.exception.RenException;
 import io.renren.common.utils.*;
 import io.renren.modules.battery.dto.KxBatteryDTO;
 import io.renren.modules.battery.service.KxBatteryService;
+import io.renren.modules.common.constant.DeviceInterfaceConstants;
 import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.common.utils.CoordinateTransform;
 import io.renren.modules.device.dto.KxDeviceDTO;
@@ -117,8 +118,11 @@ public class NettyService {
             // todo  暂时发命令取 测试命令
             JSONObject destInfo = new JSONObject();
             destInfo.putOpt("DestObject", "Emd.Service.SysMonitor.E0");
-            destInfo.putOpt("Method", "GetSysBaseInfo");
-            destInfo.putOpt("Interface", "Emd.Method.Normal");
+//            destInfo.putOpt("Method", "GetSysBaseInfo");
+//            destInfo.putOpt("Interface", "Emd.Method.Normal");
+
+            destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETSYSBASEINFO);
+            destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
             // todo 设置session
             JSONObject param = new JSONObject();
             param.putOpt("_session", 1);
@@ -206,8 +210,10 @@ public class NettyService {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", "Emd.Service.VideoSender.E0");
-                destInfo.putOpt("Method", "SendVideoStream");
-                destInfo.putOpt("Interface", "Emd.Method.Normal");
+//                destInfo.putOpt("Method", "SendVideoStream");
+//                destInfo.putOpt("Interface", "Emd.Method.Normal");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SENDVIDEOSTREAM);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 // todo 设置session
                 JSONObject param = new JSONObject();
                 param.putOpt("Camera", cameraName);
@@ -256,8 +262,11 @@ public class NettyService {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", "Emd.Service.VideoSender.E0");
-                destInfo.putOpt("Method", "KeepVideoStream");
-                destInfo.putOpt("Interface", "Emd.Method.Normal");
+//                destInfo.putOpt("Method", "KeepVideoStream");
+//                destInfo.putOpt("Interface", "Emd.Method.Normal");
+
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_KEEPVIDEOSTREAM);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 // todo 设置session
                 JSONObject param = new JSONObject();
                 param.putOpt("TaskId", taskId);
@@ -303,8 +312,10 @@ public class NettyService {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", String.valueOf(params.get("cameraName")));
-                destInfo.putOpt("Method", "PtzControl");
-                destInfo.putOpt("Interface", "Emd.Method.Ctrl");
+//                destInfo.putOpt("Method", "PtzControl");
+//                destInfo.putOpt("Interface", "Emd.Method.Ctrl");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PTZCONTROL);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_CTRL);
                 JSONObject param = new JSONObject();
 
                 param.putOpt("Command", String.valueOf(params.get("command")));
@@ -371,13 +382,12 @@ public class NettyService {
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
-                destInfo.putOpt("DestObject", "Emd.Service.Audio.E0");
-                destInfo.putOpt("Method", "GetAudioList");
-                destInfo.putOpt("Interface", "Emd.Method.Normal");
+                destInfo.putOpt("DestObject", "Emd.Service.Audio.E0"); //todo
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 JSONObject param = new JSONObject();
                 param.putOpt("_session", params.get("currentTime").toString());
                 //获取基本信息
-
 
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
@@ -415,8 +425,8 @@ public class NettyService {
                 Channel channel = getChannel(key);
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");// todo 暂时固定写法
-                destInfo.putOpt("Method", "SetConfig");
-                destInfo.putOpt("Interface", "Emd.Method.Normal");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETCONFIG);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
 
                 JSONObject param = new JSONObject();
                 JSONArray jsonArray =new JSONArray();
@@ -465,42 +475,39 @@ public class NettyService {
             }
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
-            if (!StringUtil.isNotEmpty(key)) {  //todo
-                JSONObject param = new JSONObject();
-                Long start=System.currentTimeMillis();
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
                 KxDiscernConfigDTO kxDiscernConfigDTO= kxDiscernConfigService.getBydeviceId(deviceId);
+                if(null !=kxDiscernConfigDTO.getCameraConfig()){ //相机任务
+                    JSONObject param = new JSONObject();
+                    JSONArray cameraJson=JSONUtil.parseArray(kxDiscernConfigDTO.getCameraConfig()) ;
+                    JSONObject destInfo = new JSONObject();
+                    destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");// todo 暂时固定写法
+                    destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETAITASK);
+                    destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                    param.putOpt("Tasks",cameraJson);
+                    //获取基本信息
+                    byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                    ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                    respLengthBuf.writeBytes(d);
+                    channel.writeAndFlush(respLengthBuf);
+                }
+                if(null !=kxDiscernConfigDTO.getDistinguishConfig()){ //AI配置
+                    JSONObject param = new JSONObject(); ;
+                    JSONObject disConfigJson=JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig()) ;
+                    JSONObject destInfo = new JSONObject();
+                    destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");// todo 暂时固定写法
+                    destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETALARMPARAM);
+                    destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.add(disConfigJson);
+                    param.putOpt("AlarmParam",jsonArray);
+                    //获取基本信息
+                    byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                    ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                    respLengthBuf.writeBytes(d);
+                    channel.writeAndFlush(respLengthBuf);
 
-                Long end=System.currentTimeMillis();
-                System.err.println(end-start);
-                JSONObject cameraJson=JSONUtil.parseObj(kxDiscernConfigDTO.getCameraConfig()) ;
-                JSONObject disConfigJson=JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig()) ;
-                System.err.println(cameraJson);
-                System.err.println(disConfigJson);
-//                        Object jobconf=json.get("TaskSchedule");
-                if(null !=kxDiscernConfigDTO){
-//                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
-//                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
-//                        Object jobconf=json.get("TaskSchedule");
-//                        String camera=kxScheduleJobEntity.getCamera();
-//                        if( null == jobconf || null == camera){
-//                            log.error("发送计划任务失败,参数错误");
-//                        }else {
-//                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
-//                            param.putOpt("TaskSchedule",jobconf.toString());
-//                            Channel channel = getChannel(key);
-//                            JSONObject destInfo = new JSONObject();
-//                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
-//                            destInfo.putOpt("Method", "SetConfig");
-//                            destInfo.putOpt("Interface", "Emd.Method.Normal");
-//                            //获取基本信息
-//                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-//                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-//                            respLengthBuf.writeBytes(d);
-//                            channel.writeAndFlush(respLengthBuf);
-//
-//                        }
-//
-//                    }
                 }
             } else {
                 log.error("发送AI配置失败,无相应的通讯通道");
