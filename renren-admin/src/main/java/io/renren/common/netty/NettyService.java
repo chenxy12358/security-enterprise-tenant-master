@@ -21,6 +21,8 @@ import io.renren.modules.deviceAlarm.dto.KxDeviceAlarmDTO;
 import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.deviceData.dto.*;
 import io.renren.modules.deviceData.service.*;
+import io.renren.modules.discernConfig.dto.KxDiscernConfigDTO;
+import io.renren.modules.discernConfig.service.KxDiscernConfigService;
 import io.renren.modules.gas.dto.KxGasDataDTO;
 import io.renren.modules.gas.service.KxGasDataService;
 import io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO;
@@ -76,7 +78,7 @@ public class NettyService {
     @Autowired
     private KxScheduleItemService kxScheduleItemService;
     @Autowired
-    private KxDeviceAccelerationService kxDeviceAccelerationService;
+    private KxDiscernConfigService kxDiscernConfigService;
     @Autowired
     private KxDeviceGpsService kxDeviceGpsService;
     @Autowired
@@ -348,6 +350,55 @@ public class NettyService {
     }
 
 
+
+    /**
+     * PtzControl方法
+     *
+     * @param params
+     */
+    public void getAudioList(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
+            if(null != params.get("deviceId")){
+                dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            }
+            if (dto == null) {
+                logger.error("getAudioList====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Audio.E0");
+                destInfo.putOpt("Method", "GetAudioList");
+                destInfo.putOpt("Interface", "Emd.Method.Normal");
+                JSONObject param = new JSONObject();
+                param.putOpt("_session", params.get("currentTime").toString());
+                //获取基本信息
+
+
+                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                respLengthBuf.writeBytes(d);
+                channel.writeAndFlush(respLengthBuf);
+
+
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("getAudioList",e);
+
+        }
+    }
+
+
     /**
      * 发送计划任务
      * @param deviceId
@@ -414,43 +465,52 @@ public class NettyService {
             }
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
-            if (StringUtil.isNotEmpty(key)) {
+            if (!StringUtil.isNotEmpty(key)) {  //todo
                 JSONObject param = new JSONObject();
-                List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
-                if(null !=jobList && jobList.size()>0){
-                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
-                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
-                        Object jobconf=json.get("TaskSchedule");
-                        String camera=kxScheduleJobEntity.getCamera();
-                        if( null == jobconf || null == camera){
-                            log.error("发送计划任务失败,参数错误");
-                        }else {
-                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
-                            param.putOpt("TaskSchedule",jobconf.toString());
-                            Channel channel = getChannel(key);
-                            JSONObject destInfo = new JSONObject();
-                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
-                            destInfo.putOpt("Method", "SetConfig");
-                            destInfo.putOpt("Interface", "Emd.Method.Normal");
-                            //获取基本信息
-                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                            respLengthBuf.writeBytes(d);
-                            channel.writeAndFlush(respLengthBuf);
+                Long start=System.currentTimeMillis();
+                KxDiscernConfigDTO kxDiscernConfigDTO= kxDiscernConfigService.getBydeviceId(deviceId);
 
-                        }
-
-                    }
+                Long end=System.currentTimeMillis();
+                System.err.println(end-start);
+                JSONObject cameraJson=JSONUtil.parseObj(kxDiscernConfigDTO.getCameraConfig()) ;
+                JSONObject disConfigJson=JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig()) ;
+                System.err.println(cameraJson);
+                System.err.println(disConfigJson);
+//                        Object jobconf=json.get("TaskSchedule");
+                if(null !=kxDiscernConfigDTO){
+//                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
+//                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
+//                        Object jobconf=json.get("TaskSchedule");
+//                        String camera=kxScheduleJobEntity.getCamera();
+//                        if( null == jobconf || null == camera){
+//                            log.error("发送计划任务失败,参数错误");
+//                        }else {
+//                            String cameraName=camera.substring(camera.lastIndexOf(".") + 1);;
+//                            param.putOpt("TaskSchedule",jobconf.toString());
+//                            Channel channel = getChannel(key);
+//                            JSONObject destInfo = new JSONObject();
+//                            destInfo.putOpt("DestObject", "Emd.Service.TimerTask."+cameraName);
+//                            destInfo.putOpt("Method", "SetConfig");
+//                            destInfo.putOpt("Interface", "Emd.Method.Normal");
+//                            //获取基本信息
+//                            byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+//                            ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+//                            respLengthBuf.writeBytes(d);
+//                            channel.writeAndFlush(respLengthBuf);
+//
+//                        }
+//
+//                    }
                 }
             } else {
-                log.error("发送计划任务失败,无相应的通讯通道");
+                log.error("发送AI配置失败,无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("send message error，" + e.getMessage(), e);
+            log.error("send AI message error，" + e.getMessage(), e);
 
         }
 
@@ -631,6 +691,22 @@ public class NettyService {
                     }
                 } else if ("Emd.Service.VideoSender.E0".equals(senderInfo.get("DestObject"))) {
                     if ("SendVideoStream".equals(senderInfo.get("Method"))) {
+                        MessageData<Object> message = new MessageData<>();
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("deviceSn", deviceSn);
+                        msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
+                        msgInfoJsonObject.putOpt("type", "SendVideoStream");
+                        msgInfoJsonObject.putOpt("session", session);
+                        message.setData(msgInfoJsonObject);
+                        webSocketServerVideo.sendMessageAll(message);
+
+                    }
+
+                } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
+                    logger.error("====================================================");
+                    logger.error(msgInfoJsonObject.toString());
+                    if ("GetAudioList".equals(senderInfo.get("Method"))) {
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());

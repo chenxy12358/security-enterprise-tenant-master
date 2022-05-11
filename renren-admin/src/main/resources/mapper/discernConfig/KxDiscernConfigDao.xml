@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.discernConfig.dao.KxDiscernConfigDao">
+
+    <resultMap type="io.renren.modules.discernConfig.entity.KxDiscernConfigEntity" id="kxDiscernConfigMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="name" column="name"/>
+        <result property="cameraConfig" column="camera_config"/>
+        <result property="distinguishConfig" column="distinguish_config"/>
+        <result property="orgId" column="org_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="enable" column="enable"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deleter" column="deleter"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
+    <resultMap type="io.renren.modules.discernConfig.dto.KxDiscernConfigDTO" id="kxDiscernConfigVoMap">
+        <result property="id" column="id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="name" column="name"/>
+        <result property="cameraConfig" column="camera_config"/>
+        <result property="distinguishConfig" column="distinguish_config"/>
+        <result property="orgId" column="org_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceNo" column="device_no"/>
+        <result property="enable" column="enable"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deleter" column="deleter"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
+    <select id="getBydeviceId" resultMap="kxDiscernConfigVoMap">
+        select  * from kx_discern_config t1
+        where deleted='f' and device_id = #{deviceId,jdbcType=BIGINT}
+    </select>
+
+</mapper>

@@ -68,7 +68,16 @@ public class KxSendMsgController {
         return new Result();
     }
 
-    // TODO: 2022/4/19 cxy
+
+    @PostMapping("getAudioList")
+    @ApiOperation("获取音频列表")
+    public Result getAudioList(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.getAudioList(params);
+        return new Result();
+    }
+
+
     @PostMapping("sendJobInfo")
     @ApiOperation("发送计划任务到设备端")
     public Result sendJobInfo(@RequestParam Long deviceId) {
@@ -76,6 +85,7 @@ public class KxSendMsgController {
         return new Result();
     }
 
+    // TODO: 2022/4/19 cxy
     @PostMapping("sendAIConfig")
     @ApiOperation("发送ai配置到设备端")
     public Result sendAIConfig(@RequestParam Long deviceId) {
