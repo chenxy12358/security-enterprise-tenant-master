@@ -518,7 +518,6 @@ public class NettyService {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("send AI message error，" + e.getMessage(), e);
-
         }
 
     }

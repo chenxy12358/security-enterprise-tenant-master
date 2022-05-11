@@ -85,7 +85,7 @@ public class KxSendMsgController {
         return new Result();
     }
 
-    // TODO: 2022/4/19 cxy
+
     @PostMapping("sendAIConfig")
     @ApiOperation("发送ai配置到设备端")
     public Result sendAIConfig(@RequestParam Long deviceId) {
