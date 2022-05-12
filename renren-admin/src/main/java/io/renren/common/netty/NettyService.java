@@ -386,7 +386,8 @@ public class NettyService {
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 JSONObject param = new JSONObject();
-                param.putOpt("_session", params.get("currentTime").toString());
+//                param.putOpt("_session", params.get("currentTime").toString());
+                param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
                 //获取基本信息
 
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
@@ -710,15 +711,14 @@ public class NettyService {
                     }
 
                 } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
-                    logger.error("====================================================");
-                    logger.error(msgInfoJsonObject.toString());
-                    if ("GetAudioList".equals(senderInfo.get("Method"))) {
+                    if (DeviceInterfaceConstants.METHOD_GETAUDIOLIST.equals(senderInfo.get("Method"))) {
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
                         msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
-                        msgInfoJsonObject.putOpt("type", "SendVideoStream");
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);
@@ -726,11 +726,12 @@ public class NettyService {
                     }
 
                 } else {
-                    if ("PtzControl".equals(senderInfo.get("Method"))) {
+                    if (DeviceInterfaceConstants.METHOD_PTZCONTROL.equals(senderInfo.get("Method"))) {
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
-                        msgInfoJsonObject.putOpt("type", "PtzControl");
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PTZCONTROL);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);
