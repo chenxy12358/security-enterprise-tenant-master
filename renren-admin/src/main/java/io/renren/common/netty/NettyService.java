@@ -1066,9 +1066,6 @@ public class NettyService {
             dto.setEastWest(msgInfo.get("East/West").toString());
             dto.setNorthSouth(msgInfo.get("North/South").toString());
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
-            dto.setLongitude(msgInfo.get("Longitude").toString());
-            dto.setEastWest(msgInfo.get("East/West").toString());
-            dto.setNorthSouth(msgInfo.get("North/South").toString());
             kxDeviceGpsService.save(dto);
 
             // 保存gps轨迹路径
