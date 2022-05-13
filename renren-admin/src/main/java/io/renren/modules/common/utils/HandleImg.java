@@ -137,6 +137,7 @@ public class HandleImg {
             net.setPreferableBackend(Dnn.DNN_BACKEND_OPENCV);
             // 指定为 CPU 模式
             net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
+//            net.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
 
             // 图片预处理：将图片转换为 608 大小的图片，这个数值最好与配置文件的网络大小一致
             // 缩放因子大小，opencv 文档规定的：https://github.com/opencv/opencv/blob/master/samples/dnn/models.yml#L31

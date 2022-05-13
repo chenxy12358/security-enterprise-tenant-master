@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -39,7 +38,6 @@ import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -345,6 +343,58 @@ public class NettyService {
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
                 respLengthBuf.writeBytes(d);
                 channel.writeAndFlush(respLengthBuf);
+
+
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl",e);
+
+        }
+    }
+
+
+    /**
+     * PtzControl方法
+     *
+     * @param params
+     */
+    public void getPresetList(JSONObject params) {
+        try {
+            KxDeviceDTO dto =  kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("getPresetList====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", String.valueOf(params.get("cameraName")));
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PTZCONTROL);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_CTRL);
+                JSONObject param = new JSONObject();
+
+                param.putOpt("Command", String.valueOf(params.get("command")));
+                param.putOpt("_session", params.get("currentTime").toString());
+
+                logger.debug("getPresetList====>"+destInfo.toString());
+                logger.debug("getPresetList====>"+destInfo);
+                logger.debug("getPresetList====>"+param);
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
+
+                logger.debug("getPresetList====>end"+param.toString());
+//                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+//                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+//                respLengthBuf.writeBytes(d);
+//                channel.writeAndFlush(respLengthBuf);
 
 
             } else {
@@ -727,11 +777,15 @@ public class NettyService {
 
                 } else {
                     if (DeviceInterfaceConstants.METHOD_PTZCONTROL.equals(senderInfo.get("Method"))) {
+                        logger.debug("========================");
+                        logger.debug(senderInfo.toString());
+                        logger.debug(msgInfoJsonObject.toString());
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PTZCONTROL);
                         msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("cameraName",senderInfo.get("DestObject"));
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServerVideo.sendMessageAll(message);

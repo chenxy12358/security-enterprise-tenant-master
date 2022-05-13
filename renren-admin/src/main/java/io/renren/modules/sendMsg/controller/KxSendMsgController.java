@@ -68,6 +68,14 @@ public class KxSendMsgController {
         return new Result();
     }
 
+    @PostMapping("getPresetList")
+    @ApiOperation("获取已设置的所有预置点编号")
+    public Result getPresetList(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.getPresetList(params);
+        return new Result();
+    }
+
 
     @PostMapping("getAudioList")
     @ApiOperation("获取音频列表")
