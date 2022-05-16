@@ -383,18 +383,8 @@ public class NettyService {
 
                 param.putOpt("Command", String.valueOf(params.get("command")));
                 param.putOpt("_session", params.get("currentTime").toString());
-
-                logger.debug("getPresetList====>"+destInfo.toString());
-                logger.debug("getPresetList====>"+destInfo);
-                logger.debug("getPresetList====>"+param);
                 //发送指令
                 SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
-
-                logger.debug("getPresetList====>end"+param.toString());
-//                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-//                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-//                respLengthBuf.writeBytes(d);
-//                channel.writeAndFlush(respLengthBuf);
 
 
             } else {
@@ -440,10 +430,8 @@ public class NettyService {
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
                 //获取基本信息
 
-                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                respLengthBuf.writeBytes(d);
-                channel.writeAndFlush(respLengthBuf);
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
 
 
             } else {
@@ -494,11 +482,8 @@ public class NettyService {
                 param.putOpt("TaskSchedule",jsonArray);
                 System.err.println(param);
 
-                //获取基本信息
-                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                respLengthBuf.writeBytes(d);
-                channel.writeAndFlush(respLengthBuf);
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
             } else {
                 log.error("发送计划任务失败,无相应的通讯通道");
                 printNettyLog();
@@ -537,11 +522,8 @@ public class NettyService {
                     destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETAITASK);
                     destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                     param.putOpt("Tasks",cameraJson);
-                    //获取基本信息
-                    byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                    ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                    respLengthBuf.writeBytes(d);
-                    channel.writeAndFlush(respLengthBuf);
+                    //发送指令
+                    SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
                 }
                 if(null !=kxDiscernConfigDTO.getDistinguishConfig()){ //AI配置
                     JSONObject param = new JSONObject(); ;
@@ -553,11 +535,8 @@ public class NettyService {
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(disConfigJson);
                     param.putOpt("AlarmParam",jsonArray);
-                    //获取基本信息
-                    byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
-                    ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
-                    respLengthBuf.writeBytes(d);
-                    channel.writeAndFlush(respLengthBuf);
+                    //发送指令
+                    SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
 
                 }
             } else {
