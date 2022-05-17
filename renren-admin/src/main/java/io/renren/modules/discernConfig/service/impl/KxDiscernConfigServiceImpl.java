@@ -114,13 +114,20 @@ public class KxDiscernConfigServiceImpl extends CrudServiceImpl<KxDiscernConfigD
                 JSONObject json = new JSONObject();
                 json.put("Enable", kxAICameraVO.isEnable());
                 json.put("Duration", kxAICameraVO.getDuration());
-                json.put("Id", kxAICameraVO.getPresetNo());
+                String preset=kxAICameraVO.getPresetNo();
+                if(StrUtil.isNotBlank(preset) && preset.contains("-")){
+                    String[] str=preset.split("-");
+                    json.put("Id", Integer.parseInt(str[0]));
+                    json.put("Name", preset);
+                }
                 jar.add(json);
             }
             jsonMap.put("Presets", jar);
             jSONArray.add(jsonMap);
         }
-        dto.setCameraConfig(jSONArray.toString());
+        if(jSONArray.size()>0){
+            dto.setCameraConfig(jSONArray.toString());
+        }
 
         return dto;
     }
@@ -283,7 +290,8 @@ public class KxDiscernConfigServiceImpl extends CrudServiceImpl<KxDiscernConfigD
                                                 KxAICameraVO kxAICameraVO = new KxAICameraVO();
                                                 kxAICameraVO.setDuration(jSONObjectB.get("Duration") == null ? 0 : Integer.parseInt(jSONObjectB.getString("Duration")));
                                                 kxAICameraVO.setEnable(jSONObjectB.get("Enable") == null ? false : (boolean) jSONObjectB.get("Enable"));
-                                                kxAICameraVO.setPresetNo(jSONObjectB.get("Id") == null ? 0 : Integer.parseInt(jSONObjectB.getString("Id")));
+//                                                kxAICameraVO.setPresetNo(jSONObjectB.get("Id") == null ? 0 : Integer.parseInt(jSONObjectB.getString("Id")));
+                                                kxAICameraVO.setPresetNo(jSONObjectB.get("Name") == null ? "" : jSONObjectB.getString("Name"));
                                                 AICameraListB.add(kxAICameraVO);
                                                 kxCameraNameVO.setListC(AICameraListB);
                                             }

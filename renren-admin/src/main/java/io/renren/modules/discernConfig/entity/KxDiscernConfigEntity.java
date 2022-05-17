@@ -99,4 +99,8 @@ public class KxDiscernConfigEntity {
 	* 删除时间
 	*/
 	private Date deletedTime;
+	/**
+	 * 状态
+	 */
+	private String status;
 }

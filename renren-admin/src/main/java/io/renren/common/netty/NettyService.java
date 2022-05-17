@@ -537,6 +537,8 @@ public class NettyService {
                     param.putOpt("AlarmParam",jsonArray);
                     //发送指令
                     SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
+                    kxDiscernConfigDTO.setStatus("1");//已发送
+                    kxDiscernConfigService.update(kxDiscernConfigDTO);
 
                 }
             } else {

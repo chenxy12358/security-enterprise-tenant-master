@@ -14,6 +14,7 @@
         <result property="cameraConfig" column="camera_config"/>
         <result property="distinguishConfig" column="distinguish_config"/>
         <result property="orgId" column="org_id"/>
+        <result property="status" column="status"/>
         <result property="stationId" column="station_id"/>
         <result property="deviceId" column="device_id"/>
         <result property="deviceNo" column="device_no"/>
@@ -33,6 +34,7 @@
         <result property="cameraConfig" column="camera_config"/>
         <result property="distinguishConfig" column="distinguish_config"/>
         <result property="orgId" column="org_id"/>
+        <result property="status" column="status"/>
         <result property="stationId" column="station_id"/>
         <result property="deviceId" column="device_id"/>
         <result property="deviceNo" column="device_no"/>

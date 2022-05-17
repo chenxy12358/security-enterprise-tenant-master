@@ -45,6 +45,8 @@ public class KxDiscernConfigDTO implements Serializable {
     private String enable;
     @ApiModelProperty(value = "备注")
     private String remark;
+    @ApiModelProperty(value = "状态")
+    private String status;
     @ApiModelProperty(value = "是否删除")
     private String deleted;
     @ApiModelProperty(value = "删除者")
