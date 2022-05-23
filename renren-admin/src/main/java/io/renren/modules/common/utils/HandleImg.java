@@ -304,7 +304,7 @@ public class HandleImg {
     }
 
     public static Mat setText(Mat im, String content, double leftBottomX, double leftBottomY,float red,float green,float blue) {
-        int fontSize=13;
+        int fontSize=17;
         Font font = new Font("微软雅黑", Font.PLAIN, fontSize);
         BufferedImage bufImg = ImageUtil.Mat2BufImg(im, ".png");
 
