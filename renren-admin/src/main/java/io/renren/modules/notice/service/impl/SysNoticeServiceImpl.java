@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 人人开源 All rights reserved.
+ * Copyright (c) 2019  All rights reserved.
  *
  * https://www.renren.io
  *
@@ -7,6 +7,7 @@
  */
 package io.renren.modules.notice.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.common.constant.Constant;
@@ -24,7 +25,7 @@ import io.renren.modules.notice.service.SysNoticeService;
 import io.renren.modules.notice.service.SysNoticeUserService;
 import io.renren.modules.security.user.SecurityUser;
 import io.renren.modules.sys.service.SysUserService;
-
+import io.renren.websocket.WebSocketNoticeServer;
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +49,7 @@ public class SysNoticeServiceImpl extends CrudServiceImpl<SysNoticeDao, SysNotic
     @Autowired
     private SysUserService sysUserService;
     @Autowired
+   // private WebSocketNoticeServer webSocketServer;
     private WebSocketServer webSocketServer;
 
     @Override
@@ -133,8 +135,13 @@ public class SysNoticeServiceImpl extends CrudServiceImpl<SysNoticeDao, SysNotic
             sendAllUser(notice);
 
             //通过WebSocket，提示全部用户，有新通知
-            MessageData<String> message = new MessageData<String>().msg(notice.getTitle());
-            webSocketServer.sendMessageAll(message);
+            MessageData<Object> message = new MessageData<>();
+            JSONObject data = new JSONObject();
+            data.set("msg", notice.getTitle());
+            data.set("time", new Date());
+            data.set("type", "notice");
+            message.setData(data);
+            webSocketServer.sendMessageNoticeAll(message);
 
         }else {  //选中用户
             List<Long> userIdList = sysUserService.getUserIdListByDeptId(notice.getReceiverTypeList());
@@ -146,8 +153,14 @@ public class SysNoticeServiceImpl extends CrudServiceImpl<SysNoticeDao, SysNotic
             sendUser(notice, userIdList);
 
             //通过WebSocket，提示选中用户，有新通知
-            MessageData<String> message = new MessageData<String>().msg(notice.getTitle());
-            webSocketServer.sendMessage(userIdList, message);
+            MessageData<Object> message = new MessageData<>();
+            JSONObject data = new JSONObject();
+            data.set("msg", notice.getTitle());
+            data.set("time", new Date());
+            data.set("type", "notice");
+            message.setData(data);
+
+            webSocketServer.sendNoticeMessage(userIdList, message);
         }
     }
 

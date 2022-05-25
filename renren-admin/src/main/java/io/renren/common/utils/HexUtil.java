@@ -544,7 +544,7 @@ public class HexUtil {
     }
 
     /**
-     * @param b
+     * @param 
      * @return
      * @Description: TODO
      * <p>
@@ -816,7 +816,7 @@ public class HexUtil {
     /**
      * 字符串转换为16进制字符串
      *
-     * @param s
+     * @param
      * @return
      */
   /*  public static String stringToHexString(String s) {

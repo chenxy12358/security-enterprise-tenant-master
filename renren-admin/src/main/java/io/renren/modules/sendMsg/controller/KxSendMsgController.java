@@ -34,7 +34,6 @@ public class KxSendMsgController {
             nettyService.sendCmdCamera(params.get("deviceSn").toString(), params.get("cameraName").toString(), Long.valueOf(params.get("currentTime").toString()));
             params.putOpt("command", "GetPresetsDetail");
             sendCmdPtzControl(params);
-
         }
         System.err.println("发送相机命令给设备端");
         return new Result();
@@ -61,12 +60,25 @@ public class KxSendMsgController {
 
 
     @PostMapping("sendCmdPtzControl")
-    @ApiOperation("获取已设置的所有预置点编号")
+    @ApiOperation("发送指令")
     public Result sendCmdPtzControl(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         nettyService.sendCmdPtzControl(params);
         return new Result();
     }
+
+
+
+    @PostMapping("sendTakePicture")
+    @ApiOperation("抓取图片")
+    public Result sendTakePicture(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.sendTakePicture(params);
+        return new Result();
+    }
+
+
+
 
     @PostMapping("getPresetList")
     @ApiOperation("获取已设置的所有预置点编号")
@@ -98,6 +110,34 @@ public class KxSendMsgController {
     @ApiOperation("发送ai配置到设备端")
     public Result sendAIConfig(@RequestParam Long deviceId) {
         nettyService.sendAIConfig(deviceId);
+        return new Result();
+    }
+
+
+    @PostMapping("getVPNStat")
+    @ApiOperation("获取vpn状态")
+    public Result getVPNStat(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.getVPNStat(params);
+        return new Result();
+    }
+
+
+    @PostMapping("openVpn")
+    @ApiOperation("开启vpn")
+    public Result openVpn(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.openVpn(params);
+        System.err.println("发送命令：开启vpn");
+        return new Result();
+    }
+
+    @PostMapping("closeVpn")
+    @ApiOperation("关闭vpn")
+    public Result closeVpn(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.closeVpn(params);
+        System.err.println("发送命令：关闭vpn");
         return new Result();
     }
 

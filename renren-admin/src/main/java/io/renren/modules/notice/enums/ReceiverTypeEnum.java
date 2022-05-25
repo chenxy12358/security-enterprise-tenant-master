@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2020 人人开源 All rights reserved.
+ * Copyright (c) 2016-2020  All rights reserved.
  * <p>
  * https://www.renren.io
  * <p>

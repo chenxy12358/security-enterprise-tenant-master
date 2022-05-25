@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 人人开源 All rights reserved.
+ * Copyright (c) 2019  All rights reserved.
  * <p>
  * https://www.renren.io
  * <p>
@@ -7,23 +7,19 @@
  */
 package io.renren.modules.notice.controller;
 
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import io.renren.common.annotation.LogOperation;
 import io.renren.common.constant.Constant;
 import io.renren.common.page.PageData;
 import io.renren.common.utils.Result;
-import io.renren.common.utils.StringUtil;
 import io.renren.common.validator.AssertUtils;
 import io.renren.common.validator.ValidatorUtils;
 import io.renren.common.validator.group.AddGroup;
 import io.renren.common.validator.group.DefaultGroup;
 import io.renren.common.validator.group.UpdateGroup;
-import io.renren.modules.device.dto.KxDeviceDTO;
-import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.notice.dto.SysNoticeDTO;
+import io.renren.modules.notice.entity.SysNoticeSwitchEntity;
 import io.renren.modules.notice.service.SysNoticeService;
+import io.renren.modules.notice.service.SysNoticeSwitchService;
 import io.renren.modules.notice.service.SysNoticeUserService;
 import io.renren.modules.security.user.SecurityUser;
 import io.swagger.annotations.Api;
@@ -35,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.lang.reflect.Array;
 import java.util.Map;
 
 
@@ -52,8 +47,9 @@ public class SysNoticeController {
     private SysNoticeService sysNoticeService;
     @Autowired
     private SysNoticeUserService sysNoticeUserService;
+
     @Autowired
-    private KxDeviceService kxDeviceService;
+    private SysNoticeSwitchService sysNoticeSwitchService;
 
     @GetMapping("page")
     @ApiOperation("分页")
@@ -96,45 +92,6 @@ public class SysNoticeController {
     public Result<PageData<SysNoticeDTO>> myNoticePage(@ApiIgnore @RequestParam Map<String, Object> params) {
         PageData<SysNoticeDTO> page = sysNoticeService.getMyNoticePage(params);
 
-
-        //////////////
-
-        /*//test  -----------测试设置状态
-        KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo("KX-V22P40-AI00010");
-        JSONObject statusJson = JSONUtil.parseObj(deviceDTO.getStatus());
-
-        String senderObject = "Emd.Device.Camera.E0";
-        if (StringUtil.isNotEmpty(senderObject)) {
-            String[] strings = senderObject.split("\\.");
-            if (strings.length != 4) {
-                return null;
-            }
-            Object level1 = statusJson.get(strings[1]);
-            if (level1 != null) {
-                JSONObject jsonObject = JSONUtil.parseObj(level1);
-                Object level2 = jsonObject.get(strings[2]);
-                JSONArray array = JSONUtil.parseArray(level2.toString(), false);
-                if (array.size() > 0) {
-                    JSONArray newArray = new JSONArray();
-                    for (int i = 0; i < array.size(); i++) {
-                        JSONObject parseObj = JSONUtil.parseObj(array.get(i));
-                        if ("Emd.Device.Camera.E0".equals(parseObj.get("Name"))) {
-                            parseObj.putOpt("Name", "郑威呈");
-                        }
-                        newArray.add(parseObj);
-                    }
-                    //String s = JSONUtil.toJsonStr(newArray);
-                    jsonObject.putOpt(strings[2], newArray);
-                    statusJson.putOpt(strings[1], jsonObject);
-                }
-                System.err.println(statusJson);
-            }
-
-
-        }*/
-        /////////////
-
-
         return new Result<PageData<SysNoticeDTO>>().ok(page);
     }
 
@@ -145,6 +102,18 @@ public class SysNoticeController {
 
         return new Result();
     }
+
+    @GetMapping("changeValue")
+    @ApiOperation("是否开启语音播报")
+    @LogOperation("是否开启语音播报")
+    @RequiresPermissions("sys:notice:all")
+    public Result changeValue(@ApiIgnore @RequestParam Map<String, Object> params) {
+
+        sysNoticeSwitchService.changeStatus(params.get("value").toString());
+
+        return new Result();
+    }
+
 
     @GetMapping("mynotice/unread")
     @ApiOperation("我的通知未读读")
@@ -159,6 +128,9 @@ public class SysNoticeController {
     @RequiresPermissions("sys:notice:all")
     public Result<SysNoticeDTO> get(@PathVariable("id") Long id) {
         SysNoticeDTO data = sysNoticeService.get(id);
+
+
+
 
         return new Result<SysNoticeDTO>().ok(data);
     }
@@ -175,6 +147,20 @@ public class SysNoticeController {
 
         return new Result();
     }
+
+
+    @GetMapping("getUserStatus")
+    @ApiOperation("信息")
+    @RequiresPermissions("sys:notice:all")
+    public Result<Boolean> getUserStatus() {
+        SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId();
+        Boolean flag = false;
+        if (byUserId.getStatus().equals("true")) {
+            flag = true;
+        }
+        return new Result<Boolean>().ok(flag);
+    }
+
 
     @PutMapping
     @ApiOperation("修改")

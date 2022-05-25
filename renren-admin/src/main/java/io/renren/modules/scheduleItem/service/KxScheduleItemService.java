@@ -24,7 +24,7 @@ public interface KxScheduleItemService extends CrudService<KxScheduleItemEntity,
 
 
     /**
-     * 详情
+     *
      * @param id
      * @return
      */

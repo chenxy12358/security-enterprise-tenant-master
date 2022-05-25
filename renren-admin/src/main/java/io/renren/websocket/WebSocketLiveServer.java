@@ -8,17 +8,12 @@
 
 package io.renren.websocket;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import io.renren.common.constant.Constant;
-import io.renren.modules.notice.entity.SysNoticeSwitchEntity;
-import io.renren.modules.notice.service.SysNoticeSwitchService;
 import io.renren.websocket.config.WebSocketConfig;
 import io.renren.websocket.data.MessageData;
 import io.renren.websocket.data.WebSocketData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -29,20 +24,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * WebSocket服务
+ * websocketLive
  *
  * @author Mark sunlightcs@gmail.com
  */
 @Slf4j
 @Component
-@ServerEndpoint(value = "/websocket", configurator = WebSocketConfig.class)
-public class WebSocketServer {
+@ServerEndpoint(value = "/websocketLive", configurator = WebSocketConfig.class)
+public class WebSocketLiveServer {
     /**
      * 客户端连接信息
      */
     private static Map<String, WebSocketData> servers = new ConcurrentHashMap<>();
-    @Autowired
-    private SysNoticeSwitchService sysNoticeSwitchService;
 
     @OnOpen
     public void open(Session session) {
@@ -66,29 +59,22 @@ public class WebSocketServer {
 
     @OnMessage
     public void onMessage(Session session, String msg) {
-        log.info("session id: " + session.getId() + "， message：" + msg);
+        log.info("session id: " + session.getId()+"， message：" + msg);
     }
 
     /**
      * 发送信息
-     *
-     * @param userIdList 用户ID列表
-     * @param message    消息内容
+     * @param userIdList     用户ID列表
+     * @param message       消息内容
      */
     public void sendMessage(List<Long> userIdList, MessageData<?> message) {
         userIdList.forEach(userId -> sendMessage(userId, message));
     }
 
-    public void sendNoticeMessage(List<Long> userIdList, MessageData<Object> message) {
-        userIdList.forEach(userId -> sendNoticeMessage(userId, message));
-    }
-
-
     /**
      * 发送信息
-     *
-     * @param userId  用户ID
-     * @param message 消息内容
+     * @param userId      用户ID
+     * @param message    消息内容
      */
     public void sendMessage(Long userId, MessageData<?> message) {
         servers.values().forEach(info -> {
@@ -98,46 +84,13 @@ public class WebSocketServer {
         });
     }
 
-    public void sendNoticeMessage(Long userId, MessageData<Object> message) {
-        servers.values().forEach(info -> {
-            if (userId.equals(info.getUserId())) {
-                SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId(userId);
-                Object data = message.getData();
-                JSONObject jsonObject = JSONUtil.parseObj(data);
-                jsonObject.set("status", byUserId.getStatus());
-                message.setData(jsonObject);
-                sendMessage(info.getSession(), message);
-            }
-        });
-    }
-
-
     /**
      * 发送信息给全部用户
-     *
-     * @param message 消息内容
+     * @param message    消息内容
      */
     public void sendMessageAll(MessageData<?> message) {
         servers.values().forEach(info -> sendMessage(info.getSession(), message));
     }
-
-
-    public void sendMessageNoticeAll(MessageData<Object> message) {
-        servers.values().forEach(info ->
-                {
-                    System.err.println("用户id：" + info.getUserId());
-                    SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId(info.getUserId());
-                    Object data = message.getData();
-                    JSONObject jsonObject = JSONUtil.parseObj(data);
-                    jsonObject.set("status", byUserId.getStatus());
-                    message.setData(jsonObject);
-                    sendMessage(info.getSession(), message);
-                }
-
-
-        );
-    }
-
 
     public void sendMessage(Session session, MessageData<?> message) {
         try {

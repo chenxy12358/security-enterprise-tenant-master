@@ -10,10 +10,13 @@ package io.renren.websocket;
 
 import com.alibaba.fastjson.JSON;
 import io.renren.common.constant.Constant;
+import io.renren.modules.notice.entity.SysNoticeSwitchEntity;
+import io.renren.modules.notice.service.SysNoticeSwitchService;
 import io.renren.websocket.config.WebSocketConfig;
 import io.renren.websocket.data.MessageData;
 import io.renren.websocket.data.WebSocketData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -24,18 +27,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * WebSocket服务
+ * websocketNotice
  *
  * @author Mark sunlightcs@gmail.com
  */
 @Slf4j
 @Component
-@ServerEndpoint(value = "/websocketVideo", configurator = WebSocketConfig.class)
-public class WebSocketServerVideo {
+@ServerEndpoint(value = "/websocketNotice", configurator = WebSocketConfig.class)
+public class WebSocketNoticeServer {
     /**
      * 客户端连接信息
      */
     private static Map<String, WebSocketData> servers = new ConcurrentHashMap<>();
+    @Autowired
+    private SysNoticeSwitchService sysNoticeSwitchService;
+
 
     @OnOpen
     public void open(Session session) {
@@ -48,7 +54,7 @@ public class WebSocketServerVideo {
     public void onClose(Session session) {
         //客户端断开连接
         servers.remove(session.getId());
-        log.debug("websocket close, session id：" + session.getId());
+        log.debug("websocketNotice close, session id：" + session.getId());
     }
 
     @OnError
@@ -59,26 +65,30 @@ public class WebSocketServerVideo {
 
     @OnMessage
     public void onMessage(Session session, String msg) {
-        log.info("session id: " + session.getId()+"， message：" + msg);
+        log.info("session id: " + session.getId() + "， message：" + msg);
     }
 
     /**
      * 发送信息
-     * @param userIdList     用户ID列表
-     * @param message       消息内容
+     *
+     * @param userIdList 用户ID列表
+     * @param message    消息内容
      */
-    public void sendMessage(List<Long> userIdList, MessageData<?> message) {
+    public void sendMessage(List<Long> userIdList, MessageData<String> message) {
         userIdList.forEach(userId -> sendMessage(userId, message));
     }
 
     /**
      * 发送信息
-     * @param userId      用户ID
-     * @param message    消息内容
+     *
+     * @param userId  用户ID
+     * @param message 消息内容
      */
-    public void sendMessage(Long userId, MessageData<?> message) {
+    public void sendMessage(Long userId, MessageData<String> message) {
         servers.values().forEach(info -> {
             if (userId.equals(info.getUserId())) {
+                SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId(userId);
+                message.setData(byUserId.getStatus());
                 sendMessage(info.getSession(), message);
             }
         });
@@ -86,11 +96,22 @@ public class WebSocketServerVideo {
 
     /**
      * 发送信息给全部用户
-     * @param message    消息内容
+     *
+     * @param message 消息内容
      */
-    public void sendMessageAll(MessageData<?> message) {
-        servers.values().forEach(info -> sendMessage(info.getSession(), message));
+    public void sendMessageAll(MessageData<String> message) {
+        servers.values().forEach(info ->
+                {
+                    System.err.println("用户id："+info.getUserId());
+                    SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId(info.getUserId());
+                    message.setData(byUserId.getStatus());
+                    sendMessage(info.getSession(), message);
+                }
+
+
+        );
     }
+
 
     public void sendMessage(Session session, MessageData<?> message) {
         try {

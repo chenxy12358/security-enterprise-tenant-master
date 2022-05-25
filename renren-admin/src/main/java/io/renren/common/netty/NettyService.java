@@ -29,11 +29,16 @@ import io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO;
 import io.renren.modules.netWorkData.service.KxNetWorkStateDataService;
 import io.renren.modules.newLoadData.dto.KxNewUploadDataDTO;
 import io.renren.modules.newLoadData.service.KxNewUploadDataService;
+import io.renren.modules.notice.dto.SysNoticeDTO;
+import io.renren.modules.notice.service.SysNoticeService;
 import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
 import io.renren.modules.scheduleItem.service.KxScheduleItemService;
 import io.renren.modules.scheduleJob.entity.KxScheduleJobEntity;
 import io.renren.modules.scheduleJob.service.KxScheduleJobService;
 import io.renren.modules.stationTrack.service.KxStationTrackService;
+import io.renren.modules.sys.entity.SysDictDataEntity;
+import io.renren.modules.sys.service.SysDictDataService;
+import io.renren.websocket.WebSocketLiveServer;
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
@@ -48,17 +53,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 
 @Service("nettyService")
 @Slf4j
 public class NettyService {
-    private static final String FILE_PATH = "C:/";
-
     @Autowired
     private KxDeviceService kxDeviceService;
     @Autowired
@@ -69,9 +68,8 @@ public class NettyService {
     private KxNetWorkStateDataService kxNetWorkStateDataService;
     @Autowired
     private KxBatteryService kxBatteryService;
-
     @Autowired
-    private WebSocketServer webSocketServerVideo;
+    private WebSocketServer webSocketServer;
     @Autowired
     private KxScheduleJobService kxScheduleJobService;
     @Autowired
@@ -90,17 +88,20 @@ public class NettyService {
     private KxNewUploadDataService kxNewUploadDataService;
     @Autowired
     private KxStationTrackService kxStationTrackService;
-
-
     private Map<String, Channel> map = new HashMap<String, Channel>();
     private Map<String, String> ServerMap = new HashMap<String, String>();
+    @Autowired
+    private SysNoticeService sysNoticeService;
+    @Autowired
+    private WebSocketLiveServer webSocketLiveServer;
 
+    @Autowired
+    private SysDictDataService sysDictDataService;
 
     /**
      * 日志处理
      */
     private Logger logger = LoggerFactory.getLogger(NettyService.class);
-
 
     /**
      * 初始化基本信息和状态
@@ -112,13 +113,11 @@ public class NettyService {
      */
     public void initBaseInfoAndStatus(KxDeviceDTO dto, SocketChannel channel) {
         try {
-
             // todo  暂时发命令取 测试命令
             JSONObject destInfo = new JSONObject();
             destInfo.putOpt("DestObject", "Emd.Service.SysMonitor.E0");
 //            destInfo.putOpt("Method", "GetSysBaseInfo");
 //            destInfo.putOpt("Interface", "Emd.Method.Normal");
-
             destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETSYSBASEINFO);
             destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
             // todo 设置session
@@ -135,13 +134,10 @@ public class NettyService {
             ByteBuf respLengthBuf2 = PooledByteBufAllocator.DEFAULT.buffer(4);
             respLengthBuf2.writeBytes(d2);
             channel.writeAndFlush(respLengthBuf2);
-
         } catch (Exception e) {
-            logger.error("initBaseInfoAndStatus",e);
+            logger.error("initBaseInfoAndStatus", e);
             e.printStackTrace();
         }
-
-
     }
 
     /**
@@ -165,11 +161,9 @@ public class NettyService {
         //发送初始化数据
         byte[] d = HexUtil.sendInitInfo(deviceSn, dataJson.toString());
         logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 发送初始化数据");
-
         ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
         respLengthBuf.writeBytes(d);
         channel.writeAndFlush(respLengthBuf);
-
     }
 
     /**
@@ -189,14 +183,13 @@ public class NettyService {
         channel.writeAndFlush(respLengthBuf);
     }
 
-
     /**
      * 发送相机命令给设备端 目的：获取播放信息
      *
      * @param deviceSn
      * @param cameraName
      */
-    public void sendCmdCamera(String deviceSn, String cameraName,Long currentTime) {
+    public void sendCmdCamera(String deviceSn, String cameraName, Long currentTime) {
         try {
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(deviceSn);
             if (dto == null) {
@@ -228,18 +221,13 @@ public class NettyService {
                 respLengthBuf.writeBytes(d);
                 channel.writeAndFlush(respLengthBuf);
                 log.error("发送相机命令给设备端 目的：获取播放信息");
-
             } else {
                 log.error("无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
-
         }
-
-
     }
 
     /**
@@ -262,7 +250,6 @@ public class NettyService {
                 destInfo.putOpt("DestObject", "Emd.Service.VideoSender.E0");
 //                destInfo.putOpt("Method", "KeepVideoStream");
 //                destInfo.putOpt("Interface", "Emd.Method.Normal");
-
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_KEEPVIDEOSTREAM);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 // todo 设置session
@@ -274,20 +261,14 @@ public class NettyService {
                 respLengthBuf.writeBytes(d);
                 channel.writeAndFlush(respLengthBuf);
                 log.error("发送保持推送命令");
-
             } else {
                 log.error("无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
-
         }
-
-
     }
-
 
     /**
      * PtzControl方法
@@ -297,7 +278,7 @@ public class NettyService {
     public void sendCmdPtzControl(JSONObject params) {
         try {
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
-            if(null != params.get("deviceId")){
+            if (null != params.get("deviceId")) {
                 dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
             }
             if (dto == null) {
@@ -315,7 +296,6 @@ public class NettyService {
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PTZCONTROL);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_CTRL);
                 JSONObject param = new JSONObject();
-
                 param.putOpt("Command", String.valueOf(params.get("command")));
                 param.putOpt("AutoScanParam", null);
                 if (params.get("PresetId") != null) {
@@ -324,7 +304,6 @@ public class NettyService {
                 if (params.get("PresetName") != null) {
                     String PresetName = String.valueOf(params.get("PresetName"));
                     param.putOpt("PresetName", PresetName);
-
                 }
                 if (params.get("TourID") != null) {
                     param.putOpt("TourID", params.get("TourID"));
@@ -337,24 +316,62 @@ public class NettyService {
                 }
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
                 //获取基本信息
-
-
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
                 respLengthBuf.writeBytes(d);
                 channel.writeAndFlush(respLengthBuf);
-
-
             } else {
                 log.error("无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl",e);
+            logger.error("sendCmdPtzControl", e);
+        }
+    }
 
+
+    /**
+     * @param params
+     */
+    public void sendTakePicture(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
+            if (null != params.get("deviceId")) {
+                dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            }
+            if (dto == null) {
+                logger.error("sendTakePicture====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.PicCapture.E0");
+                destInfo.putOpt("Method", "PicCapture");
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("Camera", params.get("cameraName"));
+                param.putOpt("Height", params.get("Height"));
+                param.putOpt("Width", params.get("Width"));
+                param.putOpt("Quality", params.get("Quality"));
+                param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
+                //获取基本信息
+                byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
+                ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
+                respLengthBuf.writeBytes(d);
+                channel.writeAndFlush(respLengthBuf);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl", e);
         }
     }
 
@@ -366,7 +383,7 @@ public class NettyService {
      */
     public void getPresetList(JSONObject params) {
         try {
-            KxDeviceDTO dto =  kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
             if (dto == null) {
                 logger.error("getPresetList====>未查到相关设备信息");
                 return;
@@ -380,27 +397,20 @@ public class NettyService {
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PTZCONTROL);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_CTRL);
                 JSONObject param = new JSONObject();
-
                 param.putOpt("Command", String.valueOf(params.get("command")));
                 param.putOpt("_session", params.get("currentTime").toString());
                 //发送指令
-                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
-
-
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
             } else {
                 log.error("无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl",e);
-
+            logger.error("sendCmdPtzControl", e);
         }
     }
-
-
 
     /**
      * PtzControl方法
@@ -410,7 +420,7 @@ public class NettyService {
     public void getAudioList(JSONObject params) {
         try {
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
-            if(null != params.get("deviceId")){
+            if (null != params.get("deviceId")) {
                 dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
             }
             if (dto == null) {
@@ -429,27 +439,22 @@ public class NettyService {
 //                param.putOpt("_session", params.get("currentTime").toString());
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
                 //获取基本信息
-
                 //发送指令
-                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
-
-
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
             } else {
                 log.error("无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("getAudioList",e);
-
+            logger.error("getAudioList", e);
         }
     }
 
-
     /**
      * 发送计划任务
+     *
      * @param deviceId
      */
     public void sendJobInfo(Long deviceId) {
@@ -466,41 +471,37 @@ public class NettyService {
                 destInfo.putOpt("DestObject", "Emd.Service.TimerTask.E0");// todo 暂时固定写法
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETCONFIG);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
-
                 JSONObject param = new JSONObject();
-                JSONArray jsonArray =new JSONArray();
-                List<KxScheduleJobEntity> jobList= kxScheduleJobService.getInfoByDeviceId(deviceId);
-                if(null !=jobList && jobList.size()>0){
-                    for (KxScheduleJobEntity kxScheduleJobEntity: jobList) {
-                        JSONObject json=JSONUtil.parseObj(kxScheduleJobEntity.getContent()) ;
-                        String jobconf=json.get("TaskSchedule").toString();
+                JSONArray jsonArray = new JSONArray();
+                List<KxScheduleJobEntity> jobList = kxScheduleJobService.getInfoByDeviceId(deviceId);
+                if (null != jobList && jobList.size() > 0) {
+                    for (KxScheduleJobEntity kxScheduleJobEntity : jobList) {
+                        JSONObject json = JSONUtil.parseObj(kxScheduleJobEntity.getContent());
+                        String jobconf = json.get("TaskSchedule").toString();
                         jsonArray.addAll(JSONUtil.parseArray(jobconf));
                         kxScheduleJobEntity.setStatus("1");//已发送
                         kxScheduleJobService.updateById(kxScheduleJobEntity);
                     }
                 }
-                param.putOpt("TaskSchedule",jsonArray);
+                param.putOpt("TaskSchedule", jsonArray);
                 System.err.println(param);
-
                 //发送指令
-                SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
             } else {
                 log.error("发送计划任务失败,无相应的通讯通道");
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             log.error("发送计划任务失败=");
             log.error("send message error，" + e.getMessage(), e);
-
         }
-
     }
 
     /**
      * 发送AI任务 todo
+     *
      * @param deviceId
      */
     public void sendAIConfig(Long deviceId) {
@@ -513,29 +514,31 @@ public class NettyService {
             String key = getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = getChannel(key);
-                KxDiscernConfigDTO kxDiscernConfigDTO= kxDiscernConfigService.getBydeviceId(deviceId);
-                if(null !=kxDiscernConfigDTO.getCameraConfig()){ //相机任务
+                KxDiscernConfigDTO kxDiscernConfigDTO = kxDiscernConfigService.getBydeviceId(deviceId);
+                if (null != kxDiscernConfigDTO.getCameraConfig()) { //相机任务
                     JSONObject param = new JSONObject();
-                    JSONArray cameraJson=JSONUtil.parseArray(kxDiscernConfigDTO.getCameraConfig()) ;
+                    JSONArray cameraJson = JSONUtil.parseArray(kxDiscernConfigDTO.getCameraConfig());
                     JSONObject destInfo = new JSONObject();
                     destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");// todo 暂时固定写法
                     destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETAITASK);
                     destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
-                    param.putOpt("Tasks",cameraJson);
+                    param.putOpt("Tasks", cameraJson);
                     //发送指令
-                    SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
+                    SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
                 }
-                if(null !=kxDiscernConfigDTO.getDistinguishConfig()){ //AI配置
-                    JSONObject param = new JSONObject(); ;
-                    JSONObject disConfigJson=JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig()) ;
+                if (null != kxDiscernConfigDTO.getDistinguishConfig()) { //AI配置
+                    JSONObject param = new JSONObject();
+                    ;
+                    JSONObject disConfigJson = JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig());
                     JSONObject destInfo = new JSONObject();
                     destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");// todo 暂时固定写法
                     destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETALARMPARAM);
                     destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(disConfigJson);
-                    param.putOpt("AlarmParam",jsonArray);
+                    param.putOpt("AlarmParam", jsonArray);
                     //发送指令
+                    SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
                     SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
                     kxDiscernConfigDTO.setStatus("1");//已发送
                     kxDiscernConfigService.update(kxDiscernConfigDTO);
@@ -546,12 +549,120 @@ public class NettyService {
                 printNettyLog();
                 throw new RenException("通道-设备数据异常，请检查设备!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             log.error("send AI message error，" + e.getMessage(), e);
         }
+    }
 
+    /**
+     * 获取vpn状态
+     *
+     * @param params
+     */
+    public void getVPNStat(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("获取vpn状态====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Vpn.E0");
+                destInfo.putOpt("Method", "GetStat");
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl", e);
+        }
+    }
+
+    /**
+     * 开启vpn
+     *
+     * @param params
+     */
+    public void openVpn(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("开启vpn====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Vpn.E0");
+                destInfo.putOpt("Method", "Connect");
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("ServerAddr", params.get("ServerAddr"));
+                param.putOpt("Port", params.get("Port"));
+                param.putOpt("VpnAddr", params.get("VpnAddr"));
+                param.putOpt("VpnType", params.get("VpnType"));
+                param.putOpt("VpnTime", params.get("VpnTime"));
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl", e);
+        }
+    }
+
+    /**
+     * 关闭vpn
+     *
+     * @param params
+     */
+    public void closeVpn(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("关闭vpn====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Vpn.E0");
+                destInfo.putOpt("Method", "Close");
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("sendCmdPtzControl", e);
+        }
     }
 
     /**
@@ -578,7 +689,6 @@ public class NettyService {
         //回复心跳
         byte[] d = HexUtil.makeHeartReply(deviceSn, data);
         logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 发送心跳回复:" + JSONUtil.toJsonStr(d));
-
         ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
         respLengthBuf.writeBytes(d);
         channel.writeAndFlush(respLengthBuf);
@@ -592,7 +702,6 @@ public class NettyService {
      * @param DataLen
      * @param data
      */
-
     public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface) throws ParseException, IOException {
         if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
@@ -624,13 +733,9 @@ public class NettyService {
             jsonObject.putOpt("Uri640", filename640.replace(KxConstants.IMG_UPLOAD, ""));
             newArray.add(jsonObject);
             System.err.println("图片生成完成！========================================================");
-
-
         }
-
         return newArray;
     }
-
 
     /**
      * 校验文件描述信息数组的合法性：
@@ -655,7 +760,6 @@ public class NettyService {
             return false;
         } catch (Exception e) {
         }
-
         return false;
     }
 
@@ -690,7 +794,6 @@ public class NettyService {
                 "/" + DateUtil.year(currentTime) + "-" + DateUtil.month(currentTime) + 1 +
                 "/" + new SimpleDateFormat("yyyy-MM-dd").format(currentTime) +
                 "/" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(currentTime);
-
         if (StringUtil.isNotEmpty(extType)) {
             ret = ret + '-' + extType;
         }
@@ -706,8 +809,7 @@ public class NettyService {
      * @param channel
      * @throws ParseException
      */
-    public void rcvCmmdReply(String deviceSn, JSONObject senderInfo, JSONObject msgInfoJsonObject, SocketChannel channel,String session) throws ParseException {
-
+    public void rcvCmmdReply(String deviceSn, JSONObject senderInfo, JSONObject msgInfoJsonObject, SocketChannel channel, String session) throws ParseException {
         try {
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
             if (deviceDTO == null) {
@@ -718,8 +820,8 @@ public class NettyService {
             if ("Pending".equals(msgInfoJsonObject.get("Result"))) {
                 return;
             }
-            if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
-                if ("Emd.Service.SysMonitor.E0".equals(senderInfo.get("DestObject"))) {
+            if ("Emd.Service.SysMonitor.E0".equals(senderInfo.get("DestObject"))) {
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if ("GetSysBaseInfo".equals(senderInfo.get("Method"))) {
                         deviceDTO.setBaseInfo(String.valueOf(msgInfoJsonObject.get("ResultValue")));
                         kxDeviceService.update(deviceDTO);
@@ -727,7 +829,9 @@ public class NettyService {
                         deviceDTO.setStatus(String.valueOf(msgInfoJsonObject.get("ResultValue")));
                         kxDeviceService.update(deviceDTO);
                     }
-                } else if ("Emd.Service.VideoSender.E0".equals(senderInfo.get("DestObject"))) {
+                }
+            } else if ("Emd.Service.VideoSender.E0".equals(senderInfo.get("DestObject"))) {
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if ("SendVideoStream".equals(senderInfo.get("Method"))) {
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
@@ -737,11 +841,11 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("type", "SendVideoStream");
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
-                        webSocketServerVideo.sendMessageAll(message);
-
+                        webSocketServer.sendMessageAll(message);
                     }
-
-                } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
+                }
+            } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_GETAUDIOLIST.equals(senderInfo.get("Method"))) {
                         MessageData<Object> message = new MessageData<>();
                         message.setType(1);
@@ -752,11 +856,64 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
-                        webSocketServerVideo.sendMessageAll(message);
-
+                        webSocketServer.sendMessageAll(message);
                     }
-
+                }
+            } else if ("Emd.Service.Vpn.E0".equals(senderInfo.get("DestObject"))) {
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
+                    if (DeviceInterfaceConstants.METHOD_VPN_CONNECT.equals(senderInfo.get("Method"))) {
+                        JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
+                        MessageData<Object> message = new MessageData<>();
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CONNECT);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("Connected", resultValue.get("Connected"));
+                        msgInfoJsonObject.putOpt("VpnIP", resultValue.get("VpnIP"));
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    } else if (DeviceInterfaceConstants.METHOD_VPN_GETSTAT.equals(senderInfo.get("Method"))) {
+                        JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
+                        MessageData<Object> message = new MessageData<>();
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_GETSTAT);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("Connected", resultValue.get("Connected"));
+                        msgInfoJsonObject.putOpt("VpnIP", resultValue.get("VpnIP"));
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    } else if (DeviceInterfaceConstants.METHOD_VPN_CLOSE.equals(senderInfo.get("Method"))) {
+                        MessageData<Object> message = new MessageData<>();
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CLOSE);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }
                 } else {
+                    if (DeviceInterfaceConstants.METHOD_VPN_CONNECT.equals(senderInfo.get("Method"))) {
+                        MessageData<Object> message = new MessageData<>();
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CONNECT);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "fail");
+                        msgInfoJsonObject.putOpt("msg", msgInfoJsonObject.get("ErrorMsg"));
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }
+                }
+            } else {
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_PTZCONTROL.equals(senderInfo.get("Method"))) {
                         logger.debug("========================");
                         logger.debug(senderInfo.toString());
@@ -766,20 +923,17 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PTZCONTROL);
                         msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
-                        msgInfoJsonObject.putOpt("cameraName",senderInfo.get("DestObject"));
+                        msgInfoJsonObject.putOpt("cameraName", senderInfo.get("DestObject"));
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
-                        webSocketServerVideo.sendMessageAll(message);
+                        webSocketServer.sendMessageAll(message);
                     }
                 }
-
             }
         } catch (Exception e) {
-            logger.error("rcvCmmdReply",e);
+            logger.error("rcvCmmdReply", e);
             e.printStackTrace();
         }
-
-
     }
 
     /**
@@ -789,7 +943,8 @@ public class NettyService {
      * @param msgInfo
      * @param channel
      */
-    public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel) throws ParseException {
+    public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel) throws
+            ParseException {
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);
             return;
@@ -799,16 +954,12 @@ public class NettyService {
             updateDeviceStat(deviceSn, senderInfo, msgInfo);
         } else if ("Emd.Msg.Data".equals(Interface)) {
             if ("AccessPicture".equals(senderInfo.get("Signal"))) {
-/*
-                savePic(deviceSn, senderInfo, msgInfo);
-*/
             } else {
                 saveData(deviceSn, senderInfo, msgInfo);
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {
             saveAlarm(deviceSn, senderInfo, msgInfo);
         }
-
     }
 
     /**
@@ -822,13 +973,23 @@ public class NettyService {
         try {
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
             if (deviceDTO == null) {
-                log.error("处理告警数据，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
+                log.error("计划任务，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
                 return;
             }
             KxScheduleItemDTO itemDTO = new KxScheduleItemDTO();
             itemDTO.setDeviceNo(String.valueOf(senderInfo.get("SerialNo")));
             itemDTO.setSignalType(String.valueOf(senderInfo.get("Signal")));
             itemDTO.setDeviceId(deviceDTO.getId());
+            Object taskInfo = msgInfo.get("TaskInfo");
+            if (taskInfo !=null) {
+                JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
+                if (jsonObject.get("ScheduleItemId") != null) {
+                    itemDTO.setScheduleJobId((Long)jsonObject.get("ScheduleItemId"));
+                }
+                if (jsonObject.get("Type") != null) {
+                    itemDTO.setItemType(jsonObject.get("Type") + "");
+                }
+            }
             itemDTO.setDeleted("f");
             itemDTO.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -838,23 +999,12 @@ public class NettyService {
                 itemDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
             }
             kxScheduleItemService.save(itemDTO);
-
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(itemDTO.getCreateDate());
-            dataDTO.setType("任务数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
-
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
         } catch (Exception e) {
-            logger.error("savePic",e);
+            logger.error("savePic", e);
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -891,7 +1041,6 @@ public class NettyService {
                                 if (senderObject.equals(parseObj.get("Name"))) {
                                     parseObj.putOpt("Name", msgInfo.get("InstanceName"));
                                     parseObj.putOpt("Stat", msgInfo.get("Stat"));
-
                                 }
                                 newArray.add(parseObj);
                             }
@@ -904,13 +1053,10 @@ public class NettyService {
                 }
             }
         } catch (Exception e) {
-            logger.error("updateDeviceStat",e);
+            logger.error("updateDeviceStat", e);
             e.printStackTrace();
         }
-
-
     }
-
 
     /**
      * 保存一般上传数据
@@ -920,15 +1066,11 @@ public class NettyService {
      * @param msgInfo
      */
     public void saveData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo) throws ParseException {
-
-
         KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
         if (deviceDTO == null) {
             log.error("处理一般上传数据，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
             return;
         }
-
-
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
@@ -948,31 +1090,14 @@ public class NettyService {
             saveAccelerationData(deviceDTO, senderInfo, msgInfo);
         } */ else if ("GPSsensors".equals(Signal)) {
             saveGpsData(deviceDTO, senderInfo, msgInfo);
-
         } else if ("Humiditysensors".equals(Signal)) {
             saveHumidityData(deviceDTO, senderInfo, msgInfo);
-
         } else if ("Inclinationsensors".equals(Signal)) {
             saveInclinationData(deviceDTO, senderInfo, msgInfo);
-
         } else if ("Tempsensors".equals(Signal)) {
             saveTemperatureData(deviceDTO, senderInfo, msgInfo);
-
-
         }
     }
-
-
-    /**
-     *
-     * @param deviceDTO
-     * @param senderInfo
-     * @param msgInfo
-     */
-  /*  public void saveTaskScheduleData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
-        KxScheduleJobDTO
-    }*/
-
 
     /**
      * 保存电池状态
@@ -981,7 +1106,8 @@ public class NettyService {
      * @param senderInfo
      * @param msgInfo
      */
-    public void saveBatteryStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) throws ParseException {
+    public void saveBatteryStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) throws
+            ParseException {
         try {
             KxBatteryDTO dto = new KxBatteryDTO();
             dto.setDeviceId(deviceDTO.getId());
@@ -1001,23 +1127,10 @@ public class NettyService {
             dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
             dto.setOutputVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
             kxBatteryService.save(dto);
-
-            // 保存最新数据
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("电池数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
         } catch (Exception exception) {
             exception.printStackTrace();
-
         }
-
     }
-
 
     /**
      * 保存网络状态数据
@@ -1034,41 +1147,11 @@ public class NettyService {
             dto.setContent(String.valueOf(msgInfo));
             // TODO: 2022/3/1  拆分数据
             kxNetWorkStateDataService.save(dto);
-
-            // 保存最新数据
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("网络数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
         } catch (Exception e) {
-            logger.error("saveNetWorkStateData",e);
+            logger.error("saveNetWorkStateData", e);
             e.printStackTrace();
         }
-
-
-
     }
-
-    /**
-     * 保存加速度数据
-     *
-     * @param deviceDTO
-     * @param senderInfo
-     * @param msgInfo
-     */
-    public void saveAccelerationData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
-/*        KxDeviceAccelerationDTO dto = new KxDeviceAccelerationDTO();
-        dto.setDeviceId(deviceDTO.getId());
-        dto.setStationId(deviceDTO.getStationId());
-        dto.setContent(msgInfo);
-        dto.setCreateDate((Date) senderInfo.get("CreatedTime"));
-        // TODO: 2022/3/1  拆分数据
-        kxDeviceAccelerationService.save(dto);*/
-    }
-
 
     /**
      * 保存Gps数据
@@ -1084,16 +1167,15 @@ public class NettyService {
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
             if (msgInfo.get("CreatedTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("CreatedTime").toString())) {
                 dto.setCreateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
             }
-            String lat=msgInfo.get("Latitude").toString();
-            String lng=msgInfo.get("Longitude").toString();
-            lat=CoordinateTransform.transferGps(lat);
-            lng=CoordinateTransform.transferGps(lng);
+            String lat = msgInfo.get("Latitude").toString();
+            String lng = msgInfo.get("Longitude").toString();
+            lat = CoordinateTransform.transferGps(lat);
+            lng = CoordinateTransform.transferGps(lng);
             dto.setLongitude(lng);
             dto.setLatitude(lat);
             dto.setHdop(msgInfo.get("Hdop").toString());
@@ -1102,26 +1184,12 @@ public class NettyService {
             dto.setNorthSouth(msgInfo.get("North/South").toString());
             dto.setSensorNo(Long.valueOf(msgInfo.get("SensorId").toString()));
             kxDeviceGpsService.save(dto);
-
             // 保存gps轨迹路径
-            kxStationTrackService.add(dto,deviceDTO);
-
-
-
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("GPS数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
+            kxStationTrackService.add(dto, deviceDTO);
         } catch (Exception e) {
-            logger.error("saveGpsData",e);
+            logger.error("saveGpsData", e);
             e.printStackTrace();
-
         }
-
     }
 
     /**
@@ -1134,7 +1202,6 @@ public class NettyService {
     public void saveHumidityData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
         try {
             KxDeviceHumidityDTO dto = new KxDeviceHumidityDTO();
-
             dto.setDeviceId(deviceDTO.getId());
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
@@ -1151,22 +1218,35 @@ public class NettyService {
             dto.setAlarmStatus(String.valueOf(msgInfo.get("AlarmStatus")));
             dto.setFirsLevelAlarm(new Double(String.valueOf(msgInfo.get("FirstLevelAlarm"))));
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
-
             kxDeviceHumidityService.save(dto);
-
-
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("湿度数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
+            String alarmStatus = dto.getAlarmStatus();
+            if (!"Normal".equals(alarmStatus)) {
+                String title = "您有新的湿度数据预警通知，请及时查看！";
+                String type = "湿度预警";
+                String deviceName = dto.getDeviceName();
+                String deviceCode = deviceDTO.getSerialNo();
+                List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
+                if (list.size() > 0) {
+                    for (SysDictDataEntity data : list) {
+                        alarmStatus.equals(data.getDictValue());
+                        alarmStatus = data.getDictLabel();
+                        break;
+                    }
+                }
+                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+                dataDTO.setDeviceId(deviceDTO.getId());
+                dataDTO.setStationId(deviceDTO.getStationId());
+                dataDTO.setCreateDate(dto.getCreateDate());
+                dataDTO.setType(type);
+                kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+                kxNewUploadDataService.save(dataDTO);
+                //发送统计页面刷新指令
+                sendLiveRefresh();
+            }
         } catch (Exception e) {
-            logger.error("saveHumidityData",e);
+            logger.error("saveHumidityData", e);
             e.printStackTrace();
-
         }
     }
 
@@ -1196,23 +1276,35 @@ public class NettyService {
             dto.setAlarmStatus(String.valueOf(msgInfo.get("AlarmStatus")));
             dto.setFirsLevelAlarm(new Double(String.valueOf(msgInfo.get("FirstLevelAlarm"))));
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
-
             kxDeviceInclinationService.save(dto);
-
-
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("倾斜数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
+            String alarmStatus = dto.getAlarmStatus();
+            if (!"Normal".equals(alarmStatus)) {
+                String title = "您有新的设备倾斜预警通知，请及时查看！";
+                String type = "倾斜预警";
+                String deviceName = dto.getDeviceName();
+                String deviceCode = deviceDTO.getSerialNo();
+                List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
+                if (list.size() > 0) {
+                    for (SysDictDataEntity data : list) {
+                        alarmStatus.equals(data.getDictValue());
+                        alarmStatus = data.getDictLabel();
+                        break;
+                    }
+                }
+                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+                dataDTO.setDeviceId(deviceDTO.getId());
+                dataDTO.setStationId(deviceDTO.getStationId());
+                dataDTO.setCreateDate(dto.getCreateDate());
+                dataDTO.setType(type);
+                kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+                kxNewUploadDataService.save(dataDTO);
+                sendLiveRefresh();
+            }
         } catch (Exception e) {
-            logger.error("saveInclinationData",e);
+            logger.error("saveInclinationData", e);
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -1223,10 +1315,8 @@ public class NettyService {
      * @param msgInfo
      */
     public void saveTemperatureData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
-
         try {
             KxDeviceTemperatureDTO dto = new KxDeviceTemperatureDTO();
-
             dto.setDeviceId(deviceDTO.getId());
             dto.setStationId(deviceDTO.getStationId());
             dto.setContent(String.valueOf(msgInfo));
@@ -1236,7 +1326,6 @@ public class NettyService {
             } else {
                 dto.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
             }
-
             // TODO: 2022/3/1  拆分数据
             dto.setUnit(String.valueOf(msgInfo.get("Unit")));
             dto.setCurrentValue(new Double(String.valueOf(msgInfo.get("CurrentValue"))));
@@ -1244,23 +1333,36 @@ public class NettyService {
             dto.setAlarmStatus(String.valueOf(msgInfo.get("AlarmStatus")));
             dto.setFirsLevelAlarm(new Double(String.valueOf(msgInfo.get("FirstLevelAlarm"))));
             dto.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
-
             kxDeviceTemperatureService.save(dto);
-            KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
-            dataDTO.setDeviceId(deviceDTO.getId());
-            dataDTO.setStationId(deviceDTO.getStationId());
-            dataDTO.setCreateDate(dto.getCreateDate());
-            dataDTO.setType("温度数据");
-            kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
-            kxNewUploadDataService.save(dataDTO);
-
+            String alarmStatus = dto.getAlarmStatus();
+            if (!"Normal".equals(alarmStatus)) {
+                String title = "您有新的温度数据预警通知，请及时查看！";
+                String type = "温度预警";
+                String deviceName = dto.getDeviceName();
+                String deviceCode = deviceDTO.getSerialNo();
+                List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
+                if (list.size() > 0) {
+                    for (SysDictDataEntity data : list) {
+                        alarmStatus.equals(data.getDictValue());
+                        alarmStatus = data.getDictLabel();
+                        break;
+                    }
+                }
+                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
+                dataDTO.setDeviceId(deviceDTO.getId());
+                dataDTO.setStationId(deviceDTO.getStationId());
+                dataDTO.setCreateDate(dto.getCreateDate());
+                dataDTO.setType(type);
+                kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
+                kxNewUploadDataService.save(dataDTO);
+                sendLiveRefresh();
+            }
         } catch (Exception e) {
-            logger.error("saveTemperatureData",e);
+            logger.error("saveTemperatureData", e);
             e.printStackTrace();
-
         }
     }
-
 
     /**
      * 保存天然气数据
@@ -1292,24 +1394,35 @@ public class NettyService {
             KxGasDataDTO.setCreator(deviceDTO.getCreator());
             KxGasDataDTO.setUpdater(deviceDTO.getUpdater());
             KxGasDataService.save(KxGasDataDTO);
-
-
-            // 保存最新数据
-            KxNewUploadDataDTO dto = new KxNewUploadDataDTO();
-            dto.setDeviceId(deviceDTO.getId());
-            dto.setStationId(deviceDTO.getStationId());
-            dto.setCreateDate(KxGasDataDTO.getCreateDate());
-            dto.setType("燃气数据");
-            kxNewUploadDataService.deleleByDeviceId(dto.getDeviceId());
-            kxNewUploadDataService.save(dto);
-
+            String alarmStatus = KxGasDataDTO.getAlarmStatus();
+            if (!"Normal".equals(alarmStatus)) {
+                String title = "您有新的燃气数据预警通知，请及时查看！";
+                String type = "燃气预警";
+                String deviceName = KxGasDataDTO.getDeviceName();
+                String deviceCode = deviceDTO.getSerialNo();
+                List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
+                if (list.size() > 0) {
+                    for (SysDictDataEntity data : list) {
+                        alarmStatus.equals(data.getDictValue());
+                        alarmStatus = data.getDictLabel();
+                        break;
+                    }
+                }
+                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, KxGasDataDTO.getConcentrationValue() + KxGasDataDTO.getUnit(), formatter.format(KxGasDataDTO.getUpdateDate()));
+                // 保存最新数据
+                KxNewUploadDataDTO dto = new KxNewUploadDataDTO();
+                dto.setDeviceId(deviceDTO.getId());
+                dto.setStationId(deviceDTO.getStationId());
+                dto.setCreateDate(KxGasDataDTO.getCreateDate());
+                dto.setType(type);
+                kxNewUploadDataService.deleleByDeviceId(dto.getDeviceId());
+                kxNewUploadDataService.save(dto);
+            }
         } catch (Exception e) {
-            logger.error("saveGasData",e);
+            logger.error("saveGasData", e);
             e.printStackTrace();
         }
-
     }
-
 
     /**
      * 保存告警数据
@@ -1320,8 +1433,6 @@ public class NettyService {
      */
     public void saveAlarm(String deviceSn, JSONObject senderInfo, JSONObject msgInfo) {
         try {
-
-
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
             if (deviceDTO == null) {
                 log.error("处理告警数据，未找到对应数据，丢弃数据，设备编号:" + deviceSn);
@@ -1335,8 +1446,6 @@ public class NettyService {
             alarmDTO.setStationId(deviceDTO.getStationId());
             alarmDTO.setSenderInfo(String.valueOf(senderInfo));
             alarmDTO.setContent(String.valueOf(msgInfo));
-
-
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Object files = msgInfo.get("Files");
             if (files != null) {
@@ -1348,30 +1457,86 @@ public class NettyService {
                     alarmDTO.setPictureDate(formatter.parse(String.valueOf(json.get("DateTime"))));
                 }
             }
-
             if (senderInfo.get("CreatedTime") == null) {
                 alarmDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
             } else {
                 alarmDTO.setUpdateDate(formatter.parse(String.valueOf(senderInfo.get("CreatedTime"))));
             }
             kxDeviceAlarmService.save(alarmDTO);
-
+            // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
+            //  计划用消息队列，订阅的方式通知其他模块
+            String title = "您有新的预警图片通知，请及时处理！";
+            String type = "图片预警";
+            String deviceName = deviceDTO.getName();
+            String deviceCode = deviceDTO.getSerialNo();
+            sendNoticeData(title, type, deviceName, deviceCode, "", "", formatter.format(alarmDTO.getUpdateDate()));
             KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
             dataDTO.setDeviceId(deviceDTO.getId());
             dataDTO.setStationId(deviceDTO.getStationId());
             dataDTO.setCreateDate(alarmDTO.getCreateDate());
-            dataDTO.setType("报警数据");
+            dataDTO.setType(type);
             kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
             kxNewUploadDataService.save(dataDTO);
-
-            // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
-            //  计划用消息队列，订阅的方式通知其他模块
+            sendLiveRefresh();
         } catch (Exception e) {
-            logger.error("saveAlarm",e);
+            logger.error("saveAlarm", e);
             e.printStackTrace();
         }
     }
 
+    /**
+     * <p>
+     * 将预警信息，发送到公告消息
+     *
+     * @param
+     */
+    public void sendNoticeData(String title, String type, String deviceName, String deviceCode, String level, String currentValue, String dateTime) {
+        try {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<p><strong style=\"color: rgb(136, 136, 136);\">");
+            sb.append("预警类型：");
+            sb.append("</strong>");
+            sb.append(type);
+            sb.append("</p>");
+            sb.append("<p>");
+            sb.append("<strong style=\"color: rgb(136, 136, 136);\">");
+            sb.append("设备名称：");
+            sb.append("</strong>");
+            sb.append(deviceName);
+            sb.append("</p>");
+            sb.append("<p>");
+            sb.append("<strong style=\"color: rgb(136, 136, 136);\">");
+            sb.append("设备编号：");
+            sb.append("</strong>");
+            sb.append(deviceCode);
+            sb.append("</p>");
+            if (!"图片预警".equals(type)) {
+                sb.append("<p><strong style=\"color: rgb(136, 136, 136);\">预警等级：</strong>");
+                sb.append(level);
+                sb.append("</p>");
+                sb.append("<p><strong style=\"color: rgb(136, 136, 136);\">当前数值：</strong>");
+                sb.append(currentValue);
+                sb.append("</p>");
+            }
+            sb.append("<p>");
+            sb.append("<strong style=\"color: rgb(136, 136, 136);\">");
+            sb.append("预警时间：");
+            sb.append("</strong>");
+            sb.append(dateTime);
+            sb.append("</p>");
+            SysNoticeDTO dto = new SysNoticeDTO();
+            dto.setType(0);
+            dto.setTitle(title);
+            dto.setContent(sb.toString());
+            dto.setReceiverType(0);
+            dto.setReceiverTypeList(new ArrayList<>());
+            dto.setStatus(1);
+            dto.setCreator(0L);
+            sysNoticeService.save(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 获取通道
@@ -1396,26 +1561,40 @@ public class NettyService {
                     kxDeviceService.update(dto);
                 }
             } catch (Exception e) {
-                logger.error("remove",e);
+                logger.error("remove", e);
                 e.printStackTrace();
             }
-
         }
-
-
         removeServer(key);
+    }
+
+    /**
+     * 统计界面数据刷新
+     */
+    public void sendLiveRefresh() {
+        /*try {
+            MessageData<Object> message = new MessageData<>();
+            message.setType(1);
+            message.setData(new Date());
+            System.err.println("统计界面数据刷新");
+            log.info("统计界面数据刷新" + DateUtil2.getCurrentDateTime());
+            webSocketLiveServer.sendMessageAll(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
     }
 
     public void add(String key, Channel channel) {
         log.info("添加缓存连接：" + key + "--" + DateUtil2.getCurrentDateTime());
         map.put(key, channel);
+        sendLiveRefresh();
     }
-
 
     public void removeServer(String key) {
         log.info("删除缓存连接：" + key + "--" + DateUtil2.getCurrentDateTime());
         ServerMap.remove(key);
         printNettyLog();
+        sendLiveRefresh();
     }
 
     public void addServer(String key, String value) {
@@ -1443,5 +1622,4 @@ public class NettyService {
         }
         return key;
     }
-
 }

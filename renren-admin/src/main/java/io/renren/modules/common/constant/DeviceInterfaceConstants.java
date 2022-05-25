@@ -61,6 +61,11 @@ public class DeviceInterfaceConstants {
      * 发送ptz控制
      */
     public static String METHOD_PTZCONTROL="PtzControl";
-
+    /**
+     * VPN
+     */
+    public static String METHOD_VPN_CONNECT="Connect";
+    public static String METHOD_VPN_GETSTAT="GetStat";
+    public static String METHOD_VPN_CLOSE="Close";
 
 }
