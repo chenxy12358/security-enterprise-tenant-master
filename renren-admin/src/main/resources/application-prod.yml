@@ -32,3 +32,11 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+#netty:
+#  websocket:
+#    url: ws://localhost:8888/websocket
+netty:
+  port: 9099
+  isRecord: record
+  websocket:
+    port: 8888

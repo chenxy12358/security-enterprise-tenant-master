@@ -11,11 +11,11 @@ server:
     session:
       cookie:
         http-only: true
-netty:
-  port: 9099
-  isRecord: record
-  websocket:
-    port: 8888
+#netty:
+#  port: 9099
+#  isRecord: record
+#  websocket:
+#    port: 8888
 
 spring:
   # 环境 dev|test|prod

@@ -3,9 +3,9 @@ spring:
     druid:
       #MySQL
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/security_enterprise?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
-      username: renren
-      password: 123456
+      url: jdbc:mysql://192.168.0.4:3306/kx_test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+      username: root
+      password: kxkj999
       initial-size: 10
       max-active: 100
       min-idle: 10
@@ -32,3 +32,11 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+#netty:
+#  websocket:
+#    url: ws://localhost:8888/websocket
+netty:
+  port: 9099
+  isRecord: record
+  websocket:
+    port: 8888
