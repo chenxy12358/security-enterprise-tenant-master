@@ -93,7 +93,7 @@ public class NettyServerListener {
                             23, 4, 0, 0, true));
                     // 解码转String，注意调整自己的编码格式GBK、UTF-8
                     pipeline.addLast(new StringEncoder(Charset.forName("GBK")));
-                    pipeline.addLast("handler", new IdleStateHandler(120, 0, 0, TimeUnit.SECONDS));
+                    pipeline.addLast("handler", new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
                     pipeline.addLast(channelHandlerAdapter);
                 }
             });

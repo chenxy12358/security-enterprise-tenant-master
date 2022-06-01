@@ -80,7 +80,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
             if (event.state() == IdleState.READER_IDLE) {
                 loss_connect_time++;
                 System.out.println("接收消息超时");
-                if (loss_connect_time > 5) {
+                if (loss_connect_time > 1) {
                     System.out.println("关闭不活动的链接");
                     loss_connect_time = 0;
                     nettyService.remove(ctx.channel().id().toString());
