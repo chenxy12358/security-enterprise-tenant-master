@@ -56,7 +56,7 @@ public class SysNoticeSwitchServiceImpl extends CrudServiceImpl<SysNoticeSwitchD
         if (byUserId != null) {
             re.setStatus(byUserId.getStatus());
         }
-        return byUserId;
+        return re;
     }
 
     @Override
