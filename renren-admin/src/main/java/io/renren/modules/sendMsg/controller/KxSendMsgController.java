@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import io.renren.common.netty.NettyService;
 import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
+import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -66,6 +67,17 @@ public class KxSendMsgController {
         nettyService.sendCmdPtzControl(params);
         return new Result();
     }
+
+
+
+    @PostMapping("getBaseInfo")
+    @ApiOperation("同步BaseInfo信息")
+    public Result getBaseInfo(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.sendGetBaseInfo(params);
+        return new Result();
+    }
+
 
 
 

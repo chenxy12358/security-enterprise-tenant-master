@@ -68,7 +68,6 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
         nettyService.remove(ctx.channel().id().toString());
 
 
-
     }
 
     @Override
@@ -80,7 +79,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
             if (event.state() == IdleState.READER_IDLE) {
                 loss_connect_time++;
                 System.out.println("接收消息超时");
-                if (loss_connect_time > 2) {
+                if (loss_connect_time > 1) {
                     System.out.println("关闭不活动的链接");
                     loss_connect_time = 0;
                     nettyService.remove(ctx.channel().id().toString());
@@ -173,7 +172,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     String session = "";
                     // -1 发现多了一位空格
                     if (SessionLen > 0) {
-                        session = Util16.hexStringToString(body.substring(86 + SenderInfoLen, 86 + SenderInfoLen + SessionLen-1));
+                        session = Util16.hexStringToString(body.substring(86 + SenderInfoLen, 86 + SenderInfoLen + SessionLen - 1));
 
                     }
                     // 通过类型和session判断是否是-命令回应
@@ -221,7 +220,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         //保存文件
 
                         String Interface = String.valueOf(senderInfoJsonObject.get("Interface"));
-                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data,Interface);
+                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data, Interface);
                         if (jsonArray != null && jsonArray.size() > 0) {
                             if (isCmmdReply) {
                                 Object obj = msgInfoJsonObject.get("ResultValue");
@@ -251,7 +250,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
                     if (isCmmdReply) {
-                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel,session);
+                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                     } else {
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {

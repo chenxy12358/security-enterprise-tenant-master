@@ -93,9 +93,6 @@ public class NettyService {
     @Autowired
     private SysNoticeService sysNoticeService;
     @Autowired
-    private WebSocketLiveServer webSocketLiveServer;
-
-    @Autowired
     private SysDictDataService sysDictDataService;
 
     /**
@@ -116,8 +113,6 @@ public class NettyService {
             // todo  暂时发命令取 测试命令
             JSONObject destInfo = new JSONObject();
             destInfo.putOpt("DestObject", "Emd.Service.SysMonitor.E0");
-//            destInfo.putOpt("Method", "GetSysBaseInfo");
-//            destInfo.putOpt("Interface", "Emd.Method.Normal");
             destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETSYSBASEINFO);
             destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
             // todo 设置session
@@ -333,6 +328,37 @@ public class NettyService {
 
 
     /**
+     * 主动发送同步BaseInfo命令
+     *
+     * @param params
+     */
+    public void sendGetBaseInfo(JSONObject params) {
+        try {
+            KxDeviceDTO dto = null;
+            if (null != params.get("deviceId")) {
+                dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            }
+            if (dto == null) {
+                logger.error("未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                SocketChannel channel = (SocketChannel) getChannel(key);
+                initBaseInfoAndStatus(dto, channel);
+
+            } else {
+                log.error("无相应的通讯通道");
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            logger.error("sendGetBaseInfo", e);
+        }
+    }
+
+
+    /**
      * @param params
      */
     public void sendTakePicture(JSONObject params) {
@@ -371,7 +397,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl", e);
+            logger.error("sendTakePicture", e);
         }
     }
 
@@ -408,7 +434,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl", e);
+            logger.error("getPresetList", e);
         }
     }
 
@@ -539,7 +565,7 @@ public class NettyService {
                     param.putOpt("AlarmParam", jsonArray);
                     //发送指令
                     SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
-                    SendMsgUtils.sendMsg(dto.getSerialNo(),destInfo.toString(),param.toString(),channel);
+                    SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
                     kxDiscernConfigDTO.setStatus("1");//已发送
                     kxDiscernConfigService.update(kxDiscernConfigDTO);
 
@@ -586,7 +612,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl", e);
+            logger.error("getVPNStat", e);
         }
     }
 
@@ -626,7 +652,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl", e);
+            logger.error("openVpn", e);
         }
     }
 
@@ -661,7 +687,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("sendCmdPtzControl", e);
+            logger.error("closeVpn", e);
         }
     }
 
@@ -981,10 +1007,10 @@ public class NettyService {
             itemDTO.setSignalType(String.valueOf(senderInfo.get("Signal")));
             itemDTO.setDeviceId(deviceDTO.getId());
             Object taskInfo = msgInfo.get("TaskInfo");
-            if (taskInfo !=null) {
+            if (taskInfo != null) {
                 JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
                 if (jsonObject.get("ScheduleItemId") != null) {
-                    itemDTO.setScheduleJobId((Long)jsonObject.get("ScheduleItemId"));
+                    itemDTO.setScheduleJobId((Long) jsonObject.get("ScheduleItemId"));
                 }
                 if (jsonObject.get("Type") != null) {
                     itemDTO.setItemType(jsonObject.get("Type") + "");

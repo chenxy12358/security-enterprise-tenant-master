@@ -84,16 +84,13 @@ public class NettyServerListener {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ChannelPipeline pipeline = ch.pipeline();
-                    //pipeline.addLast(new LengthFieldBasedFrameDecoder(NettyConstant.getMaxFrameLength(), 0, 2, 0, 2));
-                    //pipeline.addLast(new LengthFieldPrepender(2));
-                    // pipeline.addLast(new ObjectCodec());
                     // 解码转String，注意调整自己的编码格式GBK、UTF-8
                     pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                     pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.BIG_ENDIAN, 1024 * 1000,
                             23, 4, 0, 0, true));
                     // 解码转String，注意调整自己的编码格式GBK、UTF-8
                     pipeline.addLast(new StringEncoder(Charset.forName("GBK")));
-                    pipeline.addLast("handler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
+                    pipeline.addLast("handler", new IdleStateHandler(90, 0, 0, TimeUnit.SECONDS));
                     pipeline.addLast(channelHandlerAdapter);
                 }
             });
