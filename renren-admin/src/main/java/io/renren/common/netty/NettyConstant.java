@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NettyConstant {
 
+
 	/**
      * 最大线程量
      */

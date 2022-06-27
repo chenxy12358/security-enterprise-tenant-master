@@ -1405,7 +1405,9 @@ public class NettyService {
             KxGasDataDTO.setContent(String.valueOf(msgInfo));
             KxGasDataDTO.setUnit(String.valueOf(msgInfo.get("Unit")));
             KxGasDataDTO.setGasType(String.valueOf(msgInfo.get("GasType")));
-            KxGasDataDTO.setSensorId(Long.valueOf(String.valueOf(msgInfo.get("SensorId"))));
+            if (msgInfo.get("SensorId") == null || "NULL".equalsIgnoreCase(msgInfo.get("SensorId").toString())) {
+                KxGasDataDTO.setSensorId(Long.valueOf(String.valueOf(msgInfo.get("SensorId"))));
+            }
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
                 KxGasDataDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
@@ -1414,7 +1416,11 @@ public class NettyService {
             }
             KxGasDataDTO.setAlarmStatus(String.valueOf(msgInfo.get("AlarmStatus")));
             KxGasDataDTO.setFirsLevelAlarm(new Double(String.valueOf(msgInfo.get("FirstLevelAlarm"))));
-            KxGasDataDTO.setConcentrationValue(new Double(String.valueOf(msgInfo.get("ConcentrationValue"))));
+
+            if (msgInfo.get("ConcentrationValue") == null || "NULL".equalsIgnoreCase(msgInfo.get("ConcentrationValue").toString())) {
+                KxGasDataDTO.setConcentrationValue(new Double(String.valueOf(msgInfo.get("ConcentrationValue"))));
+            }
+
             KxGasDataDTO.setSecondaryLevelAlarm(new Double(String.valueOf(msgInfo.get("SecondaryLevelAlarm"))));
             KxGasDataDTO.setTenantCode(deviceDTO.getTenantCode());
             KxGasDataDTO.setCreator(deviceDTO.getCreator());
