@@ -977,7 +977,12 @@ public class NettyService {
         }
         String Interface = String.valueOf(senderInfo.get("Interface"));
         if ("Emd.Msg.Stat".equals(Interface)) {
-            updateDeviceStat(deviceSn, senderInfo, msgInfo);
+            if ("BatteryState".equals(senderInfo.get("Signal"))) {
+                saveData(deviceSn, senderInfo, msgInfo);
+            }else {
+                updateDeviceStat(deviceSn, senderInfo, msgInfo);
+
+            }
         } else if ("Emd.Msg.Data".equals(Interface)) {
             if ("AccessPicture".equals(senderInfo.get("Signal"))) {
             } else {
@@ -1146,12 +1151,31 @@ public class NettyService {
             } else {
                 dto.setCreateDate(formatter.parse(String.valueOf(msgInfo.get("CreatedTime"))));
             }
-            dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
-            dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
-            dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
-            dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
-            dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
-            dto.setOutputVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
+            if (msgInfo.containsKey("ChargeCurrent1")) {
+                dto.setBatSoc(new BigDecimal(msgInfo.get("Level").toString()));
+                dto.setBatteryId(Long.valueOf(msgInfo.get("ID").toString()));
+                dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage1").toString()));
+                dto.setChargeSwitch(msgInfo.get("ChargeSwitch1").toString());
+
+                if ("0".equals(msgInfo.get("ChargeSwitch1").toString())) {
+                    dto.setChargeSwitch("NotCharged");
+                }
+
+                dto.setVoltageLevel(new BigDecimal(12));
+                dto.setOutputCurrent(msgInfo.get("OutPutCurrent").toString());
+                dto.setOutputVotage(new BigDecimal(msgInfo.get("Voltage").toString()));
+
+                dto.setChargeCurrent(new BigDecimal(msgInfo.get("ChargeCurrent1").toString()));
+            }else {
+                dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
+                dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
+                dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
+                dto.setChargeVotage(new BigDecimal(msgInfo.get("ChargeVotage").toString()));
+                dto.setVoltageLevel(new BigDecimal(msgInfo.get("VoltageLevel").toString()));
+                dto.setOutputVotage(new BigDecimal(msgInfo.get("OutputVoltage").toString()));
+            }
+
+
             kxBatteryService.save(dto);
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -1405,7 +1429,7 @@ public class NettyService {
             KxGasDataDTO.setContent(String.valueOf(msgInfo));
             KxGasDataDTO.setUnit(String.valueOf(msgInfo.get("Unit")));
             KxGasDataDTO.setGasType(String.valueOf(msgInfo.get("GasType")));
-            if (msgInfo.get("SensorId") == null || "NULL".equalsIgnoreCase(msgInfo.get("SensorId").toString())) {
+            if (msgInfo.containsKey("SensorId")) {
                 KxGasDataDTO.setSensorId(Long.valueOf(String.valueOf(msgInfo.get("SensorId"))));
             }
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1417,7 +1441,7 @@ public class NettyService {
             KxGasDataDTO.setAlarmStatus(String.valueOf(msgInfo.get("AlarmStatus")));
             KxGasDataDTO.setFirsLevelAlarm(new Double(String.valueOf(msgInfo.get("FirstLevelAlarm"))));
 
-            if (msgInfo.get("ConcentrationValue") == null || "NULL".equalsIgnoreCase(msgInfo.get("ConcentrationValue").toString())) {
+            if (msgInfo.containsKey("ConcentrationValue")) {
                 KxGasDataDTO.setConcentrationValue(new Double(String.valueOf(msgInfo.get("ConcentrationValue"))));
             }
 
@@ -1427,7 +1451,10 @@ public class NettyService {
             KxGasDataDTO.setUpdater(deviceDTO.getUpdater());
             KxGasDataService.save(KxGasDataDTO);
             String alarmStatus = KxGasDataDTO.getAlarmStatus();
-            if (!"Normal".equals(alarmStatus)) {
+            if ("0".equals(alarmStatus)) {
+                KxGasDataDTO.setAlarmStatus("Normal");
+            }
+            if (!("Normal".equals(alarmStatus)|| "0".equals(alarmStatus))) {
                 String title = "您有新的燃气数据预警通知，请及时查看！";
                 String type = "燃气预警";
                 String deviceName = KxGasDataDTO.getDeviceName();
