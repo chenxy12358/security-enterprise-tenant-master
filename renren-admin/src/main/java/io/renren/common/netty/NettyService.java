@@ -1449,11 +1449,11 @@ public class NettyService {
             KxGasDataDTO.setTenantCode(deviceDTO.getTenantCode());
             KxGasDataDTO.setCreator(deviceDTO.getCreator());
             KxGasDataDTO.setUpdater(deviceDTO.getUpdater());
-            KxGasDataService.save(KxGasDataDTO);
             String alarmStatus = KxGasDataDTO.getAlarmStatus();
             if ("0".equals(alarmStatus)) {
                 KxGasDataDTO.setAlarmStatus("Normal");
             }
+            KxGasDataService.save(KxGasDataDTO);
             if (!("Normal".equals(alarmStatus)|| "0".equals(alarmStatus))) {
                 String title = "您有新的燃气数据预警通知，请及时查看！";
                 String type = "燃气预警";
