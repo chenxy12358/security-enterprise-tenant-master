@@ -108,15 +108,15 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             //配置信息
             List<KxAIPzVO> list = kxDiscernConfigHdDTO.getDiscernList();
             try {
-                logger.debug("图片：{"+imgFilePath+"} ，分析开始");
+                logger.info("图片：{"+imgFilePath+"} ，分析开始");
 //                List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
                 List listInfo= HandleImgHkCpu.analysisImgByCPU(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
-                logger.debug("图片：{"+imgFilePath+"} ，分析结束");
-                logger.debug("listInfo："+listInfo.size());
+                logger.info("图片：{"+imgFilePath+"} ，分析结束");
+                logger.info("listInfo："+listInfo.size());
                 if(!listInfo.get(0).toString().isEmpty()){
-                    logger.debug("listInfo：{"+listInfo.get(0).toString());
+                    logger.info("listInfo：{"+listInfo.get(0).toString());
                     kxDeviceAlarmService.saveAnalysisImg(listInfo,deviceID,picDate);
-                    logger.debug("保存完成");
+                    logger.info("保存完成");
                 }else {
                     logger.info("图片：{"+imgFilePath+"} ，未识别到配置对象");
                 }
