@@ -145,6 +145,10 @@ public class HandleImgHkCpu {
             if (src != null) {
                 src.release();
             }
+            if(null ==returnList || returnList.size()==0){
+                returnList.add("");
+                LOGGER.info("未识别出目标对象:" );
+            }
             return returnList;
         }
 
