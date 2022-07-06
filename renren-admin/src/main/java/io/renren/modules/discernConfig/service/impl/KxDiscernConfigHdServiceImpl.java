@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.common.context.TenantContext;
 import io.renren.common.service.impl.CrudServiceImpl;
 import io.renren.modules.common.constant.KxConstants;
+import io.renren.modules.common.utils.Gpu.HandleImgHkCpu;
 import io.renren.modules.common.utils.HandleImg;
 import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.discernConfig.dao.KxDiscernConfigHdDao;
@@ -99,14 +100,17 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             String[] picArr = pictureSize.split("x");
             String pictureWidth = picArr[0];
             String pictureHeight = picArr[1];
-            double picWidth=Double.parseDouble(pictureWidth);
-            double picHeight=Double.parseDouble(pictureHeight);
+//            double picWidth=Double.parseDouble(pictureWidth);
+//            double picHeight=Double.parseDouble(pictureHeight);
+            int picWidth=Integer.parseInt(pictureWidth);
+            int picHeight=Integer.parseInt(pictureHeight);
             String planFilePath= kxDiscernConfigHdDTO.getSchemeNo();
             //配置信息
             List<KxAIPzVO> list = kxDiscernConfigHdDTO.getDiscernList();
             try {
                 logger.debug("图片：{"+imgFilePath+"} ，分析开始");
-                List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
+//                List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
+                List listInfo= HandleImgHkCpu.analysisImgByCPU(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
                 logger.debug("图片：{"+imgFilePath+"} ，分析结束");
                 logger.debug("listInfo："+listInfo.size());
                 if(!listInfo.get(0).toString().isEmpty()){

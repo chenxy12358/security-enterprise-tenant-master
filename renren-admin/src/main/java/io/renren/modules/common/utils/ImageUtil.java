@@ -1,15 +1,20 @@
 package io.renren.modules.common.utils;
 
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+import org.bytedeco.javacv.Frame;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.util.Objects;
 
 /**
  * @author cxy
@@ -92,5 +97,100 @@ public class ImageUtil {
 
     }
 
+    /**
+     *
+     * @param imgStr
+     * @param outImgFilePath
+     * @return
+     */
+    public static boolean generateImage(String imgStr, String outImgFilePath) {
+        if(!imgStr.contains(",")){
+            imgStr=  "data:image/jpeg;base64," + imgStr;
+        }
+        String[] baseStrs = imgStr.split(",");
+        //取索引为1的元素进行处理
+        //对字节数组字符串进行Base64解码并生成图片
+        if (imgStr == null) //图像数据为空
+            return false;
+        BASE64Decoder decoder = new BASE64Decoder();
+        try {
+            //Base64解码
+            byte[] b = decoder.decodeBuffer(baseStrs[1]);
+            for (int i = 0; i < b.length; ++i) {
+                if (b[i] < 0) {//调整异常数据
+                    b[i] += 256;
+                }
+            }
+            //生成图片
+            OutputStream out = new FileOutputStream(outImgFilePath);
+            out.write(b);
+            out.flush();
+            out.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+    /**
+     * BufferedImage 编码转换为 base64
+     *
+     * @param bufferedImage
+     * @return
+     */
+    public static String BufferedImageToBase64(BufferedImage bufferedImage) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
+        try {
+            ImageIO.write(bufferedImage, "jpg", baos);//写入流中
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] bytes = baos.toByteArray();//转换成字节
+        BASE64Encoder encoder = new BASE64Encoder();
+        String png_base64 = encoder.encodeBuffer(Objects.requireNonNull(bytes)).trim();//转换成base64串
+        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
+//        return "data:image/jpeg;base64," + png_base64;
+        return  png_base64;
+    }
+
+    public static BufferedImage toBufferedImage(org.bytedeco.opencv.opencv_core.Mat src) {
+        OpenCVFrameConverter.ToMat matConv = new OpenCVFrameConverter.ToMat();
+        Java2DFrameConverter biConv = new Java2DFrameConverter();
+        Frame f = matConv.convert(src).clone();
+        Throwable var2 = null;
+
+        BufferedImage var3;
+        try {
+            var3 =  Java2DFrameConverter.cloneBufferedImage(biConv.getBufferedImage(f));
+        } catch (Throwable var12) {
+            var2 = var12;
+            throw var12;
+        } finally {
+            if (f != null) {
+                if (var2 != null) {
+                    try {
+                        f.close();
+                    } catch (Throwable var11) {
+                        var2.addSuppressed(var11);
+                    }
+                } else {
+                    f.close();
+                }
+            }
+
+        }
+
+        return var3;
+    }
+
+
+    public static org.bytedeco.opencv.opencv_core.Mat toMat(BufferedImage src) {
+        OpenCVFrameConverter.ToMat matConv = new OpenCVFrameConverter.ToMat();
+        Java2DFrameConverter biConv = new Java2DFrameConverter();
+        return matConv.convertToMat(biConv.convert(src)).clone();
+    }
 
 }
