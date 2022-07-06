@@ -83,6 +83,7 @@ public class KxDeviceAlarmServiceImpl extends CrudServiceImpl<KxDeviceAlarmDao, 
         alarmDTO.setHandleType("0");
         alarmDTO.setRemark("后台分析数据");
         alarmDTO.setPictureDate(picData);
+        alarmDTO.setLevel(1);
         this.save(alarmDTO);
 
     }
