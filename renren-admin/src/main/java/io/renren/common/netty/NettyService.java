@@ -21,6 +21,7 @@ import io.renren.modules.deviceAlarm.dto.KxDeviceAlarmDTO;
 import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.deviceData.dto.*;
 import io.renren.modules.deviceData.service.*;
+import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigDTO;
 import io.renren.modules.discernConfig.service.KxDiscernConfigService;
 import io.renren.modules.gas.dto.KxGasDataDTO;
@@ -60,6 +61,8 @@ import java.util.*;
 public class NettyService {
     @Autowired
     private KxDeviceService kxDeviceService;
+    @Autowired
+    private KxDiscernBoundaryService kxDiscernBoundaryService; //todo cxy
     @Autowired
     private KxDeviceAlarmService kxDeviceAlarmService;
     @Autowired
@@ -280,6 +283,8 @@ public class NettyService {
                 logger.error("sendCmdPtzControl====>未查到相关设备信息");
                 return;
             }
+            // todo cxy 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo()
+            // todo cxy end
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
@@ -385,6 +390,8 @@ public class NettyService {
                 param.putOpt("Width", params.get("Width"));
                 param.putOpt("Quality", params.get("Quality"));
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
+                //todo cxy 保存预置位
+                //todo cxy end
                 //获取基本信息
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
@@ -968,8 +975,9 @@ public class NettyService {
      * @param senderInfo
      * @param msgInfo
      * @param channel
+     * @param session
      */
-    public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel) throws
+    public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel, String session) throws
             ParseException {
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);
@@ -986,6 +994,9 @@ public class NettyService {
         } else if ("Emd.Msg.Data".equals(Interface)) {
             if ("AccessPicture".equals(senderInfo.get("Signal"))) {
             } else {
+                log.error("++++++ session[{}]，deviceSn[{}]",
+                        session,
+                        deviceSn); //todo cxy
                 saveData(deviceSn, senderInfo, msgInfo);
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {
@@ -1105,6 +1116,7 @@ public class NettyService {
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
+            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo); //todo cxy
             Object files = msgInfo.get("Files");
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());

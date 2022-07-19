@@ -255,7 +255,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {
                             //处理接收的上传数据
-                            nettyService.rcvUploadData(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel);
+                            nettyService.rcvUploadData(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                             // 数据确认回复
                             nettyService.sendUploadDataRep(deviceSn, channel);
                         }
