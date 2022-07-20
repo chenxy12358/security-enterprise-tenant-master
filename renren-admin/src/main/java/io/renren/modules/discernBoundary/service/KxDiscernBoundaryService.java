@@ -14,7 +14,11 @@ import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 public interface KxDiscernBoundaryService extends CrudService<KxDiscernBoundaryEntity, KxDiscernBoundaryDTO> {
     void savePresetPic(String deviceSn, JSONObject senderInfo, JSONObject msgInfo,String session);
 
-    void saveFirst(JSONObject jsonP);
+    /**
+     * 收藏第一次保存
+     * @param json
+     */
+    void saveFirst(JSONObject json);
 
     /**
      * 通过边界信息查询

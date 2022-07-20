@@ -81,6 +81,16 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
             } else {
                 kdbDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
             }
+            Object taskInfo = msgInfo.get("TaskInfo");
+            if (taskInfo != null) {
+                JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
+                if (jsonObject.get("Width") != null) {
+                    kdbDTO.setPictureWidth(jsonObject.getInt("Width"));
+                }
+                if (jsonObject.get("Height") != null) {
+                    kdbDTO.setPictureHeight(jsonObject.getInt("Height"));
+                }
+            }
             if(null !=kdbDTO.getId()){
                 this.update(kdbDTO);
             }else {

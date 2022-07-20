@@ -62,7 +62,7 @@ public class NettyService {
     @Autowired
     private KxDeviceService kxDeviceService;
     @Autowired
-    private KxDiscernBoundaryService kxDiscernBoundaryService; //todo cxy
+    private KxDiscernBoundaryService kxDiscernBoundaryService;
     @Autowired
     private KxDeviceAlarmService kxDeviceAlarmService;
     @Autowired
@@ -421,8 +421,6 @@ public class NettyService {
                 param.putOpt("Width", params.get("Width"));
                 param.putOpt("Quality", params.get("Quality"));
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
-                //todo cxy 保存预置位
-                //todo cxy end
                 //获取基本信息
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
@@ -1033,15 +1031,16 @@ public class NettyService {
         } else if ("Emd.Msg.Data".equals(Interface)) {
             if ("AccessPicture".equals(senderInfo.get("Signal"))) {
             } else {
-                log.error("++++++ session[{}]，deviceSn[{}]",
-                        session,
-                        deviceSn); //todo cxy
                 saveData(deviceSn, senderInfo, msgInfo);
-//                if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
-
-                    kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy  todo xg
-
-//                }
+                Object Signal = senderInfo.get("Signal");
+                if ("TaskSchedule".equals(Signal)) {
+                    log.error("++++++ session[{}]，deviceSn[{}]",
+                            session,
+                            deviceSn);
+//                    if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
+                        kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy
+//                    }
+                }
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {
             saveAlarm(deviceSn, senderInfo, msgInfo);
