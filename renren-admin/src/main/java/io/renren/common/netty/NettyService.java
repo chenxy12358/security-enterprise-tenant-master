@@ -301,6 +301,10 @@ public class NettyService {
                     jsonP.putOpt("stationId", dto.getStationId());
                     kxDiscernBoundaryService.saveFirst(jsonP); // 保存编辑配置信息
 
+                    log.error("保存预置点发送拍照命令，设备id[{}]，或者预置位[{}]，currentTime[{}]",
+                            dto.getId(),
+                            params.get("PresetId"),
+                            DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
                     this.sendTakePicture(json);
 
                 }else {
@@ -399,6 +403,7 @@ public class NettyService {
      */
     public void sendTakePicture(JSONObject params) {
         try {
+            log.error("125125"+params.toString());
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
             if (null != params.get("deviceId")) {
                 dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
@@ -420,7 +425,10 @@ public class NettyService {
                 param.putOpt("Height", params.get("Height"));
                 param.putOpt("Width", params.get("Width"));
                 param.putOpt("Quality", params.get("Quality"));
+                log.error("125125"+params.get("currentTime").toString());
+                log.error("125125"+Long.valueOf(params.get("currentTime").toString()));
                 param.putOpt("_session", Long.valueOf(params.get("currentTime").toString()));
+
                 //获取基本信息
                 byte[] d = HexUtil.sendCmmd(dto.getSerialNo(), destInfo.toString(), new String(param.toString().getBytes(), "UTF-8"), "", 3);
                 ByteBuf respLengthBuf = PooledByteBufAllocator.DEFAULT.buffer(4);
