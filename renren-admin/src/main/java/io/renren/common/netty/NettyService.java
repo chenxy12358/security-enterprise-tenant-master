@@ -298,9 +298,8 @@ public class NettyService {
                     json.putOpt("deviceId",dto.getId());
 
                     JSONObject jsonP = new JSONObject();
-                    jsonP.putAll(json);
                     jsonP.putAll(params);
-                    jsonP.putOpt("deviceId", dto.getId());
+                    jsonP.putAll(json);
                     jsonP.putOpt("stationId", dto.getStationId());
                     kxDiscernBoundaryService.saveFirst(jsonP); // 保存编辑配置信息
 
