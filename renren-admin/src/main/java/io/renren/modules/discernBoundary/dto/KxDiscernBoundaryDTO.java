@@ -11,7 +11,7 @@ import java.util.Date;
 * 识别边界标定
 *
 * @author cxy 
-* @since 3.0 2022-07-19
+* @since 3.0 2022-07-20
 */
 @Data
 @ApiModel(value = "识别边界标定")
@@ -32,7 +32,7 @@ public class KxDiscernBoundaryDTO implements Serializable {
     private Date updateDate;
     @ApiModelProperty(value = "站点id")
     private Long stationId;
-    @ApiModelProperty(value = "设备类型id")
+    @ApiModelProperty(value = "设备id")
     private Long deviceId;
     @ApiModelProperty(value = "设备编号")
     private String deviceNo;
@@ -40,7 +40,15 @@ public class KxDiscernBoundaryDTO implements Serializable {
     private String cameraName;
     @ApiModelProperty(value = "预置位")
     private String presetNo;
-    @ApiModelProperty(value = "图片尺寸")
+    @ApiModelProperty(value = "照片宽度")
+    private Integer pictureWidth;
+    @ApiModelProperty(value = "照片高度")
+    private Integer pictureHeight;
+    @ApiModelProperty(value = "基本信息")
+    private Object boundaryCoordinates;
+    @ApiModelProperty(value = "内容")
+    private Object content;
+    @ApiModelProperty(value = "识别码")
     private String sessionTime;
     @ApiModelProperty(value = "是否可用")
     private String enable;

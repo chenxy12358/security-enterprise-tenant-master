@@ -284,6 +284,37 @@ public class NettyService {
                 return;
             }
             // todo cxy 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo()
+
+            try {
+
+                if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && null != dto.getId() ) {
+                    JSONObject json = new JSONObject();
+                    json.putOpt("cameraName", params.get("cameraName"));
+                    json.putOpt("Height", params.get("Height"));
+                    json.putOpt("Width", params.get("Width"));
+                    json.putOpt("currentTime",DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
+
+                    JSONObject jsonP = new JSONObject();
+                    jsonP.putAll(json);
+                    jsonP.putAll(params);
+                    jsonP.putOpt("deviceId", dto.getId());
+                    jsonP.putOpt("stationId", dto.getStationId());
+                    kxDiscernBoundaryService.saveFirst(jsonP); // 保存编辑配置信息
+
+                    this.sendTakePicture(json);
+
+                }else {
+                    log.error("保存预置点发送拍照命令失败，设备id[{}]，或者预置位[{}]，参数为空",
+                            dto.getId(),
+                            params.get("PresetId"));
+
+                }
+            }catch (Exception e){
+                log.error("保存预置点发送拍照命令失败，设备编号[{}]，相机[{}]，预置位[{}]",
+                        dto.getSerialNo(),
+                        params.get("cameraName"),
+                        params.get("PresetId"));
+            }
             // todo cxy end
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
@@ -729,13 +760,18 @@ public class NettyService {
 
     /**
      * 处理接收的文件
-     *
+     * @param deviceSn
      * @param array
      * @param type
      * @param DataLen
      * @param data
+     * @param Interface
+     * @param session
+     * @return
+     * @throws ParseException
+     * @throws IOException
      */
-    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface) throws ParseException, IOException {
+    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface, String  session) throws ParseException, IOException {
         if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
             return null;
@@ -745,6 +781,9 @@ public class NettyService {
             String typePath = KxConstants.IMG_JOB;
             if ("Emd.Msg.Alarm".equals(Interface)) {
                 typePath = KxConstants.IMG_ALARM;
+            }
+            if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+                typePath = KxConstants.IMG_PRESET;
             }
             String fileName = KxConstants.IMG_UPLOAD + typePath + "/" + getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
@@ -998,6 +1037,11 @@ public class NettyService {
                         session,
                         deviceSn); //todo cxy
                 saveData(deviceSn, senderInfo, msgInfo);
+//                if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+
+                    kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy  todo xg
+
+//                }
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {
             saveAlarm(deviceSn, senderInfo, msgInfo);
@@ -1116,7 +1160,6 @@ public class NettyService {
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
-            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo); //todo cxy
             Object files = msgInfo.get("Files");
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());

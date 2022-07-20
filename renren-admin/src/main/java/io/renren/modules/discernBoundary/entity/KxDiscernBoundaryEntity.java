@@ -9,7 +9,7 @@ import java.util.Date;
  * 识别边界标定
  *
  * @author cxy 
- * @since 3.0 2022-07-19
+ * @since 3.0 2022-07-20
  */
 @Data
 @EqualsAndHashCode(callSuper=false)
@@ -52,7 +52,7 @@ public class KxDiscernBoundaryEntity {
 	*/
 	private Long stationId;
 	/**
-	* 设备类型id
+	* 设备id
 	*/
 	private Long deviceId;
 	/**
@@ -68,7 +68,23 @@ public class KxDiscernBoundaryEntity {
 	*/
 	private String presetNo;
 	/**
-	* 图片尺寸
+	* 照片宽度
+	*/
+	private Integer pictureWidth;
+	/**
+	* 照片高度
+	*/
+	private Integer pictureHeight;
+	/**
+	* 基本信息
+	*/
+	private Object boundaryCoordinates;
+	/**
+	* 内容
+	*/
+	private Object content;
+	/**
+	* 识别码
 	*/
 	private String sessionTime;
 	/**

@@ -15,6 +15,10 @@
         <result property="deviceNo" column="device_no"/>
         <result property="cameraName" column="camera_name"/>
         <result property="presetNo" column="preset_no"/>
+        <result property="pictureWidth" column="picture_width"/>
+        <result property="pictureHeight" column="picture_height"/>
+        <result property="boundaryCoordinates" column="boundary_coordinates"/>
+        <result property="content" column="content"/>
         <result property="sessionTime" column="session_time"/>
         <result property="enable" column="enable"/>
         <result property="remark" column="remark"/>

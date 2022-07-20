@@ -68,4 +68,9 @@ public class DeviceInterfaceConstants {
     public static String METHOD_VPN_GETSTAT="GetStat";
     public static String METHOD_VPN_CLOSE="Close";
 
+    /**
+     * 预置位保存前缀
+     */
+    public static String PRESET_PRE="YZWPZ_";
+
 }

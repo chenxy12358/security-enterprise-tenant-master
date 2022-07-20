@@ -31,6 +31,11 @@ public class KxConstants {
     public static String IMG_ALARM="alarm-data";
 
     /**
+     * 预置位文件夹
+     */
+    public static String IMG_PRESET="preset-data";
+
+    /**
      * 是
      */
     public static String YSC="t" ;

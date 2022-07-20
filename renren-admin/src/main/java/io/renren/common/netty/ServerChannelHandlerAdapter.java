@@ -220,7 +220,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         //保存文件
 
                         String Interface = String.valueOf(senderInfoJsonObject.get("Interface"));
-                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data, Interface);
+                        JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data, Interface, session);
                         if (jsonArray != null && jsonArray.size() > 0) {
                             if (isCmmdReply) {
                                 Object obj = msgInfoJsonObject.get("ResultValue");
