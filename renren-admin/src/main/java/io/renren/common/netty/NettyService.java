@@ -295,6 +295,7 @@ public class NettyService {
                     json.putOpt("Height", params.get("Height"));
                     json.putOpt("Width", params.get("Width"));
                     json.putOpt("currentTime",DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
+                    json.putOpt("deviceId",dto.getId());
 
                     JSONObject jsonP = new JSONObject();
                     jsonP.putAll(json);
