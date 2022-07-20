@@ -6,13 +6,14 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
-* 识别边界标定
-*
-* @author cxy 
-* @since 3.0 2022-07-20
-*/
+ * 识别边界标定
+ *
+ * @author cxy
+ * @since 3.0 2022-07-20
+ */
 @Data
 @ApiModel(value = "识别边界标定")
 public class KxDiscernBoundaryDTO implements Serializable {
@@ -60,5 +61,14 @@ public class KxDiscernBoundaryDTO implements Serializable {
     private Long deleter;
     @ApiModelProperty(value = "删除时间")
     private Date deletedTime;
+
+
+    @ApiModelProperty(value = "图片名称")
+    private String pictureName;
+    @ApiModelProperty(value = "图片缩略图")
+    private String picturUrl;
+    @ApiModelProperty(value = "站点名称")
+    private List<String> picNameList;
+
 
 }

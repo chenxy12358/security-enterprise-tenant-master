@@ -287,6 +287,8 @@ public class NettyService {
 
             try {
 
+                log.error("12222:"+
+                        params.toString());
                 if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && null != dto.getId() ) {
                     JSONObject json = new JSONObject();
                     json.putOpt("cameraName", params.get("cameraName"));

@@ -59,6 +59,8 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
     @Override
     public void savePresetPic(String deviceSn, JSONObject senderInfo, JSONObject msgInfo,String session) {
         try {
+
+            log.error("savePresetPic:" + session+";msgInfo:"+msgInfo.toString());
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
             if (deviceDTO == null) {
                 log.error("保存预置位图片，未找到对应设备数据，丢弃数据，设备编号:" + deviceSn);
