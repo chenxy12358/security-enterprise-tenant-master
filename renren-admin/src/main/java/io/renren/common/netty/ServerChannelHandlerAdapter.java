@@ -250,7 +250,7 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
                     if (isCmmdReply) {
-                        log.error("命令,session:" +session);
+                        log.error("命令,session:" +session);//todo cxy
                         nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                     } else {
                         log.error("!命令,session:" +session);
