@@ -250,8 +250,10 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
                     if (isCmmdReply) {
+                        log.error("命令,session:" +session);
                         nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                     } else {
+                        log.error("!命令,session:" +session);
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {
                             //处理接收的上传数据
