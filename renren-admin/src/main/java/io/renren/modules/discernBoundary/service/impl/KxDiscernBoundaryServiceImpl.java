@@ -93,6 +93,7 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
                     kdbDTO.setPictureHeight(jsonObject.getInt("Height"));
                 }
             }
+            kdbDTO.setRemark(kdbDTO.getRemark()+"savePresetPic");//todo cxy
             if(null !=kdbDTO.getId()){
                 this.update(kdbDTO);
             }else {
@@ -116,6 +117,8 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         dto.setPictureHeight(json.getInt("Width"));
         dto.setPresetNo(json.getStr("PresetId"));
         dto.setSessionTime(json.getStr("currentTime"));
+
+        dto.setRemark("saveFirst");
         this.save(dto);
 
     }
