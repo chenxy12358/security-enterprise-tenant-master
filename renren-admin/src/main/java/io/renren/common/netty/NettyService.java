@@ -785,7 +785,7 @@ public class NettyService {
      * @throws IOException
      */
     public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface, String  session) throws ParseException, IOException {
-       log.error("1110:"+session+",array："+array+",fileType："+type);
+       log.error("1110+session:"+session+",array："+array+",fileType："+type);
         if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
             return null;
