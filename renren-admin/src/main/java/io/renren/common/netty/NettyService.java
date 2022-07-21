@@ -283,13 +283,12 @@ public class NettyService {
                 logger.error("sendCmdPtzControl====>未查到相关设备信息");
                 return;
             }
-            // todo cxy 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo()
+            // todo cxy 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo() METHOD_PTZCONTROL_COMMAND
 
             try {
-
-                log.error("12222:"+
-                        params.toString());
-                if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && null != dto.getId() ) {
+                String command=params.getStr("command"); // 执行动作
+                if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && StringUtil.isNotEmpty(command)
+                        && null != dto.getId()&&DeviceInterfaceConstants.METHOD_PTZCONTROL_COMMAND_SETPRESET.equals(command) ) {
                     JSONObject json = new JSONObject();
                     json.putOpt("cameraName", params.get("cameraName"));
                     json.putOpt("Height", params.get("Height"));
@@ -1047,9 +1046,9 @@ public class NettyService {
                     log.error("++++++ session[{}]，deviceSn[{}]",
                             session,
                             deviceSn);
-//                    if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
+                    if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
                         kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy
-//                    }
+                    }
                 }
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {

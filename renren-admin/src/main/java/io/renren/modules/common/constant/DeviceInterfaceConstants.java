@@ -61,6 +61,11 @@ public class DeviceInterfaceConstants {
      * 发送ptz控制
      */
     public static String METHOD_PTZCONTROL="PtzControl";
+
+    /**
+     * 发送ptz控制  设置预置位SetPreset
+     */
+    public static String METHOD_PTZCONTROL_COMMAND_SETPRESET="SetPreset";
     /**
      * VPN
      */
