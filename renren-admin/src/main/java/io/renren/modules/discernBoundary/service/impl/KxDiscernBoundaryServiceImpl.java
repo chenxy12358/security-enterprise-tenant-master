@@ -59,15 +59,27 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
     @Override
     public void savePresetPic(String deviceSn, JSONObject senderInfo, JSONObject msgInfo,String session) {
         try {
-
-            log.error("savePresetPic:" + session+";msgInfo:"+msgInfo.toString());
             KxDeviceDTO deviceDTO = kxDeviceService.getBySerialNo(deviceSn);
             if (deviceDTO == null) {
                 log.error("保存预置位图片，未找到对应设备数据，丢弃数据，设备编号:" + deviceSn);
                 return;
             }
+
+
             KxDiscernBoundaryDTO kdbDTO = new KxDiscernBoundaryDTO();
             JSONObject params=new JSONObject();
+            Object obj = msgInfo.get("ResultValue");
+            if (obj != null) {
+                JSONObject resultValue = JSONUtil.parseObj(obj);
+                JSONObject taskInfo =resultValue.getJSONObject("TaskInfo");
+                int width =taskInfo.getInt("Height");
+                int height =taskInfo.getInt("Width");
+                kdbDTO.setPictureWidth(width);
+                kdbDTO.setPictureHeight(height);
+            }
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            kdbDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
 
             params.putOpt("deviceSn", deviceSn);
             params.putOpt("sessionTime", session);
@@ -75,32 +87,20 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
             if(null !=entity){
                 kdbDTO=ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
             }
-            kdbDTO.setDeleted(KxConstants.NO);
+            msgInfo.remove("Code");
+            msgInfo.remove("Result");
+            msgInfo.remove("ResultValue");
+
             kdbDTO.setContent(String.valueOf(msgInfo));
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (msgInfo.get("UpdateTime") == null || "NULL".equalsIgnoreCase(msgInfo.get("UpdateTime").toString())) {
-                kdbDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
-            } else {
-                kdbDTO.setUpdateDate(formatter.parse(String.valueOf(msgInfo.get("UpdateTime"))));
-            }
-            Object taskInfo = msgInfo.get("TaskInfo");
-            if (taskInfo != null) {
-                JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
-                if (jsonObject.get("Width") != null) {
-                    kdbDTO.setPictureWidth(jsonObject.getInt("Width"));
-                }
-                if (jsonObject.get("Height") != null) {
-                    kdbDTO.setPictureHeight(jsonObject.getInt("Height"));
-                }
-            }
-            kdbDTO.setRemark(kdbDTO.getRemark()+"savePresetPic");//todo cxy
+            kdbDTO.setDeleted(KxConstants.NO);
+
             if(null !=kdbDTO.getId()){
                 this.update(kdbDTO);
             }else {
                 this.save(kdbDTO);
             }
         } catch (Exception e) {
-            log.error("savePic", e);
+            log.error("savePresetPic", e);
             e.printStackTrace();
         }
     }
@@ -114,7 +114,7 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         dto.setStationId(json.getLong("stationId"));
         dto.setCameraName(json.getStr("cameraName"));
         dto.setPictureHeight(json.getInt("Height"));
-        dto.setPictureHeight(json.getInt("Width"));
+        dto.setPictureWidth(json.getInt("Width"));
         dto.setPresetNo(json.getStr("PresetId"));
         dto.setSessionTime(json.getStr("currentTime"));
 
@@ -149,7 +149,7 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         wrapper.eq("deleted", KxConstants.NO);
         List<KxDiscernBoundaryEntity> list = baseDao.selectList(wrapper);
         if (list.size() > 0) {
-            list.get(0);
+            return list.get(0);
         }
         return null;
     }

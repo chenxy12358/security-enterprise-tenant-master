@@ -291,8 +291,8 @@ public class NettyService {
                         && null != dto.getId()&&DeviceInterfaceConstants.METHOD_PTZCONTROL_COMMAND_SETPRESET.equals(command) ) {
                     JSONObject json = new JSONObject();
                     json.putOpt("cameraName", params.get("cameraName"));
-                    json.putOpt("Height", params.get("Height"));
-                    json.putOpt("Width", params.get("Width"));
+                    json.putOpt("Height", 1080);
+                    json.putOpt("Width", 1920);
                     json.putOpt("currentTime",DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
                     json.putOpt("deviceId",dto.getId());
 
@@ -785,7 +785,7 @@ public class NettyService {
      * @throws IOException
      */
     public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface, String  session) throws ParseException, IOException {
-        if (!checkFiles(array, DataLen)) {
+         if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
             return null;
         }
@@ -800,6 +800,9 @@ public class NettyService {
             }
             String fileName = KxConstants.IMG_UPLOAD + typePath + "/" + getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
+            log.error("fileName:"+fileName+",array："+array+",fileType："+type+",pathName："+pathName);
+            log.error("type:"+type+",array："+array+",fileType："+type+",pathName："+pathName);
+
             File dir = new File(pathName);
             if (!dir.exists()) {// 判断目录是否存在
                 dir.mkdirs();
@@ -1031,6 +1034,13 @@ public class NettyService {
      */
     public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel, String session) throws
             ParseException {
+
+        log.error("++++++ session[{}]，deviceSn[{}]",
+                session,
+                deviceSn);
+        if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
+            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy
+        }
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);
             return;
@@ -1048,14 +1058,6 @@ public class NettyService {
             } else {
                 saveData(deviceSn, senderInfo, msgInfo);
                 Object Signal = senderInfo.get("Signal");
-                if ("TaskSchedule".equals(Signal)) {
-                    log.error("++++++ session[{}]，deviceSn[{}]",
-                            session,
-                            deviceSn);
-                    if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
-                        kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy
-                    }
-                }
             }
         } else if ("Emd.Msg.Alarm".equals(Interface)) {
             saveAlarm(deviceSn, senderInfo, msgInfo);

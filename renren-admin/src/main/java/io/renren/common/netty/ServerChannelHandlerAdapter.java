@@ -16,6 +16,7 @@ import io.renren.common.utils.DateUtil2;
 import io.renren.common.utils.HexUtil;
 import io.renren.common.utils.StringUtil;
 import io.renren.common.utils.Util16;
+import io.renren.modules.common.constant.DeviceInterfaceConstants;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.pub.service.SocketService;
@@ -173,7 +174,6 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     // -1 发现多了一位空格
                     if (SessionLen > 0) {
                         session = Util16.hexStringToString(body.substring(86 + SenderInfoLen, 86 + SenderInfoLen + SessionLen - 1));
-
                     }
                     // 通过类型和session判断是否是-命令回应
                     Boolean isCmmdReply = false;
@@ -195,8 +195,16 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                                     array = JSONUtil.parseArray(resultJoson.get("Files"));
                                 }
                             } else {
-                                Object files = msgInfoJsonObject.get("Files");
-                                array = JSONUtil.parseArray(files);
+                                if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+                                    Object obj = msgInfoJsonObject.get("ResultValue");
+                                    if (obj != null) {
+                                        JSONObject resultJoson = JSONUtil.parseObj(obj);
+                                        array = JSONUtil.parseArray(resultJoson.get("Files"));
+                                    }
+                                }else {
+                                    Object files = msgInfoJsonObject.get("Files");
+                                    array = JSONUtil.parseArray(files);
+                                }
                             }
                         }
                     }
@@ -217,8 +225,12 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         if (isCmmdReply) {
                             fileType = "Result";
                         }
+                        //如果是保存预置位的图片
+                        if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){
+                            fileType =DeviceInterfaceConstants.PRESET_PRE.substring(0,1)+
+                                    DeviceInterfaceConstants.PRESET_PRE.substring(1).replace("_","").toLowerCase();
+                        }
                         //保存文件
-
                         String Interface = String.valueOf(senderInfoJsonObject.get("Interface"));
                         JSONArray jsonArray = nettyService.rcvFilesData(deviceSn, array, fileType, DataLen, data, Interface, session);
                         if (jsonArray != null && jsonArray.size() > 0) {
@@ -249,11 +261,8 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     if (senderInfoJsonObject.get("CreatedTime") == null) {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
-                    if (isCmmdReply) {
-                        log.error("命令,session:" +session);
-                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
+                    if (isCmmdReply) {nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                     } else {
-                        log.error("!命令,session:" +session);
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {
                             //处理接收的上传数据
