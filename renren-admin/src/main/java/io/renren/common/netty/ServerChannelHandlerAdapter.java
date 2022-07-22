@@ -243,13 +243,6 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                                 }
                             } else {
                                 msgInfoJsonObject.putOpt("Files", jsonArray);
-
-                         /*       //后台分析图片 todo cxy 位置？
-                                if (null != jsonArray && !jsonArray.isEmpty()) {
-                                    JSONObject json = jsonArray.getJSONObject(0);
-                                    kxDeviceService.analysisImg(json,deviceDTO.getId());
-                                }
-*/
                             }
                         }
 

@@ -5,19 +5,14 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.common.context.TenantContext;
 import io.renren.common.service.impl.CrudServiceImpl;
-import io.renren.common.constant.Constant;
 import io.renren.common.utils.ConvertUtils;
-import io.renren.modules.common.constant.DeviceInterfaceConstants;
 import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.device.dto.KxDeviceDTO;
-import io.renren.modules.device.entity.KxDeviceEntity;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.discernBoundary.dao.KxDiscernBoundaryDao;
 import io.renren.modules.discernBoundary.dto.KxDiscernBoundaryDTO;
 import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
-import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
-import io.renren.modules.scheduleItem.service.KxScheduleItemService;
 import io.renren.modules.security.user.SecurityUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +103,6 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
     @Override
     public void saveFirst(JSONObject json) {
         KxDiscernBoundaryDTO dto =new KxDiscernBoundaryDTO();
-
         dto.setDeviceNo(json.getStr("deviceSn"));
         dto.setDeviceId(json.getLong("deviceId"));
         dto.setStationId(json.getLong("stationId"));
@@ -116,11 +110,9 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         dto.setPictureHeight(json.getInt("Height"));
         dto.setPictureWidth(json.getInt("Width"));
         dto.setPresetNo(json.getStr("PresetId"));
+        dto.setPresetName(json.getStr("PresetName"));
         dto.setSessionTime(json.getStr("currentTime"));
-
-        dto.setRemark("saveFirst");
         this.save(dto);
-
     }
 
     @Override
@@ -142,9 +134,6 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         }
         if(StringUtils.isNotBlank(sessionTime)){
             wrapper.eq("session_time", sessionTime);
-            log.error("-------测试 session_time[{}]，deviceSn[{}]",
-                    sessionTime,
-                    deviceSn); //todo cxy
         }
         wrapper.eq("deleted", KxConstants.NO);
         List<KxDiscernBoundaryEntity> list = baseDao.selectList(wrapper);

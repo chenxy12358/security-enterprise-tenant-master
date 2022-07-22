@@ -283,8 +283,8 @@ public class NettyService {
                 logger.error("sendCmdPtzControl====>未查到相关设备信息");
                 return;
             }
-            // todo cxy 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo() METHOD_PTZCONTROL_COMMAND
 
+            // 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo() METHOD_PTZCONTROL_COMMAND
             try {
                 String command=params.getStr("command"); // 执行动作
                 if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && StringUtil.isNotEmpty(command)
@@ -302,7 +302,7 @@ public class NettyService {
                     jsonP.putOpt("stationId", dto.getStationId());
                     kxDiscernBoundaryService.saveFirst(jsonP); // 保存编辑配置信息
 
-                    log.error("保存预置点发送拍照命令，设备id[{}]，或者预置位[{}]，currentTime[{}]",
+                    log.info("保存预置点发送拍照命令，设备id[{}]，或者预置位[{}]，currentTime[{}]",
                             dto.getId(),
                             params.get("PresetId"),
                             DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
@@ -320,7 +320,6 @@ public class NettyService {
                         params.get("cameraName"),
                         params.get("PresetId"));
             }
-            // todo cxy end
             //获取通讯通道
             String key = getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
@@ -404,7 +403,6 @@ public class NettyService {
      */
     public void sendTakePicture(JSONObject params) {
         try {
-            log.error("125125:"+params.toString());
             KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
             if (null != params.get("deviceId")) {
                 dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
@@ -800,8 +798,6 @@ public class NettyService {
             }
             String fileName = KxConstants.IMG_UPLOAD + typePath + "/" + getUploadFilename(deviceSn, type, array.get(i), "");
             String pathName = fileName.substring(0, fileName.lastIndexOf("/"));
-            log.error("fileName:"+fileName+",array："+array+",fileType："+type+",pathName："+pathName);
-            log.error("type:"+type+",array："+array+",fileType："+type+",pathName："+pathName);
 
             File dir = new File(pathName);
             if (!dir.exists()) {// 判断目录是否存在
@@ -1035,11 +1031,8 @@ public class NettyService {
     public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel, String session) throws
             ParseException {
 
-        log.error("++++++ session[{}]，deviceSn[{}]",
-                session,
-                deviceSn);
-        if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片 todo cxy
-            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session); //todo cxy
+        if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session);
         }
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);

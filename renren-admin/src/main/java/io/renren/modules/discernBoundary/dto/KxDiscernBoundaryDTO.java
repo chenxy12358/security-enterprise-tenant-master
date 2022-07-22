@@ -61,7 +61,10 @@ public class KxDiscernBoundaryDTO implements Serializable {
     private Long deleter;
     @ApiModelProperty(value = "删除时间")
     private Date deletedTime;
-
+    @ApiModelProperty(value = "下发状态")
+    private String status;
+    @ApiModelProperty(value = "预置位名称")
+    private String presetName;
 
     @ApiModelProperty(value = "图片名称")
     private String pictureName;
