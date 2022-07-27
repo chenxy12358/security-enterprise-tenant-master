@@ -33,6 +33,12 @@ public class DeviceInterfaceConstants {
     public static String METHOD_SETCONFIG="SetConfig";
 
     /**
+     * 手动抓图方法
+     */
+    public static String METHOD_PICCAPTURE="PicCapture";
+
+
+    /**
      * 设置AI任务
      */
     public static String METHOD_SETAITASK="SetAITask";
@@ -77,5 +83,4 @@ public class DeviceInterfaceConstants {
      * 预置位保存前缀
      */
     public static String PRESET_PRE="YZWPZ_";
-
 }
