@@ -195,7 +195,9 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                                     array = JSONUtil.parseArray(resultJoson.get("Files"));
                                 }
                             } else {
-                                if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+                                Object Method = senderInfoJsonObject.get("Method");// 手动抓图
+
+                                if(session.contains(DeviceInterfaceConstants.PRESET_PRE) || "PicCapture".equals(Method)){ //如果是保存预置位的图片
                                     Object obj = msgInfoJsonObject.get("ResultValue");
                                     if (obj != null) {
                                         JSONObject resultJoson = JSONUtil.parseObj(obj);
