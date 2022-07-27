@@ -1167,7 +1167,8 @@ public class NettyService {
             return;
         }
         Object Signal = senderInfo.get("Signal");
-        if ("TaskSchedule".equals(Signal)) {
+        Object Method = senderInfo.get("Method");// 手动抓图
+        if ("TaskSchedule".equals(Signal) || DeviceInterfaceConstants.METHOD_PICCAPTURE.equals(Method)) {
             savePic(deviceSn, senderInfo, msgInfo);
             Object files = msgInfo.get("Files");
             if (files != null) {

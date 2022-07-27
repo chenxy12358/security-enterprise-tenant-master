@@ -129,7 +129,7 @@ public class WebSocketServer {
                     SysNoticeSwitchEntity byUserId = sysNoticeSwitchService.getByUserId(info.getUserId());
                     Object data = message.getData();
                     JSONObject jsonObject = JSONUtil.parseObj(data);
-                    jsonObject.set("status", byUserId.getStatus());
+                    jsonObject.set("status", byUserId==null?false:byUserId.getStatus());
                     message.setData(jsonObject);
                     sendMessage(info.getSession(), message);
                 }
