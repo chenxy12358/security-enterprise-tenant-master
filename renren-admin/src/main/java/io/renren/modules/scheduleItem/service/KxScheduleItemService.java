@@ -1,5 +1,6 @@
 package io.renren.modules.scheduleItem.service;
 
+import cn.hutool.json.JSONObject;
 import io.renren.common.page.PageData;
 import io.renren.common.service.CrudService;
 import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
@@ -29,5 +30,14 @@ public interface KxScheduleItemService extends CrudService<KxScheduleItemEntity,
      * @return
      */
     KxScheduleItemDTO get(Long id);
+
+
+    /**
+     * 保存手动抓图
+     * @param deviceSn
+     * @param senderInfo
+     * @param msgInfo
+     */
+    void savePic(String deviceSn, JSONObject senderInfo, JSONObject msgInfo);
 
 }

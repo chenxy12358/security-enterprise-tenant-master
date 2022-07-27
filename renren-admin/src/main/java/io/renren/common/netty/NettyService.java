@@ -1037,7 +1037,7 @@ public class NettyService {
 
         Object Method = senderInfo.get("Method");// 手动抓图
         if (DeviceInterfaceConstants.METHOD_PICCAPTURE.equals(Method) && msgInfo != null) {
-            saveData(deviceSn, senderInfo, msgInfo);
+            kxScheduleItemService.savePic(deviceSn, senderInfo, msgInfo);
         }
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);
@@ -1172,8 +1172,7 @@ public class NettyService {
             return;
         }
         Object Signal = senderInfo.get("Signal");
-        Object Method = senderInfo.get("Method");// 手动抓图
-        if ("TaskSchedule".equals(Signal) || DeviceInterfaceConstants.METHOD_PICCAPTURE.equals(Method)) {
+        if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
             Object files = msgInfo.get("Files");
             if (files != null) {
