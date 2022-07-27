@@ -1034,6 +1034,11 @@ public class NettyService {
         if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
             kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session);
         }
+
+        Object Method = senderInfo.get("Method");// 手动抓图
+        if (DeviceInterfaceConstants.METHOD_PICCAPTURE.equals(Method) && msgInfo != null) {
+            saveData(deviceSn, senderInfo, msgInfo);
+        }
         if (senderInfo.get("SenderObject") == null || msgInfo == null) {
             log.error("错误的上传数据：senderInfo：" + senderInfo + "----msgInfoJson:" + msgInfo);
             return;
