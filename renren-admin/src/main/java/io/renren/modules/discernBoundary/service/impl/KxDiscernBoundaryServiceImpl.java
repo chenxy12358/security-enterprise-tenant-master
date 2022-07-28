@@ -103,16 +103,37 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
     @Override
     public void saveFirst(JSONObject json) {
         KxDiscernBoundaryDTO dto =new KxDiscernBoundaryDTO();
-        dto.setDeviceNo(json.getStr("deviceSn"));
+
+
+        String deviceSn =json.getStr("deviceSn");
+        String cameraName =json.getStr("cameraName");
+        String presetId =json.getStr("PresetId");
+        String deviceId =json.getStr("deviceId");
+
+        JSONObject params=new JSONObject();
+        params.putOpt("deviceSn", deviceSn);
+        params.putOpt("cameraName", cameraName);
+        params.putOpt("presetId", presetId);
+        params.putOpt("deviceId", deviceId);
+        KxDiscernBoundaryEntity entity=this.getKxDiscernBoundaryDTO(params);
+        if(null !=entity){
+            dto=ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
+        }
+        dto.setDeviceNo(deviceSn);
         dto.setDeviceId(json.getLong("deviceId"));
         dto.setStationId(json.getLong("stationId"));
-        dto.setCameraName(json.getStr("cameraName"));
+        dto.setCameraName(cameraName);
         dto.setPictureHeight(json.getInt("Height"));
         dto.setPictureWidth(json.getInt("Width"));
-        dto.setPresetNo(json.getStr("PresetId"));
+        dto.setPresetNo(presetId);
         dto.setPresetName(json.getStr("PresetName"));
         dto.setSessionTime(json.getStr("currentTime"));
-        this.save(dto);
+        dto.setContent(null);//清空
+        if(null !=dto.getId()){
+            this.update(dto);
+        }else {
+            this.save(dto);
+        }
     }
 
     @Override
@@ -122,7 +143,11 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         String cameraName =json.getStr("cameraName");
         String presetId =json.getStr("PresetId");
         String sessionTime =json.getStr("sessionTime");
+        String deviceID = json.getStr("deviceID");
 
+        if(StringUtils.isNotBlank(deviceID)){
+            wrapper.eq("device_id", deviceID);
+        }
         if(StringUtils.isNotBlank(deviceSn)){
             wrapper.eq("device_no", deviceSn);
         }
