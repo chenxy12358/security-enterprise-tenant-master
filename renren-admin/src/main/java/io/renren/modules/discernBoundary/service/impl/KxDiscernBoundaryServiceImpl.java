@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -73,15 +74,16 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
                 kdbDTO.setPictureHeight(height);
             }
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            kdbDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
-
             params.putOpt("deviceSn", deviceSn);
             params.putOpt("sessionTime", session);
             KxDiscernBoundaryEntity entity=this.getKxDiscernBoundaryDTO(params);
             if(null !=entity){
                 kdbDTO=ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
             }
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            kdbDTO.setUpdateDate(formatter.parse(formatter.format(new Date())));
+
             msgInfo.remove("Code");
             msgInfo.remove("Result");
             msgInfo.remove("ResultValue");
@@ -119,6 +121,14 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         if(null !=entity){
             dto=ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
         }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            dto.setUpdateDate(formatter.parse(formatter.format(new Date())));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         dto.setDeviceNo(deviceSn);
         dto.setDeviceId(json.getLong("deviceId"));
         dto.setStationId(json.getLong("stationId"));
