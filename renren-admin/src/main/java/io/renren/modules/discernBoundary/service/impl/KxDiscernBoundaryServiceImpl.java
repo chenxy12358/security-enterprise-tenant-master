@@ -139,6 +139,7 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         dto.setPresetName(json.getStr("PresetName"));
         dto.setSessionTime(json.getStr("currentTime"));
         dto.setContent(null);//清空
+        dto.setStatus("");
         if(null !=dto.getId()){
             this.update(dto);
         }else {
