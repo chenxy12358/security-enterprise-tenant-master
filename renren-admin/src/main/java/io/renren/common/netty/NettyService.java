@@ -13,6 +13,7 @@ import io.renren.common.utils.*;
 import io.renren.modules.battery.dto.KxBatteryDTO;
 import io.renren.modules.battery.service.KxBatteryService;
 import io.renren.modules.common.constant.DeviceInterfaceConstants;
+import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.common.utils.CoordinateTransform;
 import io.renren.modules.device.dto.KxDeviceDTO;
@@ -21,6 +22,7 @@ import io.renren.modules.deviceAlarm.dto.KxDeviceAlarmDTO;
 import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.deviceData.dto.*;
 import io.renren.modules.deviceData.service.*;
+import io.renren.modules.discernBoundary.dto.KxDiscernBoundaryDTO;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigDTO;
 import io.renren.modules.discernConfig.service.KxDiscernConfigService;
@@ -603,7 +605,6 @@ public class NettyService {
                 }
                 if (null != kxDiscernConfigDTO.getDistinguishConfig()) { //AI配置
                     JSONObject param = new JSONObject();
-                    ;
                     JSONObject disConfigJson = JSONUtil.parseObj(kxDiscernConfigDTO.getDistinguishConfig());
                     JSONObject destInfo = new JSONObject();
                     destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");// todo 暂时固定写法
@@ -613,7 +614,6 @@ public class NettyService {
                     jsonArray.add(disConfigJson);
                     param.putOpt("AlarmParam", jsonArray);
                     //发送指令
-                    SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
                     SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
                     kxDiscernConfigDTO.setStatus("1");//已发送
                     kxDiscernConfigService.update(kxDiscernConfigDTO);
@@ -628,6 +628,63 @@ public class NettyService {
             e.printStackTrace();
             log.error("send AI message error，" + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 发送AI标记框配置
+     *
+     * @param deviceId
+     */
+    public Result sendDiscernBoundaryConfig(Long deviceId) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(deviceId);
+            if (dto == null) {
+                return new Result().error("发送AI标记框配置失败,未找到相应的设备");
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                List<KxDiscernBoundaryDTO> list = kxDiscernBoundaryService.getBydeviceId(deviceId);
+                if (null != list&& list.size()>0) { // AI标记框配置
+
+                    long _session =new Date().getTime();
+                    JSONObject destInfo = new JSONObject();
+                    destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");
+                    destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETDETECTAREAS);
+                    destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                    JSONObject param = new JSONObject();
+                    JSONArray jsonArray = new JSONArray();
+                    for (KxDiscernBoundaryDTO kxDiscernBoundaryDTO:list ) {
+                        JSONObject disAIMarkConfigJson = JSONUtil.parseObj(kxDiscernBoundaryDTO.getContent());
+                        JSONObject detectArea = new JSONObject();
+                        detectArea.putOpt("Camera",kxDiscernBoundaryDTO.getCameraName());
+                        detectArea.putOpt("Preset", kxDiscernBoundaryDTO.getPresetNo());
+                        detectArea.putOpt("Areas", disAIMarkConfigJson.getJSONArray("BoundaryCoordinates")); //区域
+                        jsonArray.add(detectArea);
+                        //已发送 返回 "ErrorMsg":"Param Error",   "Result":"Failed" 改回状态为未发送状态 todo session deviceId+"-"+_session
+                        kxDiscernBoundaryDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
+                        kxDiscernBoundaryDTO.setSessionTime( deviceId+"-"+_session);
+                        kxDiscernBoundaryService.update(kxDiscernBoundaryDTO);
+                    }
+                    param.putOpt("_session", deviceId+"-"+_session);
+                    param.putOpt("DetectAreas", jsonArray);
+                    //发送指令
+                    SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+                }else {
+                    return new Result().error("无需要发送的配置信息!");
+                }
+            } else {
+                log.error("发送AI标记框配置失败,无相应的通讯通道");
+                printNettyLog();
+                return new Result().error("发送AI标记框配置失败,无相应的通讯通道");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("send AI—mark message error，" + e.getMessage(), e);
+            return new Result().error("发送AI标记框配置失败,请检查！");
+        }
+        return new Result();
     }
 
     /**

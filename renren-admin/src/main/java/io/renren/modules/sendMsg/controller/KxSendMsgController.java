@@ -6,7 +6,6 @@ import cn.hutool.json.JSONUtil;
 import io.renren.common.netty.NettyService;
 import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
-import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -115,6 +114,14 @@ public class KxSendMsgController {
     public Result sendJobInfo(@RequestParam Long deviceId) {
         nettyService.sendJobInfo(deviceId);
         return new Result();
+    }
+
+
+
+    @PostMapping("sendDiscernBoundaryConfig")
+    @ApiOperation("发送AI标记框配置")
+    public Result sendDiscernBoundaryConfig(@RequestParam Long deviceId) {
+        return nettyService.sendDiscernBoundaryConfig(deviceId);
     }
 
 

@@ -5,6 +5,8 @@ import io.renren.common.service.CrudService;
 import io.renren.modules.discernBoundary.dto.KxDiscernBoundaryDTO;
 import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 
+import java.util.List;
+
 /**
  * 识别边界标定
  *
@@ -25,6 +27,13 @@ public interface KxDiscernBoundaryService extends CrudService<KxDiscernBoundaryE
      * @param json
      * @return
      */
-    KxDiscernBoundaryEntity getKxDiscernBoundaryDTO(JSONObject json);
+    List<KxDiscernBoundaryEntity> getKxDiscernBoundaryDTO(JSONObject json);
 
+
+    /**
+     * 查找已标记没发送的
+     * @param deviceId
+     * @return
+     */
+    List<KxDiscernBoundaryDTO> getBydeviceId(Long deviceId);
 }

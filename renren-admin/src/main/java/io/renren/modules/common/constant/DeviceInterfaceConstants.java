@@ -49,6 +49,11 @@ public class DeviceInterfaceConstants {
     public static String METHOD_SETALARMPARAM="SetAlarmParam";
 
     /**
+     * 设置AI标记框
+     */
+    public static String METHOD_SETDETECTAREAS="SetDetectAreas";
+
+    /**
      * 通知设备保持推送流
      */
     public static String METHOD_KEEPVIDEOSTREAM="KeepVideoStream";
