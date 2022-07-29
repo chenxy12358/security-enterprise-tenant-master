@@ -118,7 +118,7 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
         JSONObject params = new JSONObject();
         params.putOpt("deviceSn", deviceSn);
         params.putOpt("cameraName", cameraName);
-        params.putOpt("presetId", presetId);
+        params.putOpt("PresetId", presetId);
         params.putOpt("deviceId", deviceId);
         List<KxDiscernBoundaryEntity> list = this.getKxDiscernBoundaryDTO(params);
         if (null != list && list.size() > 0) {
@@ -179,9 +179,9 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
             wrapper.and(queryWrapper -> queryWrapper.eq("status", KxAiBoundary.BOUNDARY_STATUS_MARK)
                     .or().eq("status", KxAiBoundary.BOUNDARY_STATUS_SEND));
         }
-        if (StringUtils.isEmpty(status)) {
-            wrapper.isNull(true,"status");
-        }
+//        if (StringUtils.isEmpty(status)) {
+//            wrapper.isNull(true,"status");
+//        }
         wrapper.eq("deleted", KxConstants.NO);
         List<KxDiscernBoundaryEntity> list = baseDao.selectList(wrapper);
         return list;
