@@ -47,11 +47,11 @@ public interface KxDeviceService extends CrudService<KxDeviceEntity, KxDeviceDTO
      */
     Result modify(KxDeviceDTO vo);
 
-    /**
-     * 图片分析
-     * @param json
-     * @param deviceId
-     */
-     void analysisImg(JSONObject json, Long deviceId, JSONObject msgInfo);
+//    /**  todo del
+//     * 图片分析
+//     * @param json
+//     * @param deviceId
+//     */
+//     void analysisImg(JSONObject json, Long deviceId, JSONObject msgInfo);
 
 }

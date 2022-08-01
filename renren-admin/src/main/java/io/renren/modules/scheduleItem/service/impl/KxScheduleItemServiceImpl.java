@@ -10,6 +10,7 @@ import io.renren.common.service.impl.CrudServiceImpl;
 import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
+import io.renren.modules.discernConfig.service.KxDiscernConfigHdService;
 import io.renren.modules.scheduleItem.dao.KxScheduleItemDao;
 import io.renren.modules.scheduleItem.dto.KxScheduleItemDTO;
 import io.renren.modules.scheduleItem.entity.KxScheduleItemEntity;
@@ -33,6 +34,8 @@ public class KxScheduleItemServiceImpl extends CrudServiceImpl<KxScheduleItemDao
 
     @Autowired
     private KxDeviceService kxDeviceService;
+    @Autowired
+    private KxDiscernConfigHdService kxDiscernConfigHdService;
     @Override
     public QueryWrapper<KxScheduleItemEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<KxScheduleItemEntity> wrapper = new QueryWrapper<>();
@@ -89,7 +92,7 @@ public class KxScheduleItemServiceImpl extends CrudServiceImpl<KxScheduleItemDao
             if (files != null) {
                 cn.hutool.json.JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 cn.hutool.json.JSONObject json = jsonArray.getJSONObject(0);
-                kxDeviceService.analysisImg(json, deviceDTO.getId(),msgInfo);
+                kxDiscernConfigHdService.analysisImg(json, deviceDTO.getId(),msgInfo);
             }
         } catch (Exception e) {
             log.error("savePic", e);

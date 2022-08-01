@@ -37,8 +37,8 @@ import java.util.Map;
 @EnableAsync
 public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEntity, KxDeviceDTO> implements KxDeviceService {
 
-    @Autowired
-    private KxDiscernConfigHdService kxDiscernConfigHdService;
+//    @Autowired
+//    private KxDiscernConfigHdService kxDiscernConfigHdService; todo
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Override
     public QueryWrapper<KxDeviceEntity> getWrapper(Map<String, Object> params) {
@@ -102,47 +102,47 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
         return new Result();
     }
 
-    @Override
-    @Async
-    public void analysisImg(JSONObject json,Long deviceId, JSONObject msgInfo) {
-        try {
-            Date picDate = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (json.get("DateTime") != null) {
-                picDate = formatter.parse(json.get("DateTime").toString());
-            }
-            // url /job-data/Data-Jpeg/KX-V22P40-AI00010/2022-31/2022-04-01/2022-04-01_10-51-42.jpeg
-            String url=json.get("Uri").toString();
-            String imgFilePath = KxConstants.IMG_UPLOAD+url;
-
-            String filePath="";
-            if(imgFilePath.contains("\\")){
-                imgFilePath=imgFilePath.replaceAll("\\\\","/");
-            }
-            filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
-            String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
-
-
-
-            // 后台分析图片 本地
-            logger.debug("后台分析图片开始");
-            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate,msgInfo);
-            logger.debug("后台分析图片结束");
-
-//            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
-//            com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();
-//            parameters.put("imgFilePath", imgFilePath);
-//            parameters.put("outImgFilePath", outImgFilePath);
-//            parameters.put("deviceId", deviceId);
-//            parameters.put("picDate", picDate);
-//            String str = HttpClientUtil.postMethod(interfacePath, parameters);
-//            System.err.println(str);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("error"+e);
-            logger.error("图片分析出错"+e);
-        }
-    }
+//    @Override todo del
+//    @Async
+//    public void analysisImg(JSONObject json,Long deviceId, JSONObject msgInfo) {
+//        try {
+//            Date picDate = new Date();
+//            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            if (json.get("DateTime") != null) {
+//                picDate = formatter.parse(json.get("DateTime").toString());
+//            }
+//            // url /job-data/Data-Jpeg/KX-V22P40-AI00010/2022-31/2022-04-01/2022-04-01_10-51-42.jpeg
+//            String url=json.get("Uri").toString();
+//            String imgFilePath = KxConstants.IMG_UPLOAD+url;
+//
+//            String filePath="";
+//            if(imgFilePath.contains("\\")){
+//                imgFilePath=imgFilePath.replaceAll("\\\\","/");
+//            }
+//            filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
+//            String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
+//
+//
+//
+//            // 后台分析图片 本地
+//            logger.debug("后台分析图片开始");
+//            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate,msgInfo);
+//            logger.debug("后台分析图片结束");
+//
+////            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";
+////            com.alibaba.fastjson.JSONObject parameters = new com.alibaba.fastjson.JSONObject();
+////            parameters.put("imgFilePath", imgFilePath);
+////            parameters.put("outImgFilePath", outImgFilePath);
+////            parameters.put("deviceId", deviceId);
+////            parameters.put("picDate", picDate);
+////            String str = HttpClientUtil.postMethod(interfacePath, parameters);
+////            System.err.println(str);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.err.println("error"+e);
+//            logger.error("图片分析出错"+e);
+//        }
+//    }
 
     /**
      * 效验数据

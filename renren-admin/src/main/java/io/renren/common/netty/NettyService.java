@@ -23,9 +23,9 @@ import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.deviceData.dto.*;
 import io.renren.modules.deviceData.service.*;
 import io.renren.modules.discernBoundary.dto.KxDiscernBoundaryDTO;
-import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigDTO;
+import io.renren.modules.discernConfig.service.KxDiscernConfigHdService;
 import io.renren.modules.discernConfig.service.KxDiscernConfigService;
 import io.renren.modules.gas.dto.KxGasDataDTO;
 import io.renren.modules.gas.service.KxGasDataService;
@@ -100,6 +100,8 @@ public class NettyService {
     private SysNoticeService sysNoticeService;
     @Autowired
     private SysDictDataService sysDictDataService;
+    @Autowired
+    private KxDiscernConfigHdService kxDiscernConfigHdService;
 
     /**
      * 日志处理
@@ -1254,7 +1256,7 @@ public class NettyService {
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 JSONObject json = jsonArray.getJSONObject(0);
-                kxDeviceService.analysisImg(json, deviceDTO.getId(),msgInfo);
+                kxDiscernConfigHdService.analysisImg(json, deviceDTO.getId(),msgInfo);
             }
         } else if ("GasTransmitter".equals(Signal)) {
             saveGasData(deviceDTO, senderInfo, msgInfo);
