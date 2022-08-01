@@ -44,8 +44,8 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SysDictDataService sysDictDataService;
-    @Autowired
-    private KxDiscernBoundaryService kxDiscernBoundaryService;
+//    @Autowired
+//    private KxDiscernBoundaryService kxDiscernBoundaryService;
     @Autowired
     private KxDeviceAlarmService kxDeviceAlarmService;
 
@@ -126,10 +126,10 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             params.putOpt("status",  KxAiBoundary.BOUNDARY_STATUS_SEND); // 已发送
             KxDiscernBoundaryEntity entity=null;
             if(StringUtil.isNotEmpty(camera) && StringUtil.isNotEmpty(presetId) && null != deviceID){
-                List<KxDiscernBoundaryEntity> boundaryList = kxDiscernBoundaryService.getKxDiscernBoundaryDTO(params);
-                if (null != boundaryList && boundaryList.size() > 0) {
-                    entity = boundaryList.get(0);
-                }
+//                List<KxDiscernBoundaryEntity> boundaryList = kxDiscernBoundaryService.getKxDiscernBoundaryDTO(params);
+//                if (null != boundaryList && boundaryList.size() > 0) {
+//                    entity = boundaryList.get(0);
+//                }
             }else {
                 logger.info("查询ai范围标记框信息参数错误，设备id[{}]，或者预置位[{}]，相机[{}]",
                         deviceID,
