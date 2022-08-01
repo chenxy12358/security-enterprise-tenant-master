@@ -678,10 +678,10 @@ public class NettyService {
                         jsonArray.add(detectArea);
                         //已发送 返回 "ErrorMsg":"Param Error",   "Result":"Failed" 改回状态为未发送状态 todo session deviceId+"-"+_session
 //                        kxDiscernBoundaryDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
-                        kxDiscernBoundaryDTO.setSessionTime( KxAiBoundary.PRESET_SEND+"_"+_session);
+                        kxDiscernBoundaryDTO.setSessionTime( KxAiBoundary.PRESET_SEND+_session);
                         kxDiscernBoundaryService.update(kxDiscernBoundaryDTO);
                     }
-                    param.putOpt("_session", KxAiBoundary.PRESET_SEND+"-"+_session);
+                    param.putOpt("_session", KxAiBoundary.PRESET_SEND+_session);
                     param.putOpt("DetectAreas", jsonArray);
                     //发送指令
                     SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
