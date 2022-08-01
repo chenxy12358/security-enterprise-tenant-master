@@ -174,9 +174,9 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
             wrapper.eq("session_time", sessionTime);
         }
         if (StringUtils.isNotBlank(status)) {
-            if(KxAiBoundary.BOUNDARY_STATUS_MARK.equals(status) || KxAiBoundary.BOUNDARY_STATUS_SEND.equals(status)){
+            if (KxAiBoundary.BOUNDARY_STATUS_MARK.equals(status) || KxAiBoundary.BOUNDARY_STATUS_SEND.equals(status)) {
                 wrapper.eq("status", status);
-            }else {
+            } else {
                 wrapper.and(queryWrapper -> queryWrapper.eq("status", KxAiBoundary.BOUNDARY_STATUS_MARK)
                         .or().eq("status", KxAiBoundary.BOUNDARY_STATUS_SEND));
             }
@@ -193,13 +193,14 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
     public List<KxDiscernBoundaryDTO> getBydeviceId(Long deviceId) {
         JSONObject params = new JSONObject();
         params.putOpt("deviceID", deviceId);
-        params.putOpt("status",  "sendAndMark"); // 有标记的
+        params.putOpt("status", "sendAndMark"); // 有标记的
         List<KxDiscernBoundaryEntity> list = this.getKxDiscernBoundaryDTO(params);
         return ConvertUtils.sourceToTarget(list, KxDiscernBoundaryDTO.class);
     }
 
     /**
-     *  更新标记框状态 msgInfo:{"Code":6145,"Result":"Ok"} or {"ErrorMsg":"Param Error","Result":"Failed"}
+     * 更新标记框状态 msgInfo:{"Code":6145,"Result":"Ok"} or {"ErrorMsg":"Param Error","Result":"Failed"}
+     *
      * @param deviceSn
      * @param msgInfo
      * @param session
@@ -217,10 +218,11 @@ public class KxDiscernBoundaryServiceImpl extends CrudServiceImpl<KxDiscernBound
             params.putOpt("sessionTime", session);
             List<KxDiscernBoundaryEntity> list = this.getKxDiscernBoundaryDTO(params);
             if (null != list && list.size() > 0) {
-                KxDiscernBoundaryEntity entity = list.get(0);
-                KxDiscernBoundaryDTO kdbDTO = ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
-                kdbDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
-                this.update(kdbDTO);
+                for (KxDiscernBoundaryEntity entity : list) {
+                    KxDiscernBoundaryDTO kdbDTO = ConvertUtils.sourceToTarget(entity, KxDiscernBoundaryDTO.class);
+                    kdbDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
+                    this.update(kdbDTO);
+                }
             }
         } catch (Exception e) {
             log.error("updatePresetPicInfo", e);
