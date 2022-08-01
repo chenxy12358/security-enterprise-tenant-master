@@ -58,6 +58,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service("nettyService")
 @Slf4j
@@ -658,13 +659,21 @@ public class NettyService {
                     destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                     JSONObject param = new JSONObject();
                     JSONArray jsonArray = new JSONArray();
+                    Pattern pattern = Pattern.compile("[0-9]*");
+//                    return pattern.matcher(str).matches();
                     for (KxDiscernBoundaryDTO kxDiscernBoundaryDTO:list ) {
                         JSONObject disAIMarkConfigJson = JSONUtil.parseObj(kxDiscernBoundaryDTO.getContent());
                         JSONObject detectArea = new JSONObject();
                         detectArea.putOpt("Camera",kxDiscernBoundaryDTO.getCameraName());
                         detectArea.putOpt("PictureHeight", kxDiscernBoundaryDTO.getPictureHeight());
                         detectArea.putOpt("PictureWidth", kxDiscernBoundaryDTO.getPictureWidth());
-                        detectArea.putOpt("Preset", kxDiscernBoundaryDTO.getPresetNo());
+                        String presetNo=kxDiscernBoundaryDTO.getPresetNo();
+                        if(pattern.matcher(presetNo).matches() && StringUtil.isNotEmpty(presetNo)){
+                            detectArea.putOpt("Preset", Integer.parseInt(presetNo));
+                        }else {
+                            detectArea.putOpt("Preset", kxDiscernBoundaryDTO.getPresetNo());
+                        }
+
                         detectArea.putOpt("Areas", disAIMarkConfigJson.getJSONArray("BoundaryCoordinates")); //区域
                         jsonArray.add(detectArea);
                         //已发送 返回 "ErrorMsg":"Param Error",   "Result":"Failed" 改回状态为未发送状态 todo session deviceId+"-"+_session
