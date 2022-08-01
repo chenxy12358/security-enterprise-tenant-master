@@ -1,14 +1,18 @@
 package io.renren.modules.discernConfig.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.common.context.TenantContext;
 import io.renren.common.service.impl.CrudServiceImpl;
+import io.renren.common.utils.StringUtil;
+import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.common.utils.Gpu.HandleImgHkCpu;
-import io.renren.modules.common.utils.HandleImg;
 import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
+import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
+import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
 import io.renren.modules.discernConfig.dao.KxDiscernConfigHdDao;
 import io.renren.modules.discernConfig.dto.KxAIPzVO;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigHdDTO;
@@ -40,6 +44,8 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private SysDictDataService sysDictDataService;
+    @Autowired
+    private KxDiscernBoundaryService kxDiscernBoundaryService;
     @Autowired
     private KxDeviceAlarmService kxDeviceAlarmService;
 
@@ -93,15 +99,48 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
     }
 
     @Override
-    public void analysisImg(String imgFilePath, String outImgFilePath, Long deviceID, Date picDate) {
+    public void analysisImg(String imgFilePath, String outImgFilePath, Long deviceID, Date picDate, cn.hutool.json.JSONObject msgInfo) {
+
+        Object taskInfo = msgInfo.get("TaskInfo");
+        String camera="";
+        String presetId="";
+        cn.hutool.json.JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
+        if (jsonObject.get("Camera") != null) {
+            camera=msgInfo.getStr("Camera");
+
+        }
+        if (jsonObject.get("PresetId") != null) {
+            presetId=msgInfo.getStr("PresetId");
+        }
+
+
         KxDiscernConfigHdDTO kxDiscernConfigHdDTO =getBydeviceId(deviceID);
         if(null !=kxDiscernConfigHdDTO && KxConstants.YSC.equals(kxDiscernConfigHdDTO.getEnable())){ // 有配置信息才处理
+
+
+            //查询ai范围标记框信息
+            cn.hutool.json.JSONObject params = new cn.hutool.json.JSONObject();
+            params.putOpt("cameraName", camera);
+            params.putOpt("PresetId", presetId);
+            params.putOpt("deviceId", deviceID);
+            params.putOpt("status",  KxAiBoundary.BOUNDARY_STATUS_SEND); // 已发送
+            KxDiscernBoundaryEntity entity=null;
+            if(StringUtil.isNotEmpty(camera) && StringUtil.isNotEmpty(presetId) && null != deviceID){
+                List<KxDiscernBoundaryEntity> boundaryList = kxDiscernBoundaryService.getKxDiscernBoundaryDTO(params);
+                if (null != boundaryList && boundaryList.size() > 0) {
+                    entity = boundaryList.get(0);
+                }
+            }else {
+                logger.info("查询ai范围标记框信息参数错误，设备id[{}]，或者预置位[{}]，相机[{}]",
+                        deviceID,
+                        presetId,
+                        camera);
+            }
+
             String pictureSize=kxDiscernConfigHdDTO.getPicSize();
             String[] picArr = pictureSize.split("x");
             String pictureWidth = picArr[0];
             String pictureHeight = picArr[1];
-//            double picWidth=Double.parseDouble(pictureWidth);
-//            double picHeight=Double.parseDouble(pictureHeight);
             int picWidth=Integer.parseInt(pictureWidth);
             int picHeight=Integer.parseInt(pictureHeight);
             String planFilePath= kxDiscernConfigHdDTO.getSchemeNo();
@@ -110,7 +149,7 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             try {
                 logger.info("图片：{"+imgFilePath+"} ，分析开始");
 //                List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
-                List listInfo= HandleImgHkCpu.analysisImgByCPU(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
+                List listInfo= HandleImgHkCpu.analysisImgByCPU(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false,entity);
                 logger.info("图片：{"+imgFilePath+"} ，分析结束");
                 logger.info("listInfo："+listInfo.size());
                 if(!listInfo.get(0).toString().isEmpty()){

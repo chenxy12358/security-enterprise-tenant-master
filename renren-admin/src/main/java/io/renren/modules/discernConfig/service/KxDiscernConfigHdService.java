@@ -1,5 +1,6 @@
 package io.renren.modules.discernConfig.service;
 
+import cn.hutool.json.JSONObject;
 import io.renren.common.service.CrudService;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigHdDTO;
 import io.renren.modules.discernConfig.entity.KxDiscernConfigHdEntity;
@@ -24,7 +25,7 @@ public interface KxDiscernConfigHdService extends CrudService<KxDiscernConfigHdE
      * @param deviceID 设备编号
      * @param picDate 拍照时间
      */
-    void analysisImg(String imgFilePath,String outImgFilePath,Long deviceID, Date picDate);
+    void analysisImg(String imgFilePath,String outImgFilePath,Long deviceID, Date picDate, JSONObject msgInfo);
 
 
     @Override

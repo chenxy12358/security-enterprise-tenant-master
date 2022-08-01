@@ -7,7 +7,6 @@ import io.renren.common.service.impl.CrudServiceImpl;
 import io.renren.common.utils.ConvertUtils;
 import io.renren.common.utils.Result;
 import io.renren.modules.common.constant.KxConstants;
-import io.renren.modules.common.utils.HttpClientUtil;
 import io.renren.modules.device.dao.KxDeviceDao;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.entity.KxDeviceEntity;
@@ -105,7 +104,7 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
 
     @Override
     @Async
-    public void analysisImg(JSONObject json,Long deviceId) {
+    public void analysisImg(JSONObject json,Long deviceId, JSONObject msgInfo) {
         try {
             Date picDate = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -123,9 +122,11 @@ public class KxDeviceServiceImpl extends CrudServiceImpl<KxDeviceDao, KxDeviceEn
             filePath=imgFilePath.substring(0,imgFilePath.lastIndexOf("/")+1);
             String outImgFilePath = filePath.replace(KxConstants.IMG_JOB,KxConstants.IMG_ALARM);
 
+
+
             // 后台分析图片 本地
             logger.debug("后台分析图片开始");
-            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate);
+            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate,msgInfo);
             logger.debug("后台分析图片结束");
 
 //            String interfacePath = KxConstants.IMG_SERVER_URL+ "discernConfig/kxdiscernconfighd/analysisImg";

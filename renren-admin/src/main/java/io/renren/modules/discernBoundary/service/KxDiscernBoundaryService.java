@@ -36,4 +36,6 @@ public interface KxDiscernBoundaryService extends CrudService<KxDiscernBoundaryE
      * @return
      */
     List<KxDiscernBoundaryDTO> getBydeviceId(Long deviceId);
+
+    void updatePresetPicInfo(String deviceSn, JSONObject msgInfo, String session);
 }

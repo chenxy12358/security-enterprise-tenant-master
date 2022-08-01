@@ -84,7 +84,7 @@ public class KxDiscernConfigHdController {
         if(StringUtils.isEmpty(imgFilePath) || StringUtils.isEmpty(outImgFilePath) || null ==deviceId ){
             logger.error("参数错误");
         }else {
-            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate);
+//            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate,jsonObject);
         }
     }
 

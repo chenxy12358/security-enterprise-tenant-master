@@ -89,7 +89,7 @@ public class KxScheduleItemServiceImpl extends CrudServiceImpl<KxScheduleItemDao
             if (files != null) {
                 cn.hutool.json.JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 cn.hutool.json.JSONObject json = jsonArray.getJSONObject(0);
-                kxDeviceService.analysisImg(json, deviceDTO.getId());
+                kxDeviceService.analysisImg(json, deviceDTO.getId(),msgInfo);
             }
         } catch (Exception e) {
             log.error("savePic", e);

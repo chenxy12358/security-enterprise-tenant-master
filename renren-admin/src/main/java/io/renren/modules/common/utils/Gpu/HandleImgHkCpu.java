@@ -1,14 +1,13 @@
 package io.renren.modules.common.utils.Gpu;
 
-import io.renren.modules.common.constant.KxConstants;
 import io.renren.modules.common.utils.FileUtils;
 import io.renren.modules.common.utils.ImageUtil;
 import io.renren.modules.common.utils.RectUtils;
+import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 import io.renren.modules.discernConfig.dto.KxAIPzVO;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.librealsense.frame;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.Net;
@@ -64,10 +63,11 @@ public class HandleImgHkCpu {
      * @param picHeight
      * @param listDis
      * @param deleteFlag
+     * @param entity 标记范围框
      * @return
      */
     public static List<Object>  analysisImgByCPU(String imgFilePath, String planFilePath, String outImgFilePath
-            , int picWidth, int picHeight, List<KxAIPzVO> listDis, boolean deleteFlag) {
+            , int picWidth, int picHeight, List<KxAIPzVO> listDis, boolean deleteFlag, KxDiscernBoundaryEntity entity) {
 
         List<Object> returnList = new ArrayList<>();
         // 初始化打印一下，确保编码正常，否则日志输出会是乱码

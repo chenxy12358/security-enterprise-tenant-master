@@ -23,6 +23,7 @@ import io.renren.modules.deviceAlarm.service.KxDeviceAlarmService;
 import io.renren.modules.deviceData.dto.*;
 import io.renren.modules.deviceData.service.*;
 import io.renren.modules.discernBoundary.dto.KxDiscernBoundaryDTO;
+import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
 import io.renren.modules.discernConfig.dto.KxDiscernConfigDTO;
 import io.renren.modules.discernConfig.service.KxDiscernConfigService;
@@ -659,12 +660,14 @@ public class NettyService {
                         JSONObject disAIMarkConfigJson = JSONUtil.parseObj(kxDiscernBoundaryDTO.getContent());
                         JSONObject detectArea = new JSONObject();
                         detectArea.putOpt("Camera",kxDiscernBoundaryDTO.getCameraName());
+                        detectArea.putOpt("PictureHeight", kxDiscernBoundaryDTO.getPictureHeight());
+                        detectArea.putOpt("PictureWidth", kxDiscernBoundaryDTO.getPictureWidth());
                         detectArea.putOpt("Preset", kxDiscernBoundaryDTO.getPresetNo());
                         detectArea.putOpt("Areas", disAIMarkConfigJson.getJSONArray("BoundaryCoordinates")); //区域
                         jsonArray.add(detectArea);
                         //已发送 返回 "ErrorMsg":"Param Error",   "Result":"Failed" 改回状态为未发送状态 todo session deviceId+"-"+_session
-                        kxDiscernBoundaryDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
-                        kxDiscernBoundaryDTO.setSessionTime( deviceId+"-"+_session);
+//                        kxDiscernBoundaryDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
+                        kxDiscernBoundaryDTO.setSessionTime( KxAiBoundary.PRESET_SEND+deviceId+"_"+_session);
                         kxDiscernBoundaryService.update(kxDiscernBoundaryDTO);
                     }
                     param.putOpt("_session", deviceId+"-"+_session);
@@ -961,6 +964,21 @@ public class NettyService {
             if ("Pending".equals(msgInfoJsonObject.get("Result"))) {
                 return;
             }
+
+            // 更新标记框发送状态   Msg:{"Code":6145,"Result":"Ok"} or {"ErrorMsg":"Param Error","Result":"Failed"}
+            String method=senderInfo.getStr("Method");
+            String destObject=senderInfo.getStr("DestObject");
+            if ("Emd.Service.DLDetect.E0".equals(destObject)) {
+                if(DeviceInterfaceConstants.METHOD_SETDETECTAREAS.equals(method)){
+                    if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
+                        if(StringUtil.isNotEmpty(session)&&session.contains(KxAiBoundary.PRESET_SEND)){ //如果是发送预置位命令
+                            kxDiscernBoundaryService.updatePresetPicInfo(deviceSn, msgInfoJsonObject,session);
+                        }
+                    }
+                }
+            }
+            // 更新标记框发送状态  end 2022年8月1日16:04:23
+
             if ("Emd.Service.SysMonitor.E0".equals(senderInfo.get("DestObject"))) {
                 if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if ("GetSysBaseInfo".equals(senderInfo.get("Method"))) {
@@ -1231,11 +1249,12 @@ public class NettyService {
         Object Signal = senderInfo.get("Signal");
         if ("TaskSchedule".equals(Signal)) {
             savePic(deviceSn, senderInfo, msgInfo);
+            //后台分析 todo 预置位 相机 标记框未完成分析
             Object files = msgInfo.get("Files");
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 JSONObject json = jsonArray.getJSONObject(0);
-                kxDeviceService.analysisImg(json, deviceDTO.getId());
+                kxDeviceService.analysisImg(json, deviceDTO.getId(),msgInfo);
             }
         } else if ("GasTransmitter".equals(Signal)) {
             saveGasData(deviceDTO, senderInfo, msgInfo);

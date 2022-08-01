@@ -256,7 +256,8 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                     if (senderInfoJsonObject.get("CreatedTime") == null) {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
-                    if (isCmmdReply) {nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
+                    if (isCmmdReply) {
+                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
                     } else {
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {

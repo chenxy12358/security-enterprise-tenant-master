@@ -23,4 +23,10 @@ public class KxAiBoundary {
     public static String BOUNDARY_STATUS_SEND="1";
 
 
+    /**
+     * 预置位发送session前缀
+     */
+    public static String PRESET_SEND="YZW_SEND_";
+
+
 }
