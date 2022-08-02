@@ -1,6 +1,6 @@
 package io.renren.modules.discernConfig.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONObject;
 import io.renren.common.annotation.LogOperation;
 import io.renren.common.constant.Constant;
 import io.renren.common.page.PageData;
@@ -74,18 +74,8 @@ public class KxDiscernConfigHdController {
     @ApiOperation("分析图片")
     @LogOperation("分析图片")
     public void analysisImg(@RequestBody JSONObject jsonObject){
-        String imgFilePath = jsonObject.getString("imgFilePath");
-        String outImgFilePath = jsonObject.getString("outImgFilePath");
-        Long deviceId = jsonObject.getLongValue("deviceId");
-        Date picDate = jsonObject.getDate("picDate");
-        if(null ==picDate){
-            picDate=new Date();
-        }
-        if(StringUtils.isEmpty(imgFilePath) || StringUtils.isEmpty(outImgFilePath) || null ==deviceId ){
-            logger.error("参数错误");
-        }else {
-//            kxDiscernConfigHdService.analysisImg(imgFilePath,outImgFilePath,deviceId,picDate,jsonObject);
-        }
+        Long deviceId = jsonObject.getLong("deviceId");
+        kxDiscernConfigHdService.analysisImg(jsonObject,deviceId,jsonObject);
     }
 
     @PostMapping
