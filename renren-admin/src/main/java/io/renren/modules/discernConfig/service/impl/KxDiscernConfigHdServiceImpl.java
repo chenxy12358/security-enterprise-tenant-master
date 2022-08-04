@@ -1,5 +1,6 @@
 package io.renren.modules.discernConfig.service.impl;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -21,6 +22,7 @@ import io.renren.modules.discernConfig.service.KxDiscernConfigHdService;
 import io.renren.modules.security.user.SecurityUser;
 import io.renren.modules.sys.entity.SysDictDataEntity;
 import io.renren.modules.sys.service.SysDictDataService;
+import org.opencv.core.Rect2d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,13 +106,14 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
     @Override
     @Async
     public void analysisImg(cn.hutool.json.JSONObject json, Long deviceID, cn.hutool.json.JSONObject msgInfo) {
-
         try {
+
             Date picDate = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             if (json.get("DateTime") != null) {
                 picDate = formatter.parse(json.get("DateTime").toString());
             }
+            logger.info("后台AI识别开始，设备id[{}]", deviceID);
             // url /job-data/Data-Jpeg/KX-V22P40-AI00010/2022-31/2022-04-01/2022-04-01_10-51-42.jpeg
             String url = json.get("Uri").toString();
             String imgFilePath = KxConstants.IMG_UPLOAD + url;
@@ -129,36 +132,56 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
             String presetId = "";
             cn.hutool.json.JSONObject jsonObject = JSONUtil.parseObj(taskInfo);
             if (jsonObject.get("Camera") != null) {
-                camera = msgInfo.getStr("Camera");
+                camera = jsonObject.getStr("Camera");
 
             }
             if (jsonObject.get("PresetId") != null) {
-                presetId = msgInfo.getStr("PresetId");
+                presetId = jsonObject.getStr("PresetId");
             }
 
 
             KxDiscernConfigHdDTO kxDiscernConfigHdDTO = getBydeviceId(deviceID);
-            if (null != kxDiscernConfigHdDTO && KxConstants.YSC.equals(kxDiscernConfigHdDTO.getEnable())) { // 有配置信息才处理
-
-
+            // 有配置信息才处理
+            if (null != kxDiscernConfigHdDTO && KxConstants.YSC.equals(kxDiscernConfigHdDTO.getEnable())) {
                 //查询ai范围标记框信息
                 cn.hutool.json.JSONObject params = new cn.hutool.json.JSONObject();
                 params.putOpt("cameraName", camera);
                 params.putOpt("PresetId", presetId);
-                params.putOpt("deviceId", deviceID);
+                params.putOpt("deviceID", deviceID);
                 params.putOpt("status", KxAiBoundary.BOUNDARY_STATUS_SEND); // 已发送
-                KxDiscernBoundaryEntity entity = null;
+                cn.hutool.json.JSONObject jsonBoubdary=new cn.hutool.json.JSONObject();
                 if (StringUtil.isNotEmpty(camera) && StringUtil.isNotEmpty(presetId) && null != deviceID) {
-//                List<KxDiscernBoundaryEntity> boundaryList = kxDiscernBoundaryService.getKxDiscernBoundaryDTO(params);
-//                if (null != boundaryList && boundaryList.size() > 0) {
-//                    entity = boundaryList.get(0);
-//                }
+                    List<KxDiscernBoundaryEntity> boundaryList = kxDiscernBoundaryService.getKxDiscernBoundaryDTO(params);
+                    if (null != boundaryList && boundaryList.size() > 0) {
+                        KxDiscernBoundaryEntity entity = boundaryList.get(0);
+                        cn.hutool.json.JSONObject disAIMarkConfigJson = JSONUtil.parseObj(entity.getContent());
+                        JSONArray array = disAIMarkConfigJson.getJSONArray("BoundaryCoordinates");
+                        if (null != array) {
+                            List<Rect2d> rectList=new ArrayList<Rect2d>();
+                            for (int i = 0; i < array.size(); i++) {
+                                cn.hutool.json.JSONObject parseObj = JSONUtil.parseObj(array.get(i));
+                                cn.hutool.json.JSONObject leftXy=parseObj.getJSONObject("LeftTop");
+                                if(null != leftXy){
+                                    int leftX=leftXy.getInt("x");
+                                    int leftY=leftXy.getInt("y");
+                                    int width =parseObj.getInt("rectW");
+                                    int height=parseObj.getInt("rectH");
+                                    String type=parseObj.getStr("Type");
+                                    Rect2d rect = new Rect2d(leftX, leftY, width, height);
+                                    rectList.add(rect);
+                                    jsonBoubdary.putOpt("type",type);
+                                    jsonBoubdary.putOpt("rectList",rectList);
+                                }
+                            }
+                        }
+                    }
                 } else {
                     logger.info("查询ai范围标记框信息参数错误，设备id[{}]，或者预置位[{}]，相机[{}]",
                             deviceID,
                             presetId,
                             camera);
                 }
+                //查询ai范围标记框信息end
 
                 String pictureSize = kxDiscernConfigHdDTO.getPicSize();
                 String[] picArr = pictureSize.split("x");
@@ -171,13 +194,14 @@ public class KxDiscernConfigHdServiceImpl extends CrudServiceImpl<KxDiscernConfi
                 List<KxAIPzVO> list = kxDiscernConfigHdDTO.getDiscernList();
                 try {
                     logger.info("图片：{" + imgFilePath + "} ，分析开始");
-//                List listInfo= HandleImg.analysisImgImg(imgFilePath,planFilePath,outImgFilePath,picWidth,picHeight,list,false);
-                    List listInfo = HandleImgHkCpu.analysisImgByCPU(imgFilePath, planFilePath, outImgFilePath, picWidth, picHeight, list, false, entity);
+                    List listInfo = HandleImgHkCpu.analysisImgByCPU(imgFilePath, planFilePath, outImgFilePath, picWidth, picHeight, list,
+                            false, jsonBoubdary);
                     logger.info("图片：{" + imgFilePath + "} ，分析结束");
                     logger.info("listInfo：" + listInfo.size());
                     if (!listInfo.get(0).toString().isEmpty()) {
                         logger.info("listInfo：{" + listInfo.get(0).toString());
                         kxDeviceAlarmService.saveAnalysisImg(listInfo, deviceID, picDate);
+
                         logger.info("保存完成");
                     } else {
                         logger.info("图片：{" + imgFilePath + "} ，未识别到配置对象");

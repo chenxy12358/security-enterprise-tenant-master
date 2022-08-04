@@ -1,5 +1,6 @@
 package io.renren.modules.common.utils;
 
+ import org.opencv.core.Point;
  import org.opencv.core.Rect2d;
 
 /**
@@ -11,17 +12,17 @@ package io.renren.modules.common.utils;
 public class RectUtils {
     public static void main(String[] args) {
         Rect2d r1 = new Rect2d(775, 775, 274, 445);
-        Rect2d r2 = new Rect2d(775, 775, 274, 450);
+        Rect2d r2 = new Rect2d(775, 775, 274, 500);
         float s = DecideOverlap(r1, r2);
         System.err.println(s);
+        System.err.println(r1.contains(new Point(r2.x, r2.y)));
 
     }
 
     /**
-     *  计算相似度 gpu-cpu
-     *
-     * @param o1 标记框1
-     * @param o2 标记框2
+     * 计算相似度 gpu-cpu
+     * @param r1 标记框1
+     * @param r2 标记框2
      * @return
      */
     public static float DecideOverlap(Rect2d r1, Rect2d r2) {

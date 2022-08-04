@@ -292,15 +292,15 @@ public class NettyService {
 
             // 保存 预置位 SetPreset cameraName PresetId dto.getSerialNo() METHOD_PTZCONTROL_COMMAND
             try {
-                String command=params.getStr("command"); // 执行动作
-                if (StringUtil.isNotEmpty(params.getStr("PresetId"))  && StringUtil.isNotEmpty(command)
-                        && null != dto.getId()&&DeviceInterfaceConstants.METHOD_PTZCONTROL_COMMAND_SETPRESET.equals(command) ) {
+                String command = params.getStr("command"); // 执行动作
+                if (StringUtil.isNotEmpty(params.getStr("PresetId")) && StringUtil.isNotEmpty(command)
+                        && null != dto.getId() && DeviceInterfaceConstants.METHOD_PTZCONTROL_COMMAND_SETPRESET.equals(command)) {
                     JSONObject json = new JSONObject();
                     json.putOpt("cameraName", params.get("cameraName"));
                     json.putOpt("Height", 1080);
                     json.putOpt("Width", 1920);
-                    json.putOpt("currentTime",DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
-                    json.putOpt("deviceId",dto.getId());
+                    json.putOpt("currentTime", DeviceInterfaceConstants.PRESET_PRE + new Date().getTime());
+                    json.putOpt("deviceId", dto.getId());
 
                     JSONObject jsonP = new JSONObject();
                     jsonP.putAll(params);
@@ -311,16 +311,16 @@ public class NettyService {
                     log.info("保存预置点发送拍照命令，设备id[{}]，或者预置位[{}]，currentTime[{}]",
                             dto.getId(),
                             params.get("PresetId"),
-                            DeviceInterfaceConstants.PRESET_PRE+new Date().getTime());
+                            DeviceInterfaceConstants.PRESET_PRE + new Date().getTime());
                     this.sendTakePicture(json);
 
-                }else {
+                } else {
                     log.error("保存预置点发送拍照命令失败，设备id[{}]，或者预置位[{}]，参数为空",
                             dto.getId(),
                             params.get("PresetId"));
 
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("保存预置点发送拍照命令失败，设备编号[{}]，相机[{}]，预置位[{}]",
                         dto.getSerialNo(),
                         params.get("cameraName"),
@@ -430,11 +430,11 @@ public class NettyService {
                 param.putOpt("Height", params.get("Height"));
                 param.putOpt("Width", params.get("Width"));
                 param.putOpt("Quality", params.get("Quality"));
-                String  session =params.getStr("currentTime");
-                if(StringUtil.isNotEmpty(session)){
-                    if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){
+                String session = params.getStr("currentTime");
+                if (StringUtil.isNotEmpty(session)) {
+                    if (session.contains(DeviceInterfaceConstants.PRESET_PRE)) {
                         param.putOpt("_session", session);
-                    }else{
+                    } else {
                         param.putOpt("_session", Long.valueOf(session));
                     }
 
@@ -558,14 +558,15 @@ public class NettyService {
                 if (null != jobList && jobList.size() > 0) {
                     for (KxScheduleJobEntity kxScheduleJobEntity : jobList) {
                         JSONObject json = JSONUtil.parseObj(kxScheduleJobEntity.getContent());
-                        String jobconf = json.get("TaskSchedule").toString();
-                        jsonArray.addAll(JSONUtil.parseArray(jobconf));
-                        kxScheduleJobEntity.setStatus("1");//已发送
+                        if (!json.isNull("TaskSchedule")) {
+                            String jobconf = json.get("TaskSchedule").toString();
+                            jsonArray.addAll(JSONUtil.parseArray(jobconf));
+                        }
+                        kxScheduleJobEntity.setStatus("1");//已发送 todo cxy 改为接受反馈成功后修改
                         kxScheduleJobService.updateById(kxScheduleJobEntity);
                     }
                 }
                 param.putOpt("TaskSchedule", jsonArray);
-                System.err.println(param);
                 //发送指令
                 SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
             } else {
@@ -575,7 +576,7 @@ public class NettyService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("发送计划任务失败=");
+            log.error("发送计划任务失败");
             log.error("send message error，" + e.getMessage(), e);
         }
     }
@@ -619,9 +620,8 @@ public class NettyService {
                     param.putOpt("AlarmParam", jsonArray);
                     //发送指令
                     SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
-                    kxDiscernConfigDTO.setStatus("1");//已发送
+                    kxDiscernConfigDTO.setStatus("1");//已发送 //已发送 todo cxy 改为接受反馈成功后修改
                     kxDiscernConfigService.update(kxDiscernConfigDTO);
-
                 }
             } else {
                 log.error("发送AI配置失败,无相应的通讯通道");
@@ -650,9 +650,8 @@ public class NettyService {
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = getChannel(key);
                 List<KxDiscernBoundaryDTO> list = kxDiscernBoundaryService.getBydeviceId(deviceId);
-                if (null != list&& list.size()>0) { // AI标记框配置
-
-                    long _session =new Date().getTime();
+                if (null != list && list.size() > 0) { // AI标记框配置
+                    long _session = new Date().getTime();
                     JSONObject destInfo = new JSONObject();
                     destInfo.putOpt("DestObject", "Emd.Service.DLDetect.E0");
                     destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETDETECTAREAS);
@@ -660,17 +659,16 @@ public class NettyService {
                     JSONObject param = new JSONObject();
                     JSONArray jsonArray = new JSONArray();
                     Pattern pattern = Pattern.compile("[0-9]*");
-//                    return pattern.matcher(str).matches();
-                    for (KxDiscernBoundaryDTO kxDiscernBoundaryDTO:list ) {
+                    for (KxDiscernBoundaryDTO kxDiscernBoundaryDTO : list) {
                         JSONObject disAIMarkConfigJson = JSONUtil.parseObj(kxDiscernBoundaryDTO.getContent());
                         JSONObject detectArea = new JSONObject();
-                        detectArea.putOpt("Camera",kxDiscernBoundaryDTO.getCameraName());
+                        detectArea.putOpt("Camera", kxDiscernBoundaryDTO.getCameraName());
                         detectArea.putOpt("PictureHeight", kxDiscernBoundaryDTO.getPictureHeight());
                         detectArea.putOpt("PictureWidth", kxDiscernBoundaryDTO.getPictureWidth());
-                        String presetNo=kxDiscernBoundaryDTO.getPresetNo();
-                        if(pattern.matcher(presetNo).matches() && StringUtil.isNotEmpty(presetNo)){
+                        String presetNo = kxDiscernBoundaryDTO.getPresetNo();
+                        if (pattern.matcher(presetNo).matches() && StringUtil.isNotEmpty(presetNo)) {
                             detectArea.putOpt("Preset", Integer.parseInt(presetNo));
-                        }else {
+                        } else {
                             detectArea.putOpt("Preset", kxDiscernBoundaryDTO.getPresetNo());
                         }
 
@@ -678,14 +676,14 @@ public class NettyService {
                         jsonArray.add(detectArea);
                         //已发送 返回 "ErrorMsg":"Param Error",   "Result":"Failed" 改回状态为未发送状态 todo session deviceId+"-"+_session
 //                        kxDiscernBoundaryDTO.setStatus(KxAiBoundary.BOUNDARY_STATUS_SEND);
-                        kxDiscernBoundaryDTO.setSessionTime( KxAiBoundary.PRESET_SEND+_session);
+                        kxDiscernBoundaryDTO.setSessionTime(KxAiBoundary.PRESET_SEND + _session);
                         kxDiscernBoundaryService.update(kxDiscernBoundaryDTO);
                     }
-                    param.putOpt("_session", KxAiBoundary.PRESET_SEND+_session);
+                    param.putOpt("_session", KxAiBoundary.PRESET_SEND + _session);
                     param.putOpt("DetectAreas", jsonArray);
                     //发送指令
                     SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
-                }else {
+                } else {
                     return new Result().error("无需要发送的配置信息!");
                 }
             } else {
@@ -853,8 +851,8 @@ public class NettyService {
      * @throws ParseException
      * @throws IOException
      */
-    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface, String  session) throws ParseException, IOException {
-         if (!checkFiles(array, DataLen)) {
+    public JSONArray rcvFilesData(String deviceSn, JSONArray array, String type, int DataLen, String data, String Interface, String session) throws ParseException, IOException {
+        if (!checkFiles(array, DataLen)) {
             logger.info(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 文件长度值和文件list的长度总和不相等，请查看数据！");
             return null;
         }
@@ -864,7 +862,7 @@ public class NettyService {
             if ("Emd.Msg.Alarm".equals(Interface)) {
                 typePath = KxConstants.IMG_ALARM;
             }
-            if(session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
+            if (session.contains(DeviceInterfaceConstants.PRESET_PRE)) { //如果是保存预置位的图片
                 typePath = KxConstants.IMG_PRESET;
             }
             String fileName = KxConstants.IMG_UPLOAD + typePath + "/" + getUploadFilename(deviceSn, type, array.get(i), "");
@@ -977,13 +975,13 @@ public class NettyService {
             }
 
             // 更新标记框发送状态   Msg:{"Code":6145,"Result":"Ok"} or {"ErrorMsg":"Param Error","Result":"Failed"}
-            String method=senderInfo.getStr("Method");
-            String destObject=senderInfo.getStr("DestObject");
+            String method = senderInfo.getStr("Method");
+            String destObject = senderInfo.getStr("DestObject");
             if ("Emd.Service.DLDetect.E0".equals(destObject)) {
-                if(DeviceInterfaceConstants.METHOD_SETDETECTAREAS.equals(method)){
+                if (DeviceInterfaceConstants.METHOD_SETDETECTAREAS.equals(method)) {
                     if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
-                        if(StringUtil.isNotEmpty(session)&&session.contains(KxAiBoundary.PRESET_SEND)){ //如果是发送预置位命令
-                            kxDiscernBoundaryService.updatePresetPicInfo(deviceSn, msgInfoJsonObject,session);
+                        if (StringUtil.isNotEmpty(session) && session.contains(KxAiBoundary.PRESET_SEND)) { //如果是发送预置位命令
+                            kxDiscernBoundaryService.updatePresetPicInfo(deviceSn, msgInfoJsonObject, session);
                         }
                     }
                 }
@@ -1117,8 +1115,8 @@ public class NettyService {
     public void rcvUploadData(String deviceSn, JSONObject senderInfo, JSONObject msgInfo, SocketChannel channel, String session) throws
             ParseException {
 
-        if(StringUtil.isNotEmpty(session)&&session.contains(DeviceInterfaceConstants.PRESET_PRE)){ //如果是保存预置位的图片
-            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo,session);
+        if (StringUtil.isNotEmpty(session) && session.contains(DeviceInterfaceConstants.PRESET_PRE)) { //如果是保存预置位的图片
+            kxDiscernBoundaryService.savePresetPic(deviceSn, senderInfo, msgInfo, session);
         }
 
         Object Method = senderInfo.get("Method");// 手动抓图
@@ -1133,7 +1131,7 @@ public class NettyService {
         if ("Emd.Msg.Stat".equals(Interface)) {
             if ("BatteryState".equals(senderInfo.get("Signal"))) {
                 saveData(deviceSn, senderInfo, msgInfo);
-            }else {
+            } else {
                 updateDeviceStat(deviceSn, senderInfo, msgInfo);
 
             }
@@ -1265,7 +1263,7 @@ public class NettyService {
             if (files != null) {
                 JSONArray jsonArray = JSONUtil.parseArray(files.toString());
                 JSONObject json = jsonArray.getJSONObject(0);
-                kxDiscernConfigHdService.analysisImg(json, deviceDTO.getId(),msgInfo);
+                kxDiscernConfigHdService.analysisImg(json, deviceDTO.getId(), msgInfo);
             }
         } else if ("GasTransmitter".equals(Signal)) {
             saveGasData(deviceDTO, senderInfo, msgInfo);
@@ -1322,7 +1320,7 @@ public class NettyService {
                 dto.setOutputVotage(new BigDecimal(msgInfo.get("Voltage").toString()));
 
                 dto.setChargeCurrent(new BigDecimal(msgInfo.get("ChargeCurrent1").toString()));
-            }else {
+            } else {
                 dto.setBatSoc(new BigDecimal(msgInfo.get("BatSoc").toString()));
                 dto.setBatteryId(Long.valueOf(msgInfo.get("BatteryId").toString()));
                 dto.setChargeSwitch(msgInfo.get("ChargeSwitch").toString());
@@ -1610,7 +1608,7 @@ public class NettyService {
                 KxGasDataDTO.setAlarmStatus("Normal");
             }
             KxGasDataService.save(KxGasDataDTO);
-            if (!("Normal".equals(alarmStatus)|| "0".equals(alarmStatus))) {
+            if (!("Normal".equals(alarmStatus) || "0".equals(alarmStatus))) {
                 String title = "您有新的燃气数据预警通知，请及时查看！";
                 String type = "燃气预警";
                 String deviceName = KxGasDataDTO.getDeviceName();

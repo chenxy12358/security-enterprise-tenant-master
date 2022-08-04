@@ -1,9 +1,10 @@
 package io.renren.modules.common.utils.Gpu;
 
+import cn.hutool.json.JSONObject;
+import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.common.utils.FileUtils;
 import io.renren.modules.common.utils.ImageUtil;
 import io.renren.modules.common.utils.RectUtils;
-import io.renren.modules.discernBoundary.entity.KxDiscernBoundaryEntity;
 import io.renren.modules.discernConfig.dto.KxAIPzVO;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -14,7 +15,6 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
 import org.opencv.core.Rect2d;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,6 @@ public class HandleImgHkCpu {
     private static float nmsThreshold = 0.2f;
 
     /**
-     *
      * @param imgFilePath
      * @param planFilePath
      * @param outImgFilePath
@@ -63,12 +62,11 @@ public class HandleImgHkCpu {
      * @param picHeight
      * @param listDis
      * @param deleteFlag
-     * @param entity 标记范围框
+     * @param jsonBoubdary   标记范围框
      * @return
      */
-    public static List<Object>  analysisImgByCPU(String imgFilePath, String planFilePath, String outImgFilePath
-            , int picWidth, int picHeight, List<KxAIPzVO> listDis, boolean deleteFlag, KxDiscernBoundaryEntity entity) {
-
+    public static List<Object> analysisImgByCPU(String imgFilePath, String planFilePath, String outImgFilePath
+            , int picWidth, int picHeight, List<KxAIPzVO> listDis, boolean deleteFlag, JSONObject jsonBoubdary) {
         List<Object> returnList = new ArrayList<>();
         // 初始化打印一下，确保编码正常，否则日志输出会是乱码
 //        System.err.println("file.encoding is " + System.getProperty("file.encoding"));
@@ -124,12 +122,12 @@ public class HandleImgHkCpu {
             // 还要找出每个目标的位置， ObjectDetectionResultCPU
             // 检测到的目标总数  results.size()
             List<ObjectDetectionResult> results = postprocess(src, outs, names);
-            System.err.println("一共检测到{}个目标" + results.size());
+            LOGGER.info("一共检测到{}个目标" ,results.size());
 
 
             if (null != results && results.size() > 0) {
                 // 将每一个被识别的对象在图片框出来，并在框的左上角标注该对象的类别
-                returnList= markEveryDetectObject(imgFilePath, src, results, listDis, outImgFilePath);
+                returnList = markEveryDetectObject(imgFilePath, src, results, listDis, outImgFilePath, jsonBoubdary);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,9 +143,9 @@ public class HandleImgHkCpu {
             if (src != null) {
                 src.release();
             }
-            if(null ==returnList || returnList.size()==0){
+            if (null == returnList || returnList.size() == 0) {
                 returnList.add("");
-                LOGGER.info("未识别出目标对象:" );
+                LOGGER.info("未识别出目标对象:");
             }
             return returnList;
         }
@@ -159,13 +157,62 @@ public class HandleImgHkCpu {
      *
      * @param results
      */
-    private static List<Object> markEveryDetectObject(String imgFilePath, Mat im, List<ObjectDetectionResult> results, List<KxAIPzVO> listDis, String outImgFilePath) {
+    private static List<Object> markEveryDetectObject(String imgFilePath, Mat im, List<ObjectDetectionResult> results, List<KxAIPzVO> listDis,
+                                                      String outImgFilePath, JSONObject jsonBoubdary) {
+
+        List<Rect2d> rectList = new ArrayList<Rect2d>();
+        String rectType = KxAiBoundary.TYPE_DETECT;
+        if (!jsonBoubdary.isEmpty() && !jsonBoubdary.isNull("rectList")) {
+            if (!jsonBoubdary.isNull("type")) {
+                rectType = jsonBoubdary.getStr("type");
+            }
+            rectList = jsonBoubdary.getJSONArray("rectList").toList(Rect2d.class);
+
+        }
         // 在图片上标出每个目标以及类别和置信度
         List<Object> returnList = new ArrayList<>();
         List<Map<String, Object>> listBrokenObject = new ArrayList<>();
         String jpgFile = "";
         Boolean isObject = false;
         for (ObjectDetectionResult result : results) {
+            Boolean isBoubdary = false;
+            System.err.println(result.getConfidence());
+            if (null != rectList && rectList.size() > 0) {
+                for (Rect2d r2 : rectList) {
+                    if(KxAiBoundary.TYPE_DETECT.equals(rectType)){
+                        if(KxAiBoundary.DRAW_BOUNDARY){ //是否画框
+                            rectangle(im,
+                                    new Point((int)r2.x, (int)r2.y),
+                                    new Point((int)r2.x+ (int)r2.width,
+                                            (int)r2.y+ (int)r2.height),
+                                    new Scalar(0, 255, 0, 0),
+                                    1,
+                                    LINE_8,
+                                    0);
+                        }
+                        Rect2d r1 = new Rect2d(result.getX(), result.getY(), result.getWidth(), result.getHeight());
+                        float xsd = RectUtils.DecideOverlap(r1, r2);
+                        if (xsd > KxAiBoundary.boundary_in_similarity) { // 大于此值判断为在标记框内
+                            isBoubdary=true;
+                        }
+                    }else {
+                        // TODO: 2022/8/2 显示框外目标
+                        if(KxAiBoundary.DRAW_BOUNDARY){ //是否画框
+                            rectangle(im,
+                                    new Point((int)r2.x, (int)r2.y),
+                                    new Point((int)r2.x+ (int)r2.width,
+                                            (int)r2.y+ (int)r2.height),
+                                    new Scalar(0, 0, 255, 0),
+                                    1,
+                                    LINE_8,
+                                    0);
+                        }
+                    }
+                }
+
+            }else {
+                isBoubdary=true;
+            }
 
             String typeClass = result.getClassName().trim(); // 类别
             float confidence = result.getConfidence();
@@ -173,7 +220,7 @@ public class HandleImgHkCpu {
                 String code = kxAIPzVO.getCode();
                 String name = kxAIPzVO.getName();
                 BigDecimal thresh = kxAIPzVO.getThresh();
-                if (typeClass.equalsIgnoreCase(code) && kxAIPzVO.isEnable() && confidence >= thresh.floatValue()) {
+                if (typeClass.equalsIgnoreCase(code) && kxAIPzVO.isEnable() && confidence >= thresh.floatValue()&& isBoubdary) {
                     LOGGER.info("类别[{}]，置信度[{}%]", result.getClassName(), result.getConfidence() * 100f);
                     Map<String, Object> map = new HashMap();
                     map.put("Object", name);
