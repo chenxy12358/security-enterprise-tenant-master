@@ -1006,6 +1006,7 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
                         msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
                         msgInfoJsonObject.putOpt("type", "SendVideoStream");
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
