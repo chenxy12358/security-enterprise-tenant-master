@@ -1006,7 +1006,7 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
                         msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("type", "SendVideoStream");
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
@@ -1020,7 +1020,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("deviceSn", deviceSn);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
                         msgInfoJsonObject.putOpt("session", session);
@@ -1036,7 +1036,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CONNECT);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("Connected", resultValue.get("Connected"));
                         msgInfoJsonObject.putOpt("VpnIP", resultValue.get("VpnIP"));
                         msgInfoJsonObject.putOpt("session", session);
@@ -1049,7 +1049,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_GETSTAT);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("Connected", resultValue.get("Connected"));
                         msgInfoJsonObject.putOpt("VpnIP", resultValue.get("VpnIP"));
                         msgInfoJsonObject.putOpt("session", session);
@@ -1061,7 +1061,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CLOSE);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("session", session);
                         msgInfoJsonObject.putOpt("result", "ok");
                         message.setData(msgInfoJsonObject);
@@ -1073,7 +1073,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_VPN_CONNECT);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("session", session);
                         msgInfoJsonObject.putOpt("result", "fail");
                         msgInfoJsonObject.putOpt("msg", msgInfoJsonObject.get("ErrorMsg"));
@@ -1091,7 +1091,7 @@ public class NettyService {
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PTZCONTROL);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId());
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("cameraName", senderInfo.get("DestObject"));
                         msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
