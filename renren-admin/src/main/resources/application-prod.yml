@@ -40,3 +40,12 @@ netty:
   isRecord: record
   websocket:
     port: 8888
+
+
+
+
+# 流媒体地址、端口
+kxkj:
+  streamingMedia:
+    host: "117.175.158.169"
+    port: 1935

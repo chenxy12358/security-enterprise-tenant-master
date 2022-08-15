@@ -68,3 +68,12 @@ netty:
 #      url: jdbc:postgresql://123456:5432/security_enterprise
 #      username: postgres
 #      password: 123456
+
+
+
+
+# 流媒体地址、端口
+kxkj:
+  streamingMedia:
+    host: "117.175.158.169"
+    port: 1935

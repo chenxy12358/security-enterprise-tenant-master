@@ -1,5 +1,6 @@
 package io.renren.modules.common.constant;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -52,4 +53,31 @@ public class KxConstants {
     public static String KX_DISCERN_TYPE="kx_discern_type";
 
 
+    /**
+     * 流媒体服务器地址
+     */
+    public static String STREAMING_MEDIA_SERVERADDR;
+
+    /**
+     * 流媒体服务器端口
+     */
+    public static String STREAMING_MEDIA_SERVERPORT;
+
+    public String getStreamingMediaServeraddr() {
+        return STREAMING_MEDIA_SERVERADDR;
+    }
+
+    @Value("${kxkj.streamingMedia.host}")
+    public void setStreamingMediaServeraddr(String streamingMediaServeraddr) {
+        STREAMING_MEDIA_SERVERADDR = streamingMediaServeraddr;
+    }
+
+    public String getStreamingMediaServerport() {
+        return STREAMING_MEDIA_SERVERPORT;
+    }
+
+    @Value("${kxkj.streamingMedia.port}")
+    public void setStreamingMediaServerport(String streamingMediaServerport) {
+        STREAMING_MEDIA_SERVERPORT = streamingMediaServerport;
+    }
 }

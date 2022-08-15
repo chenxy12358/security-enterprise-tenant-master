@@ -213,8 +213,10 @@ public class NettyService {
                 JSONObject param = new JSONObject();
                 param.putOpt("Camera", cameraName);
                 param.putOpt("Nic", "Emd.Device.Nic.E0");
-                param.putOpt("ServerAddr", "117.175.158.169");
-                param.putOpt("ServerPort", 1935);
+//                param.putOpt("ServerAddr", "117.175.158.169");
+//                param.putOpt("ServerPort", 1935);
+                param.putOpt("ServerAddr", KxConstants.STREAMING_MEDIA_SERVERADDR);
+                param.putOpt("ServerPort", KxConstants.STREAMING_MEDIA_SERVERPORT);
                 param.putOpt("Channel", 2);
                 param.putOpt("StreamType", "Rtmp");
                 param.putOpt("Protocol", "tcp");
