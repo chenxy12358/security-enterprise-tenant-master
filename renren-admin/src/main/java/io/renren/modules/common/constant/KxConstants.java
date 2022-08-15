@@ -61,7 +61,7 @@ public class KxConstants {
     /**
      * 流媒体服务器端口
      */
-    public static String STREAMING_MEDIA_SERVERPORT;
+    public static int STREAMING_MEDIA_SERVERPORT;
 
     public String getStreamingMediaServeraddr() {
         return STREAMING_MEDIA_SERVERADDR;
@@ -72,12 +72,12 @@ public class KxConstants {
         STREAMING_MEDIA_SERVERADDR = streamingMediaServeraddr;
     }
 
-    public String getStreamingMediaServerport() {
+    public int getStreamingMediaServerport() {
         return STREAMING_MEDIA_SERVERPORT;
     }
 
     @Value("${kxkj.streamingMedia.port}")
-    public void setStreamingMediaServerport(String streamingMediaServerport) {
+    public void setStreamingMediaServerport(int streamingMediaServerport) {
         STREAMING_MEDIA_SERVERPORT = streamingMediaServerport;
     }
 }
