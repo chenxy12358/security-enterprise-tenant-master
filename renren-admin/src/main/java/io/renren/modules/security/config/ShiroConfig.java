@@ -70,17 +70,22 @@ public class ShiroConfig {
         filterMap.put("/doc.html", "anon");
         filterMap.put("/swagger-resources/**", "anon");
 
+
         filterMap.put("/modeler/**", "anon");
         filterMap.put("/flowable/**", "anon");
         filterMap.put("/app/rest/**", "anon");
         filterMap.put("/views/**", "anon");
-
+        filterMap.put("/api/**", "anon");
         filterMap.put("/captcha", "anon");
         filterMap.put("/favicon.ico", "anon");
         filterMap.put("/ureport/**", "anon");
         filterMap.put("/pay/alipay/**", "anon");
         filterMap.put("/mp/portal/**", "anon");
-        filterMap.put("/**", "oauth2");
+
+
+
+
+        filterMap.put("/**", "oauth2");//最后设值
         shiroFilter.setFilterChainDefinitionMap(filterMap);
 
         return shiroFilter;
