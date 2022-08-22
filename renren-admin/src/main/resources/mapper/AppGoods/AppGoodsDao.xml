@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.AppGoods.dao.AppGoodsDao">
+
+    <resultMap type="io.renren.modules.AppGoods.entity.AppGoodsEntity" id="appGoodsMap">
+        <result property="id" column="id"/>
+        <result property="remark" column="remark"/>
+        <result property="schoolCode" column="school_code"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="normalPrice" column="normal_price"/>
+        <result property="comNormalPrice" column="com_normal_price"/>
+        <result property="comSpecialPrice" column="com_special_price"/>
+        <result property="remainCount" column="remain_count"/>
+        <result property="saleCount" column="sale_count"/>
+        <result property="name" column="name"/>
+        <result property="url" column="url"/>
+    </resultMap>
+    <select id="getGoodsList" resultType="io.renren.modules.AppGoods.dto.AppGoodsDTO">
+        select  * from  app_goods
+    </select>
+
+</mapper>

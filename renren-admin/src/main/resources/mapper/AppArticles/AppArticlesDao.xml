@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.AppArticles.dao.AppArticlesDao">
+
+    <resultMap type="io.renren.modules.AppArticles.entity.AppArticlesEntity" id="appArticlesMap">
+        <result property="id" column="id"/>
+        <result property="remark" column="remark"/>
+        <result property="schoolCode" column="school_code"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="pubDate" column="pub_date"/>
+        <result property="readCount" column="read_count"/>
+        <result property="type" column="type"/>
+        <result property="url" column="url"/>
+    </resultMap>
+    <select id="getArticlesList" resultType="io.renren.modules.AppArticles.dto.AppArticlesDTO">
+
+          select  * from  app_articles t  where t.type =#{type} order by t.pub_date desc;
+
+
+
+    </select>
+
+</mapper>
