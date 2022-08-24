@@ -1,7 +1,9 @@
 package io.renren.modules.netWorkData.service;
 
+import cn.hutool.json.JSONObject;
 import io.renren.common.page.PageData;
 import io.renren.common.service.CrudService;
+import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO;
 import io.renren.modules.netWorkData.entity.KxNetWorkStateDataEntity;
 
@@ -16,4 +18,5 @@ import java.util.Map;
 public interface KxNetWorkStateDataService extends CrudService<KxNetWorkStateDataEntity, KxNetWorkStateDataDTO> {
     PageData<KxNetWorkStateDataDTO> page(Map<String, Object> params);
 
+    void saveNetWorkData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo);
 }

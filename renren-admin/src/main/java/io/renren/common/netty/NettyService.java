@@ -29,7 +29,6 @@ import io.renren.modules.discernConfig.service.KxDiscernConfigHdService;
 import io.renren.modules.discernConfig.service.KxDiscernConfigService;
 import io.renren.modules.gas.dto.KxGasDataDTO;
 import io.renren.modules.gas.service.KxGasDataService;
-import io.renren.modules.netWorkData.dto.KxNetWorkStateDataDTO;
 import io.renren.modules.netWorkData.service.KxNetWorkStateDataService;
 import io.renren.modules.newLoadData.dto.KxNewUploadDataDTO;
 import io.renren.modules.newLoadData.service.KxNewUploadDataService;
@@ -55,6 +54,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1273,7 +1273,7 @@ public class NettyService {
         } else if ("BatteryState".equals(Signal)) {
             saveBatteryStateData(deviceDTO, senderInfo, msgInfo);
         } else if ("NetWorkState".equals(Signal)) {
-            saveNetWorkStateData(deviceDTO, senderInfo, msgInfo);
+            kxNetWorkStateDataService.saveNetWorkData(deviceDTO, senderInfo, msgInfo);
         } /*else if ("".equals(Signal)) {
             saveAccelerationData(deviceDTO, senderInfo, msgInfo);
         } */ else if ("GPSsensors".equals(Signal)) {
@@ -1339,26 +1339,6 @@ public class NettyService {
         }
     }
 
-    /**
-     * 保存网络状态数据
-     *
-     * @param deviceDTO
-     * @param senderInfo
-     * @param msgInfo
-     */
-    public void saveNetWorkStateData(KxDeviceDTO deviceDTO, JSONObject senderInfo, JSONObject msgInfo) {
-        try {
-            KxNetWorkStateDataDTO dto = new KxNetWorkStateDataDTO();
-            dto.setDeviceid(deviceDTO.getId());
-            dto.setStationid(deviceDTO.getStationId());
-            dto.setContent(String.valueOf(msgInfo));
-            // TODO: 2022/3/1  拆分数据
-            kxNetWorkStateDataService.save(dto);
-        } catch (Exception e) {
-            logger.error("saveNetWorkStateData", e);
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 保存Gps数据
