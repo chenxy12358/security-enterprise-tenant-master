@@ -37,6 +37,10 @@
         <result property="signalQuality" column="signal_quality"/>
         <result property="properties" column="properties"/>
         <result property="remark" column="remark"/>
+        <result column="imei" property="imei"/>
+        <result column="imsi" property="imsi"/>
+        <result column="state" property="state"/>
+        <result column="iccid" property="iccid"/>
     </resultMap>
 
 

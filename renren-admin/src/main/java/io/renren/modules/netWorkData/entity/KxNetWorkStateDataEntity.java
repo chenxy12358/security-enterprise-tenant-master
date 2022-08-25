@@ -95,6 +95,12 @@ public class KxNetWorkStateDataEntity {
 	private String remark;
 
 
+	private String imei;
+	private String imsi;
+	private String state;
+	private String iccid;
+
+
 	@TableField(exist=false)
 	private String deviceName;
 	@TableField(exist=false)

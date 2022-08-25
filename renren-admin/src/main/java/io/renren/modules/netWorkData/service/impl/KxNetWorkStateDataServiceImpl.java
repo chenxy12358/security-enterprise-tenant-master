@@ -65,6 +65,12 @@ public class KxNetWorkStateDataServiceImpl extends CrudServiceImpl<KxNetWorkStat
             dto.setOperatorName(String.valueOf(msgInfo.get("OperatorName")));
             dto.setAccessTech(String.valueOf(msgInfo.get("AccessTech")));
             dto.setNicName(String.valueOf(msgInfo.get("NicName")));
+
+            dto.setImei(String.valueOf(msgInfo.get("IMEI")));
+            dto.setImsi(String.valueOf(msgInfo.get("IMSI")));
+            dto.setIccid(String.valueOf(msgInfo.get("ICCID")));
+            dto.setState(String.valueOf(msgInfo.get("State")));
+
             String quality=String.valueOf(msgInfo.get("SignalQuality"));
             if(StringUtil.isNotEmpty(quality)){
                 double signalQuality=new Double(quality);

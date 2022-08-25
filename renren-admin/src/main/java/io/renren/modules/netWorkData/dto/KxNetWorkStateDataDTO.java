@@ -61,4 +61,9 @@ public class KxNetWorkStateDataDTO implements Serializable {
     @ApiModelProperty(value = "机构名称")
     private String depName;
 
+    private String imei;
+    private String imsi;
+    private String state;
+    private String iccid;
+
 }
