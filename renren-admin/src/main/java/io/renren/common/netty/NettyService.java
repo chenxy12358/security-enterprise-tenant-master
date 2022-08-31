@@ -12,6 +12,7 @@ import io.renren.common.exception.RenException;
 import io.renren.common.utils.*;
 import io.renren.modules.battery.dto.KxBatteryDTO;
 import io.renren.modules.battery.service.KxBatteryService;
+import io.renren.modules.common.constant.AlertConstants;
 import io.renren.modules.common.constant.DeviceInterfaceConstants;
 import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.common.constant.KxConstants;
@@ -1408,8 +1409,6 @@ public class NettyService {
             kxDeviceHumidityService.save(dto);
             String alarmStatus = dto.getAlarmStatus();
             if (!"Normal".equals(alarmStatus)) {
-                String title = "您有新的湿度数据预警通知，请及时查看！";
-                String type = "湿度预警";
                 String deviceName = dto.getDeviceName();
                 String deviceCode = deviceDTO.getSerialNo();
                 List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
@@ -1420,12 +1419,12 @@ public class NettyService {
                         break;
                     }
                 }
-                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                sendNoticeData(AlertConstants.ALERT_TYPE_HUMIDITY_TITLE, AlertConstants.ALERT_TYPE_HUMIDITY, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
                 KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
                 dataDTO.setDeviceId(deviceDTO.getId());
                 dataDTO.setStationId(deviceDTO.getStationId());
                 dataDTO.setCreateDate(dto.getCreateDate());
-                dataDTO.setType(type);
+                dataDTO.setType(AlertConstants.ALERT_TYPE_HUMIDITY_NAME);
                 kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
                 kxNewUploadDataService.save(dataDTO);
                 //发送统计页面刷新指令
@@ -1466,8 +1465,6 @@ public class NettyService {
             kxDeviceInclinationService.save(dto);
             String alarmStatus = dto.getAlarmStatus();
             if (!"Normal".equals(alarmStatus)) {
-                String title = "您有新的设备倾斜预警通知，请及时查看！";
-                String type = "倾斜预警";
                 String deviceName = dto.getDeviceName();
                 String deviceCode = deviceDTO.getSerialNo();
                 List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
@@ -1478,12 +1475,12 @@ public class NettyService {
                         break;
                     }
                 }
-                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                sendNoticeData(AlertConstants.ALERT_TYPE_TILT_TITLE, AlertConstants.ALERT_TYPE_TILT, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
                 KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
                 dataDTO.setDeviceId(deviceDTO.getId());
                 dataDTO.setStationId(deviceDTO.getStationId());
                 dataDTO.setCreateDate(dto.getCreateDate());
-                dataDTO.setType(type);
+                dataDTO.setType(AlertConstants.ALERT_TYPE_TILT_NAME);
                 kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
                 kxNewUploadDataService.save(dataDTO);
                 sendLiveRefresh();
@@ -1523,8 +1520,6 @@ public class NettyService {
             kxDeviceTemperatureService.save(dto);
             String alarmStatus = dto.getAlarmStatus();
             if (!"Normal".equals(alarmStatus)) {
-                String title = "您有新的温度数据预警通知，请及时查看！";
-                String type = "温度预警";
                 String deviceName = dto.getDeviceName();
                 String deviceCode = deviceDTO.getSerialNo();
                 List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
@@ -1535,12 +1530,12 @@ public class NettyService {
                         break;
                     }
                 }
-                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
+                sendNoticeData(AlertConstants.ALERT_TYPE_GAS_TITLE, AlertConstants.ALERT_TYPE_TEMP, deviceName, deviceCode, alarmStatus, dto.getCurrentValue() + dto.getUnit(), formatter.format(dto.getUpdateDate()));
                 KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
                 dataDTO.setDeviceId(deviceDTO.getId());
                 dataDTO.setStationId(deviceDTO.getStationId());
                 dataDTO.setCreateDate(dto.getCreateDate());
-                dataDTO.setType(type);
+                dataDTO.setType(AlertConstants.ALERT_TYPE_TEMP_NAME);
                 kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
                 kxNewUploadDataService.save(dataDTO);
                 sendLiveRefresh();
@@ -1592,8 +1587,8 @@ public class NettyService {
             }
             KxGasDataService.save(KxGasDataDTO);
             if (!("Normal".equals(alarmStatus) || "0".equals(alarmStatus))) {
-                String title = "您有新的燃气数据预警通知，请及时查看！";
-                String type = "燃气预警";
+//                String title = "您有新的燃气数据预警通知，请及时查看！";
+//                String type = "燃气预警";
                 String deviceName = KxGasDataDTO.getDeviceName();
                 String deviceCode = deviceDTO.getSerialNo();
                 List<SysDictDataEntity> list = sysDictDataService.getListByDictName("kx_data_status");
@@ -1604,13 +1599,13 @@ public class NettyService {
                         break;
                     }
                 }
-                sendNoticeData(title, type, deviceName, deviceCode, alarmStatus, KxGasDataDTO.getConcentrationValue() + KxGasDataDTO.getUnit(), formatter.format(KxGasDataDTO.getUpdateDate()));
+                sendNoticeData(AlertConstants.ALERT_TYPE_GAS_TITLE, AlertConstants.ALERT_TYPE_GAS, deviceName, deviceCode, alarmStatus, KxGasDataDTO.getConcentrationValue() + KxGasDataDTO.getUnit(), formatter.format(KxGasDataDTO.getUpdateDate()));
                 // 保存最新数据
                 KxNewUploadDataDTO dto = new KxNewUploadDataDTO();
                 dto.setDeviceId(deviceDTO.getId());
                 dto.setStationId(deviceDTO.getStationId());
                 dto.setCreateDate(KxGasDataDTO.getCreateDate());
-                dto.setType(type);
+                dto.setType(AlertConstants.ALERT_TYPE_GAS_NAME);
                 kxNewUploadDataService.deleleByDeviceId(dto.getDeviceId());
                 kxNewUploadDataService.save(dto);
             }
@@ -1661,16 +1656,14 @@ public class NettyService {
             kxDeviceAlarmService.save(alarmDTO);
             // todo   向总线的告警消息组发送通知信息，其它模块可以获取做后续处理，如通知前端、短信、微信发送等
             //  计划用消息队列，订阅的方式通知其他模块
-            String title = "您有新的预警图片通知，请及时处理！";
-            String type = "图片预警";
             String deviceName = deviceDTO.getName();
             String deviceCode = deviceDTO.getSerialNo();
-            sendNoticeData(title, type, deviceName, deviceCode, "", "", formatter.format(alarmDTO.getUpdateDate()));
+            sendNoticeData(AlertConstants.ALERT_TYPE_IMG_TITLE, AlertConstants.ALERT_TYPE_IMG, deviceName, deviceCode, "", "", formatter.format(alarmDTO.getUpdateDate()));
             KxNewUploadDataDTO dataDTO = new KxNewUploadDataDTO();
             dataDTO.setDeviceId(deviceDTO.getId());
             dataDTO.setStationId(deviceDTO.getStationId());
             dataDTO.setCreateDate(alarmDTO.getCreateDate());
-            dataDTO.setType(type);
+            dataDTO.setType(AlertConstants.ALERT_TYPE_IMG_NAME);
             kxNewUploadDataService.deleleByDeviceId(dataDTO.getDeviceId());
             kxNewUploadDataService.save(dataDTO);
             sendLiveRefresh();
@@ -1686,7 +1679,7 @@ public class NettyService {
      *
      * @param
      */
-    public void sendNoticeData(String title, String type, String deviceName, String deviceCode, String level, String currentValue, String dateTime) {
+    public void sendNoticeData(String title, int type, String deviceName, String deviceCode, String level, String currentValue, String dateTime) {
         try {
             StringBuffer sb = new StringBuffer();
             sb.append("<p><strong style=\"color: rgb(136, 136, 136);\">");
@@ -1706,7 +1699,7 @@ public class NettyService {
             sb.append("</strong>");
             sb.append(deviceCode);
             sb.append("</p>");
-            if (!"图片预警".equals(type)) {
+            if (AlertConstants.ALERT_TYPE_IMG != type) {
                 sb.append("<p><strong style=\"color: rgb(136, 136, 136);\">预警等级：</strong>");
                 sb.append(level);
                 sb.append("</p>");
@@ -1721,7 +1714,7 @@ public class NettyService {
             sb.append(dateTime);
             sb.append("</p>");
             SysNoticeDTO dto = new SysNoticeDTO();
-            dto.setType(0);
+            dto.setType(type); //cxy test
             dto.setTitle(title);
             dto.setContent(sb.toString());
             dto.setReceiverType(0);
