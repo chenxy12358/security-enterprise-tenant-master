@@ -164,12 +164,16 @@ public class HandleDataService {
                         if (null != jsonArray && !jsonArray.isEmpty()) {
                             JSONObject json= jsonArray.getJSONObject(0);
                             enable=json.getBool("Enable");
+                            for (int j = 0; j < jsonArray.size(); j++) {
+
+                            }
                         }
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETPARAM);
                         msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("Enable", enable);
+                        msgInfoJsonObject.putOpt("Speaker", jsonArray);
                         msgInfoJsonObject.putOpt("session", session);
                         msgInfoJsonObject.putOpt("result", "ok");
                         message.setData(msgInfoJsonObject);
