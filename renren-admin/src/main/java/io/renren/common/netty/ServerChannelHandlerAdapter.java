@@ -41,6 +41,8 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
     private SocketService socketService;
     @Autowired
     private NettyService nettyService;
+    @Autowired
+    private HandleDataService handleDataService;
     @Resource
     private NettyConfig nettyConfig;
 
@@ -257,7 +259,8 @@ public class ServerChannelHandlerAdapter extends ChannelInboundHandlerAdapter {
                         senderInfoJsonObject.putOpt("CreatedTime", dateString);
                     }
                     if (isCmmdReply) {
-                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);
+//                        nettyService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject, channel, session);// todo del
+                        handleDataService.rcvCmmdReply(deviceSn, senderInfoJsonObject, msgInfoJsonObject,session);
                     } else {
                         //判断Json格式的消息体不是空
                         if (StringUtil.isNotEmpty(msgInfo)) {

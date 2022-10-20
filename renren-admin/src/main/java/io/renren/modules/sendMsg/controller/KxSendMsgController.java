@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import io.renren.common.netty.NettyService;
 import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
+import io.renren.modules.sendMsg.service.KxSendMsgService;
 import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +25,7 @@ public class KxSendMsgController {
     @Autowired
     private NettyService nettyService;
     @Autowired
-    private WebSocketServer webSocketServerVideo;
+    private KxSendMsgService kxSendMsgService;
 
     @PostMapping("sendCmdCamera")
     @ApiOperation("发送相机命令给设备端")
@@ -165,18 +166,18 @@ public class KxSendMsgController {
 
     @PostMapping("getSoundStat")
     @ApiOperation("获取喇叭声音状态")
-    public Result getSoundStat(@RequestBody Object object) {
+    public Result getAudioStat(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
-        nettyService.getSoundStat(params);
+        kxSendMsgService.getAudioStat(params);
         return new Result();
     }
 
 
     @PostMapping("switchSound")
     @ApiOperation("开关喇叭声音")
-    public Result switchSound(@RequestBody Object object) {
+    public Result switchAudio(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
-        nettyService.switchSound(params);
+        kxSendMsgService.switchAudio(params);
         return new Result();
     }
 
