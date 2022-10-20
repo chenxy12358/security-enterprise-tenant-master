@@ -1,6 +1,5 @@
 package io.renren.common.netty;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -10,8 +9,6 @@ import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
-import io.renren.modules.discernConfig.dto.KxAICameraVO;
-import io.renren.modules.discernConfig.dto.KxCameraNameVO;
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author cxy
