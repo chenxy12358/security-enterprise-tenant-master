@@ -1090,22 +1090,23 @@ public class NettyService {
                         webSocketServer.sendMessageAll(message);
                     }
                 }
-            } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
-                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
-                    if (DeviceInterfaceConstants.METHOD_GETAUDIOLIST.equals(senderInfo.get("Method"))) {
-                        MessageData<Object> message = new MessageData<>();
-                        message.setType(1);
-                        msgInfoJsonObject.putOpt("time", new Date());
-                        msgInfoJsonObject.putOpt("deviceSn", deviceSn);
-                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
-                        msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
-                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
-                        msgInfoJsonObject.putOpt("session", session);
-                        message.setData(msgInfoJsonObject);
-                        webSocketServer.sendMessageAll(message);
-                    }
-                }
             }
+//            else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) {
+//                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
+//                    if (DeviceInterfaceConstants.METHOD_GETAUDIOLIST.equals(senderInfo.get("Method"))) {
+//                        MessageData<Object> message = new MessageData<>();
+//                        message.setType(1);
+//                        msgInfoJsonObject.putOpt("time", new Date());
+//                        msgInfoJsonObject.putOpt("deviceSn", deviceSn);
+//                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+//                        msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
+//                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
+//                        msgInfoJsonObject.putOpt("session", session);
+//                        message.setData(msgInfoJsonObject);
+//                        webSocketServer.sendMessageAll(message);
+//                    }
+//                }
+//            }
             else if ("Emd.Service.Vpn.E0".equals(senderInfo.get("DestObject"))) {
                 if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_VPN_CONNECT.equals(senderInfo.get("Method"))) {
@@ -1181,6 +1182,16 @@ public class NettyService {
                         msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("session", session);
                         msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }else if (DeviceInterfaceConstants.METHOD_GETAUDIOLIST.equals(senderInfo.get("Method"))) {
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("deviceSn", deviceSn);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+                        msgInfoJsonObject.putOpt("deviceName", deviceDTO.getName());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETAUDIOLIST);
+                        msgInfoJsonObject.putOpt("session", session);
                         message.setData(msgInfoJsonObject);
                         webSocketServer.sendMessageAll(message);
                     }
