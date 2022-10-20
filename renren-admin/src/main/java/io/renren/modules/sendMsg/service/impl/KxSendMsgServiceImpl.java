@@ -1,5 +1,6 @@
 package io.renren.modules.sendMsg.service.impl;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import io.netty.channel.Channel;
 import io.renren.common.exception.RenException;
@@ -70,13 +71,22 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
             String key = nettyService.getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = nettyService.getChannel(key);
+
+                JSONArray jsonArray = params.getJSONArray("Speaker");
+
                 JSONObject destInfo = new JSONObject();
                 destInfo.putOpt("DestObject", "Emd.Service.Audio.E0");
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETPARAM);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
-                JSONObject param = new JSONObject();
-                param.putOpt("Enable", params.get("Enable"));
 
+                JSONArray paramArray = new JSONArray();
+                for (int j = 0; j < jsonArray.size(); j++) {
+                    JSONObject jSONObject = jsonArray.getJSONObject(j);
+                    jSONObject.putOpt("Enable", params.getBool("Enable"));
+                    paramArray.add(jSONObject);
+                }
+                JSONObject param = new JSONObject();
+                param.putOpt("Speaker",paramArray);
                 param.putOpt("_session", params.get("currentTime").toString());
                 //发送指令
                 SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
