@@ -154,7 +154,6 @@ public class HandleDataService {
                     if (DeviceInterfaceConstants.METHOD_GETPARAM.equals(senderInfo.get("Method"))) {
                         JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
                         JSONArray jsonArray = resultValue.getJSONArray("Speaker");
-
                         boolean enable = false;
                         if (null != jsonArray && !jsonArray.isEmpty()) {
                             JSONObject json= jsonArray.getJSONObject(0);
@@ -168,7 +167,6 @@ public class HandleDataService {
                         msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETPARAM);
                         msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
                         msgInfoJsonObject.putOpt("Enable", enable);
-                        msgInfoJsonObject.putOpt("Speaker", jsonArray);
                         msgInfoJsonObject.putOpt("session", session);
                         msgInfoJsonObject.putOpt("result", "ok");
                         message.setData(msgInfoJsonObject);
