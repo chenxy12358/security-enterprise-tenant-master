@@ -101,4 +101,19 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
         }
 
     }
+
+    @Override
+    public void upgradeDevice(JSONObject params) {
+        // TODO: 2022/10/20  
+    }
+
+    @Override
+    public void downloadSystem(JSONObject params) {
+        // TODO: 2022/10/20  
+    }
+
+    @Override
+    public void setOsdInfo(JSONObject params) {
+        // TODO: 2022/10/20  
+    }
 }

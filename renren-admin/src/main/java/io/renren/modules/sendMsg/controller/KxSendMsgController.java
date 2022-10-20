@@ -7,7 +7,6 @@ import io.renren.common.netty.NettyService;
 import io.renren.common.utils.Result;
 import io.renren.common.utils.StringUtil;
 import io.renren.modules.sendMsg.service.KxSendMsgService;
-import io.renren.websocket.WebSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,9 +161,7 @@ public class KxSendMsgController {
     }
 
 
-
-
-    @PostMapping("getSoundStat")
+    @PostMapping("getAudioStat")
     @ApiOperation("获取喇叭声音状态")
     public Result getAudioStat(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
@@ -173,11 +170,35 @@ public class KxSendMsgController {
     }
 
 
-    @PostMapping("switchSound")
+    @PostMapping("switchAudio")
     @ApiOperation("开关喇叭声音")
     public Result switchAudio(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         kxSendMsgService.switchAudio(params);
+        return new Result();
+    }
+
+    @PostMapping("upgradeDevice")
+    @ApiOperation("升级系统")
+    public Result upgradeDevice(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        kxSendMsgService.upgradeDevice(params);
+        return new Result();
+    }
+
+    @PostMapping("downloadSystem")
+    @ApiOperation("下载系统")
+    public Result downloadSystem(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        kxSendMsgService.downloadSystem(params);
+        return new Result();
+    }
+
+    @PostMapping("setOsdInfo")
+    @ApiOperation("osd设置")
+    public Result setOsdInfo(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        kxSendMsgService.setOsdInfo(params);
         return new Result();
     }
 

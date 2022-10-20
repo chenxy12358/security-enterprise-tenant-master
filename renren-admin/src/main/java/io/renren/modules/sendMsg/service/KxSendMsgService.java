@@ -19,4 +19,26 @@ public interface KxSendMsgService {
      * @param params
      */
     void switchAudio(JSONObject params);
+
+
+    /**
+     * 升级系统
+     * @param params
+     */
+    void upgradeDevice(JSONObject params);
+
+    /**
+     * 下载系统
+     * @param params
+     */
+    void downloadSystem(JSONObject params);
+
+
+    /**
+     * osd设置
+     * @param params
+     */
+    void setOsdInfo(JSONObject params);
+
+
 }
