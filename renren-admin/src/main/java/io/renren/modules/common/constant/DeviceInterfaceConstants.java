@@ -84,6 +84,17 @@ public class DeviceInterfaceConstants {
     public static String METHOD_VPN_GETSTAT="GetStat";
     public static String METHOD_VPN_CLOSE="Close";
 
+
+    /**
+     * SetParam方法
+     */
+    public static String METHOD_SETPARAM="SetParam";
+
+    /**
+     * GetParam方法
+     */
+    public static String METHOD_GETPARAM="GetParam";
+
     /**
      * 预置位保存前缀
      */

@@ -160,4 +160,25 @@ public class KxSendMsgController {
         return new Result();
     }
 
+
+
+
+    @PostMapping("getSoundStat")
+    @ApiOperation("获取喇叭声音状态")
+    public Result getSoundStat(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.getSoundStat(params);
+        return new Result();
+    }
+
+
+    @PostMapping("switchSound")
+    @ApiOperation("开关喇叭声音")
+    public Result switchSound(@RequestBody Object object) {
+        JSONObject params = JSONUtil.parseObj(object);
+        nettyService.switchSound(params);
+        return new Result();
+    }
+
+
 }

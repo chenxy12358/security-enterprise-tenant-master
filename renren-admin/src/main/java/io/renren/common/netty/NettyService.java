@@ -812,6 +812,80 @@ public class NettyService {
         }
     }
 
+
+    /**
+     * 获取喇叭状态
+     *
+     * @param params
+     */
+    public void getSoundStat(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("获取喇叭状态====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Audio.E0");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_GETPARAM);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("getVPNStat", e);
+        }
+    }
+
+    /**
+     * 开关喇叭声音
+     * @param params
+     */
+    public void switchSound(JSONObject params) {
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                logger.error("开启vpn====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Service.Vpn.E0");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_SETPARAM);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("Enable", params.get("Enable"));
+
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("openVpn", e);
+        }
+    }
+
+
+
     /**
      * 接收心跳数据
      *
@@ -1031,7 +1105,8 @@ public class NettyService {
                         webSocketServer.sendMessageAll(message);
                     }
                 }
-            } else if ("Emd.Service.Vpn.E0".equals(senderInfo.get("DestObject"))) {
+            }
+            else if ("Emd.Service.Vpn.E0".equals(senderInfo.get("DestObject"))) {
                 if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_VPN_CONNECT.equals(senderInfo.get("Method"))) {
                         JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
@@ -1084,7 +1159,57 @@ public class NettyService {
                         webSocketServer.sendMessageAll(message);
                     }
                 }
-            } else {
+            } else if ("Emd.Service.Audio.E0".equals(senderInfo.get("DestObject"))) { // 喇叭开关功能 返回数据
+
+                MessageData<Object> message = new MessageData<>();
+                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
+                    if (DeviceInterfaceConstants.METHOD_GETPARAM.equals(senderInfo.get("Method"))) {
+                        JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETPARAM);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+                        msgInfoJsonObject.putOpt("Enable", resultValue.get("Enable"));
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    } else if (DeviceInterfaceConstants.METHOD_SETPARAM.equals(senderInfo.get("Method"))) {
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_SETPARAM);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "ok");
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }
+                } else {
+                    if (DeviceInterfaceConstants.METHOD_GETPARAM.equals(senderInfo.get("Method"))) {
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_GETPARAM);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "fail");
+                        msgInfoJsonObject.putOpt("msg", "获取喇叭开关状态失败，"+msgInfoJsonObject.get("ErrorMsg"));
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }
+                    else if (DeviceInterfaceConstants.METHOD_SETPARAM.equals(senderInfo.get("Method"))) {
+                        message.setType(1);
+                        msgInfoJsonObject.putOpt("time", new Date());
+                        msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_SETPARAM);
+                        msgInfoJsonObject.putOpt("deviceID", deviceDTO.getId()+"");
+                        msgInfoJsonObject.putOpt("session", session);
+                        msgInfoJsonObject.putOpt("result", "fail");
+                        msgInfoJsonObject.putOpt("msg", "设置喇叭开关状态失败，"+msgInfoJsonObject.get("ErrorMsg"));
+                        message.setData(msgInfoJsonObject);
+                        webSocketServer.sendMessageAll(message);
+                    }
+                }
+            }
+            else {
                 if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_PTZCONTROL.equals(senderInfo.get("Method"))) {
                         logger.debug("========================");
