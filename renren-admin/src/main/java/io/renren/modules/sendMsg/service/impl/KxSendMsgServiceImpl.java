@@ -64,7 +64,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
         try {
             KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
             if (dto == null) {
-                log.error("开启vpn====>未查到相关设备信息");
+                log.error("开关喇叭====>未查到相关设备信息");
                 return;
             }
             //获取通讯通道
@@ -97,7 +97,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("openVpn", e);
+            log.error("switchAudio", e);
         }
 
     }
@@ -114,6 +114,76 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
 
     @Override
     public void setOsdInfo(JSONObject params) {
-        // TODO: 2022/10/20  
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                log.error("设置osd====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = nettyService.getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = nettyService.getChannel(key);
+
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Device.Camera.E0");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PITCHOSD);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject json = new JSONObject();
+                JSONObject position = new JSONObject();
+                position.putOpt("x", 0.5);
+                position.putOpt("y", 0.5);
+
+                json.putOpt("Enable", true);
+                json.putOpt("FontSize", 24);
+                json.putOpt("PlainText", params.get("osd"));
+                json.putOpt("Position", position);
+                JSONObject param = new JSONObject();
+                param.putOpt("Channel",json);
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                nettyService.printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("setOsdInfo", e);
+        }
+    }
+
+    @Override
+    public void getOsdInfo(JSONObject params) {
+
+        try {
+            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            if (dto == null) {
+                log.error("获取osd信息====>未查到相关设备信息");
+                return;
+            }
+            //获取通讯通道
+            String key = nettyService.getServer(dto.getSerialNo());
+            if (StringUtil.isNotEmpty(key)) {
+                Channel channel = nettyService.getChannel(key);
+                JSONObject destInfo = new JSONObject();
+                destInfo.putOpt("DestObject", "Emd.Device.Camera.E0");
+                destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_FETCHOSD);
+                destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+                JSONObject param = new JSONObject();
+                param.putOpt("_session", params.get("currentTime").toString());
+                //发送指令
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+            } else {
+                log.error("无相应的通讯通道");
+                nettyService.printNettyLog();
+                throw new RenException("通道-设备数据异常，请检查设备!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("getOsdInfo", e);
+        }
+
     }
 }

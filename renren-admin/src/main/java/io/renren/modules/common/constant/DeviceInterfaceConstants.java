@@ -96,6 +96,14 @@ public class DeviceInterfaceConstants {
     public static String METHOD_GETPARAM="GetParam";
 
     /**
+     * 9. 获取OSD信息
+     */
+    public static String METHOD_FETCHOSD="FetchOSD";
+    /**
+     * 10. 设置OSD
+     */
+    public static String METHOD_PITCHOSD="PitchOSD";
+    /**
      * 预置位保存前缀
      */
     public static String PRESET_PRE="YZWPZ_";

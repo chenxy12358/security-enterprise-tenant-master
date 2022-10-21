@@ -41,4 +41,11 @@ public interface KxSendMsgService {
     void setOsdInfo(JSONObject params);
 
 
+
+    /**
+     * 9. 获取OSD信息
+     * @param params
+     */
+    void getOsdInfo(JSONObject params);
+
 }
