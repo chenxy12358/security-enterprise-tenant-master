@@ -216,21 +216,6 @@ public class HandleDataService {
                     }
                 }
             }
-            // osd 返回数据
-            else if (senderInfo.get("DestObject").equals("Emd.Service.Camera")) {
-                MessageData<Object> message = new MessageData<>();
-                if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
-                    if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
-                        message.setType(1);
-                        message.setData(msgInfoJsonObject);
-                        webSocketServer.sendMessageAll(message);
-                    } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
-                        message.setType(1);
-                        message.setData(msgInfoJsonObject);
-                        webSocketServer.sendMessageAll(message);
-                    }
-                }
-            }
             else {
                 if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                     if (DeviceInterfaceConstants.METHOD_PTZCONTROL.equals(senderInfo.get("Method"))) {
@@ -247,7 +232,24 @@ public class HandleDataService {
                         message.setData(msgInfoJsonObject);
                         webSocketServer.sendMessageAll(message);
                     }
+
+                    // osd 返回数据
+                    if (senderInfo.get("DestObject").toString().contains("Emd.Device.Camera")) {
+                        MessageData<Object> message = new MessageData<>();
+                        if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
+                            if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
+                                message.setType(1);
+                                message.setData(msgInfoJsonObject);
+                                webSocketServer.sendMessageAll(message);
+                            } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
+                                message.setType(1);
+                                message.setData(msgInfoJsonObject);
+                                webSocketServer.sendMessageAll(message);
+                            }
+                        }
+                    }
                 }
+
             }
         } catch (Exception e) {
             log.error("rcvCmmdReply", e);
