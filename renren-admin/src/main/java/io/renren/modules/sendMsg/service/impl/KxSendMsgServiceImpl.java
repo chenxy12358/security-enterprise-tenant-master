@@ -124,9 +124,8 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
             String key = nettyService.getServer(dto.getSerialNo());
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = nettyService.getChannel(key);
-
                 JSONObject destInfo = new JSONObject();
-                destInfo.putOpt("DestObject", "Emd.Device.Camera.E0");
+                destInfo.putOpt("DestObject", params.get("cameraName"));
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PITCHOSD);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 JSONObject json = new JSONObject();
@@ -136,7 +135,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
 
                 json.putOpt("Enable", true);
                 json.putOpt("FontSize", 24);
-                json.putOpt("PlainText", params.get("osd"));
+                json.putOpt("PlainText", params.get("OsdData"));
                 json.putOpt("Position", position);
                 JSONObject param = new JSONObject();
                 param.putOpt("Channel",json);
@@ -158,7 +157,10 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
     public void getOsdInfo(JSONObject params) {
 
         try {
-            KxDeviceDTO dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            KxDeviceDTO dto = kxDeviceService.getBySerialNo(String.valueOf(params.get("deviceSn")));
+            if (null != params.get("deviceId")) {
+                dto = kxDeviceService.get(Long.valueOf(String.valueOf(params.get("deviceId"))));
+            }
             if (dto == null) {
                 log.error("获取osd信息====>未查到相关设备信息");
                 return;
@@ -168,7 +170,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
             if (StringUtil.isNotEmpty(key)) {
                 Channel channel = nettyService.getChannel(key);
                 JSONObject destInfo = new JSONObject();
-                destInfo.putOpt("DestObject", "Emd.Device.Camera.E0");
+                destInfo.putOpt("DestObject", params.get("cameraName"));
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_FETCHOSD);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
                 JSONObject param = new JSONObject();
