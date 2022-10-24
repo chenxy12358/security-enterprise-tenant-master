@@ -128,20 +128,33 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
                 destInfo.putOpt("DestObject", params.get("cameraName"));
                 destInfo.putOpt("Method", DeviceInterfaceConstants.METHOD_PITCHOSD);
                 destInfo.putOpt("Interface", DeviceInterfaceConstants.INTERFACE_NORMAL);
+
+                //ICCID
+                JSONObject iccid_json = new JSONObject();
+                JSONObject iccid_position = new JSONObject();
+                iccid_position.putOpt("x", 0.70);
+                iccid_position.putOpt("y", 0.95);
+                iccid_json.putOpt("Enable", true);
+                iccid_json.putOpt("PlainText", params.get("ICCID"));
+                iccid_json.putOpt("Position", iccid_position);
+                JSONObject param = new JSONObject();
+                param.putOpt("ICCID",iccid_json);
+                param.putOpt("_session", params.get("currentTime").toString());
+
+                //channel
                 JSONObject json = new JSONObject();
                 JSONObject position = new JSONObject();
-                position.putOpt("x", 0.5);
-                position.putOpt("y", 0.5);
-
+                position.putOpt("x", 0.01);
+                position.putOpt("y", 0.95);
                 json.putOpt("Enable", true);
-                json.putOpt("FontSize", 24);
-                json.putOpt("PlainText", params.get("OsdData"));
+                json.putOpt("PlainText", params.get("channel"));
                 json.putOpt("Position", position);
-                JSONObject param = new JSONObject();
+                JSONObject paramC = new JSONObject();
                 param.putOpt("Channel",json);
                 param.putOpt("_session", params.get("currentTime").toString());
                 //发送指令
                 SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), param.toString(), channel);
+                SendMsgUtils.sendMsg(dto.getSerialNo(), destInfo.toString(), paramC.toString(), channel);
             } else {
                 log.error("无相应的通讯通道");
                 nettyService.printNettyLog();

@@ -196,14 +196,14 @@ public class KxSendMsgController {
 
 
     @PostMapping("getOsdInfo")
-    @ApiOperation("osd设置")
+    @ApiOperation("获取OSD信息")
     public Result getOsdInfo(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         kxSendMsgService.getOsdInfo(params);
         return new Result();
     }
     @PostMapping("setOsdInfo")
-    @ApiOperation("osd设置")
+    @ApiOperation("OSD设置")
     public Result setOsdInfo(@RequestBody Object object) {
         JSONObject params = JSONUtil.parseObj(object);
         kxSendMsgService.setOsdInfo(params);
