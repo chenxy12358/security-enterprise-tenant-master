@@ -238,6 +238,7 @@ public class HandleDataService {
                         if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
                             message.setType(1);
                             msgInfoJsonObject.putOpt("session", session);
+                            msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_FETCHOSD);
                             msgInfoJsonObject.putOpt("Channel", resultValue.get("Channel"));
                             msgInfoJsonObject.putOpt("ICCID", resultValue.get("ICCID"));
                             msgInfoJsonObject.putOpt("DateAndTime", resultValue.get("DateAndTime"));
@@ -246,6 +247,7 @@ public class HandleDataService {
                         } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
                             message.setType(1);
                             message.setData(msgInfoJsonObject);
+                            msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PITCHOSD);
                             msgInfoJsonObject.putOpt("session", session);
                             webSocketServer.sendMessageAll(message);
                         }
