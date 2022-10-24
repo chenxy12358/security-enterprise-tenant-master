@@ -135,6 +135,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
                 iccid_position.putOpt("x", 0.70);
                 iccid_position.putOpt("y", 0.95);
                 iccid_json.putOpt("Enable", true);
+                iccid_json.putOpt("FontSize", 24);
                 iccid_json.putOpt("PlainText", params.get("ICCID"));
                 iccid_json.putOpt("Position", iccid_position);
                 JSONObject param = new JSONObject();
@@ -147,6 +148,7 @@ public class KxSendMsgServiceImpl implements KxSendMsgService {
                 position.putOpt("x", 0.01);
                 position.putOpt("y", 0.95);
                 json.putOpt("Enable", true);
+                json.putOpt("FontSize", 24);
                 json.putOpt("PlainText", params.get("channel"));
                 json.putOpt("Position", position);
                 JSONObject paramC = new JSONObject();

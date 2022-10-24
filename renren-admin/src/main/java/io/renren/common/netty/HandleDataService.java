@@ -9,6 +9,8 @@ import io.renren.modules.common.constant.KxAiBoundary;
 import io.renren.modules.device.dto.KxDeviceDTO;
 import io.renren.modules.device.service.KxDeviceService;
 import io.renren.modules.discernBoundary.service.KxDiscernBoundaryService;
+import io.renren.modules.security.entity.SysUserTokenEntity;
+import io.renren.modules.security.service.ShiroService;
 import io.renren.websocket.WebSocketServer;
 import io.renren.websocket.data.MessageData;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,8 @@ public class HandleDataService {
     private KxDiscernBoundaryService kxDiscernBoundaryService;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private ShiroService shiroService;
 
 
     /**
@@ -52,7 +56,6 @@ public class HandleDataService {
             if ("Pending".equals(msgInfoJsonObject.get("Result"))) {
                 return;
             }
-
             // 更新标记框发送状态   Msg:{"Code":6145,"Result":"Ok"} or {"ErrorMsg":"Param Error","Result":"Failed"}
             String method = senderInfo.getStr("Method");
             String destObject = senderInfo.getStr("DestObject");
@@ -232,7 +235,13 @@ public class HandleDataService {
 
                     // osd 返回数据
                     if (senderInfo.get("DestObject").toString().contains("Emd.Device.Camera")) {
-
+                        SysUserTokenEntity tokenEntity = shiroService.getByToken(session);
+                        Long userId=null;
+                        if(tokenEntity == null || tokenEntity.getExpireDate().getTime() < System.currentTimeMillis()){
+                            log.error("osd返回数据,session失效："+session);
+                        }else {
+                            userId=tokenEntity.getUserId();
+                        }
                         JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
                         MessageData<Object> message = new MessageData<>();
                         if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
@@ -243,13 +252,13 @@ public class HandleDataService {
                             msgInfoJsonObject.putOpt("ICCID", resultValue.get("ICCID"));
                             msgInfoJsonObject.putOpt("DateAndTime", resultValue.get("DateAndTime"));
                             message.setData(msgInfoJsonObject);
-                            webSocketServer.sendMessageAll(message);
+                            webSocketServer.sendMessage(userId,message);
                         } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
                             message.setType(1);
                             message.setData(msgInfoJsonObject);
                             msgInfoJsonObject.putOpt("type", DeviceInterfaceConstants.METHOD_PITCHOSD);
                             msgInfoJsonObject.putOpt("session", session);
-                            webSocketServer.sendMessageAll(message);
+                            webSocketServer.sendMessage(userId,message);
                         }
                     }
                 }
