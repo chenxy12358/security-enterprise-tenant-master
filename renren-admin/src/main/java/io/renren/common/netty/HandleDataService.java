@@ -158,9 +158,6 @@ public class HandleDataService {
                         if (null != jsonArray && !jsonArray.isEmpty()) {
                             JSONObject json= jsonArray.getJSONObject(0);
                             enable=json.getBool("Enable");
-                            for (int j = 0; j < jsonArray.size(); j++) {
-
-                            }
                         }
                         message.setType(1);
                         msgInfoJsonObject.putOpt("time", new Date());
@@ -235,19 +232,22 @@ public class HandleDataService {
 
                     // osd 返回数据
                     if (senderInfo.get("DestObject").toString().contains("Emd.Device.Camera")) {
+
+                        JSONObject resultValue = JSONUtil.parseObj(msgInfoJsonObject.get("ResultValue"));
                         MessageData<Object> message = new MessageData<>();
-                        if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
-                            if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
-                                message.setType(1);
-                                msgInfoJsonObject.putOpt("session", session);
-                                message.setData(msgInfoJsonObject);
-                                webSocketServer.sendMessageAll(message);
-                            } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
-                                message.setType(1);
-                                message.setData(msgInfoJsonObject);
-                                msgInfoJsonObject.putOpt("session", session);
-                                webSocketServer.sendMessageAll(message);
-                            }
+                        if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
+                            message.setType(1);
+                            msgInfoJsonObject.putOpt("session", session);
+                            msgInfoJsonObject.putOpt("Channel", resultValue.get("Channel"));
+                            msgInfoJsonObject.putOpt("ICCID", resultValue.get("ICCID"));
+                            msgInfoJsonObject.putOpt("DateAndTime", resultValue.get("DateAndTime"));
+                            message.setData(msgInfoJsonObject);
+                            webSocketServer.sendMessageAll(message);
+                        } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
+                            message.setType(1);
+                            message.setData(msgInfoJsonObject);
+                            msgInfoJsonObject.putOpt("session", session);
+                            webSocketServer.sendMessageAll(message);
                         }
                     }
                 }
