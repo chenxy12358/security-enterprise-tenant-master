@@ -239,11 +239,13 @@ public class HandleDataService {
                         if ("Ok".equals(msgInfoJsonObject.get("Result"))) {
                             if (DeviceInterfaceConstants.METHOD_FETCHOSD.equals(senderInfo.get("Method"))) {  //获取OSD信息
                                 message.setType(1);
+                                msgInfoJsonObject.putOpt("session", session);
                                 message.setData(msgInfoJsonObject);
                                 webSocketServer.sendMessageAll(message);
                             } else if (DeviceInterfaceConstants.METHOD_PITCHOSD.equals(senderInfo.get("Method"))) {//设置OSD信息
                                 message.setType(1);
                                 message.setData(msgInfoJsonObject);
+                                msgInfoJsonObject.putOpt("session", session);
                                 webSocketServer.sendMessageAll(message);
                             }
                         }
